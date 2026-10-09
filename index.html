@@ -512,7 +512,8 @@ async function callNVIDIA(prompt){
     method:'POST',
     headers:{ 'Content-Type':'application/json' },
     body: JSON.stringify({
-      model: 'meta/llama-3.1-8b-instruct', // This is the free general-purpose model!
+      // USING THE MODEL YOU REQUESTED
+      model: 'nvidia/nemotron-3.5-content-safety', 
       messages:[
         { role:'system', content:'You are an expert exam writer. Always respond with strict JSON only.' },
         { role:'user', content: prompt }
