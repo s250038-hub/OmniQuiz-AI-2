@@ -1,27 +1,22 @@
-# OmniQuiz AI - Assessment UI 🎓
+# OmniQuiz AI
 
-A modern, responsive, and interactive UI template for an AI-powered Assessment & Exam Generator. Built with HTML and Tailwind CSS, this project serves as a front-end showcase for educational platforms, quiz generators, or LMS (Learning Management System) integrations.
+AI-powered quiz generator that works entirely in the browser — no API keys needed.
 
-## ✨ Features
+## Features
+- Upload PDF, DOCX, TXT files (parsed client-side)
+- Generate MCQ, short-answer, and essay questions via AI
+- Interactive quiz mode with auto-grading
+- Printable worksheet mode with answer key toggle
+- Dark mode support
 
-- 🌗 **Dark/Light Mode Toggle** (Persists via LocalStorage)
-- 📱 **Fully Responsive** (Mobile, Tablet, Desktop layouts)
-- 🎨 **Tailwind CSS v3** (Modern utility-first styling)
-- 📑 **Interactive vs. Printable Views** (Tabbed interface for digital exams and paper printouts)
-- 🖱️ **Interactive Elements** (Clickable MCQs with visual feedback)
-- 🖨️ **Print-Optimized CSS** (Hides UI clutter, formats cleanly for PDF/Paper)
-- 🎯 **No Build Step Required** (Uses Tailwind CDN for instant deployment)
+## Usage
+Just open `index.html` in a browser, or deploy to GitHub Pages.
 
-## 🚀 Getting Started
+## Tech Stack
+- Tailwind CSS (styling)
+- PDF.js (PDF extraction)
+- Mammoth.js (DOCX extraction)
+- [Pollinations.ai](https://pollinations.ai) (free LLM API, no key required)
 
-### Prerequisites
-- A modern web browser (Chrome, Firefox, Safari, Edge)
-- (Optional) A code editor like VS Code
-
-### Running Locally
-
-Since this project uses the Tailwind CSS CDN, there are no Node.js dependencies or build steps required!
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/omniquiz-ai-ui.git
+## License
+MIT
