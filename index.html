@@ -468,7 +468,8 @@ async function handleFile(file){
 }
 
 function sampleText(text){
-  const MAX = 30000;
+  // REDUCED LIMIT TO 12,000 CHARS TO PREVENT TIMEOUT (524 ERROR)
+  const MAX = 12000;
   let t = text.replace(/\r/g,'').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();
   if(t.length <= MAX) return t;
   const headLen = Math.floor(MAX * 0.45);
@@ -518,7 +519,8 @@ async function callNVIDIA(prompt){
       ],
       temperature: 0.7,
       top_p: 0.7,
-      max_tokens: 4096,
+      // REDUCED TOKENS TO 2048 TO PREVENT TIMEOUT (524 ERROR)
+      max_tokens: 2048,
       stream: false
     })
   });
