@@ -299,8 +299,8 @@
         <button type="button" data-v="nvidia" class="on">NVIDIA NIM</button>
       </div>
       <div class="lab"><span style="letter-spacing:.08em">Model</span></div>
-      <select class="in" id="modelSel" disabled><option>nvidia/nemotron-3.5-content-safety</option></select>
-      <p class="micro">Using NVIDIA Safety Model securely via a hidden server proxy.</p>
+      <select class="in" id="modelSel" disabled><option>nvidia/nemotron-3.5-lightning-30b-a3b</option></select>
+      <p class="micro">Using NVIDIA Nemotron Lightning securely via a hidden server proxy.</p>
     </div>
 
     <button class="gen" id="genBtn" type="button"><span id="genLabel">⚡ GENERATE QUIZ</span></button>
@@ -455,8 +455,6 @@ async function handleFile(file){
     else if(name.endsWith('.pptx')) text = await extractPPTX(file);
     else                            text = await file.text();
     
-    // READABLE TEXT CHECK DELETED AS REQUESTED
-    
     state.file = file; state.text = text;
     const words = text.split(/\s+/).filter(Boolean).length;
     $('#chipName').textContent = file.name;
@@ -509,22 +507,15 @@ function buildPrompt(material){
 }
 
 async function callNVIDIA(prompt){
-  // THIS POINTS TO YOUR SECURE CLOUDFLARE WORKER
   const r = await fetch(WORKER_URL, { 
     method:'POST',
     headers:{ 'Content-Type':'application/json' },
     body: JSON.stringify({
-      // USING THE MODEL YOU REQUESTED
-      model: 'nvidia/nemotron-3.5-content-safety', 
+      model: 'nvidia/nemotron-3.5-lightning-30b-a3b',
       messages:[
         { role:'system', content:'You are an expert exam writer. Always respond with strict JSON only.' },
         { role:'user', content: prompt }
       ],
-      // SPECIFIC SETTINGS FROM YOUR PYTHON SNIPPET
-      chat_template_kwargs: {
-        request_categories: "/categories",
-        enable_thinking: true
-      },
       temperature: 0.7,
       top_p: 0.7,
       max_tokens: 4096,
@@ -568,14 +559,13 @@ async function generate(){
 
   const btn = $('#genBtn'), label = $('#genLabel');
   btn.disabled = true; label.textContent = '✍ WRITING QUESTIONS…';
-  const model = 'nvidia/nemotron-3.5-content-safety';
+  const model = 'nvidia/nemotron-3.5-lightning-30b-a3b';
   const t0 = performance.now();
   try{
     setStatus('▸ Building the exam brief…');
     const prompt = buildPrompt(sampleText(state.text));
     setStatus('▸ Asking ' + esc(model) + ' to write the paper… this can take 10–40s.');
     
-    // NO API KEY PASSED HERE! The worker handles it securely.
     const raw = await callNVIDIA(prompt); 
     
     setStatus('▸ Checking the generator\'s homework…');
