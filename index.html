@@ -299,8 +299,8 @@
         <button type="button" data-v="nvidia" class="on">NVIDIA NIM</button>
       </div>
       <div class="lab"><span style="letter-spacing:.08em">Model</span></div>
-      <select class="in" id="modelSel" disabled><option>meta/llama-3.1-8b-instruct (Free Tier)</option></select>
-      <p class="micro">Using NVIDIA Llama 3.1 8B securely via a hidden server proxy. Free & Fast!</p>
+      <select class="in" id="modelSel"></select>
+      <p class="micro">Using NVIDIA NIM securely via a hidden server proxy. No API key required from you!</p>
     </div>
 
     <button class="gen" id="genBtn" type="button"><span id="genLabel">⚡ GENERATE QUIZ</span></button>
@@ -378,6 +378,15 @@ let difficulty = 'medium';
 // SECURE CLOUDFLARE WORKER URL
 const WORKER_URL = "https://ehjkwqngbrf.s250038.workers.dev"; 
 
+const MODELS = {
+  nvidia: [
+    ['nvidia/llama-3.3-nemotron-super-49b','NVIDIA Llama 3.3 Nemotron Super · recommended'],
+    ['meta/llama-3.1-405b-instruct','Meta Llama 3.1 405B · powerful'],
+    ['nvidia/nemotron-mini-4b-instruct','NVIDIA Nemotron Mini 4B · fast'],
+    ['mistralai/mistral-large-2-instruct','Mistral Large 2']
+  ]
+};
+
 function toast(msg){
   const t = document.createElement('div');
   t.className = 'toast'; t.textContent = msg;
@@ -389,13 +398,14 @@ const setStatus = html => { $('#status').innerHTML = html; };
 
 $('#today').textContent = new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}).toUpperCase();
 
+function refreshProvider(){
+  $('#modelSel').innerHTML = MODELS.nvidia.map(m => `<option value="${m[0]}">${m[1]}</option>`).join('');
+}
+
+refreshProvider();
+
 $('#mcRange').addEventListener('input', e => $('#mcOut').textContent = e.target.value + ' Qs');
 $('#shRange').addEventListener('input', e => $('#shOut').textContent = e.target.value + ' Qs');
-$('#diffSeg').addEventListener('click', e => {
-  const b = e.target.closest('button'); if(!b) return;
-  $('#diffSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
-  difficulty = b.dataset.v;
-});
 
 const dz = $('#dz'), fileInput = $('#fileInput');
 dz.addEventListener('click', () => fileInput.click());
@@ -506,13 +516,13 @@ function buildPrompt(material){
   ].filter(Boolean).join('\n');
 }
 
-async function callNVIDIA(prompt){
-  // THIS POINTS TO YOUR SECURE CLOUDFLARE WORKER
+async function callNVIDIA(model, prompt){
+  // THIS NOW POINTS TO YOUR SECURE CLOUDFLARE WORKER!
   const r = await fetch(WORKER_URL, { 
     method:'POST',
     headers:{ 'Content-Type':'application/json' },
     body: JSON.stringify({
-      model: 'meta/llama-3.1-8b-instruct', // This is the free general-purpose model!
+      model: model,
       messages:[
         { role:'system', content:'You are an expert exam writer. Always respond with strict JSON only.' },
         { role:'user', content: prompt }
@@ -560,15 +570,14 @@ async function generate(){
 
   const btn = $('#genBtn'), label = $('#genLabel');
   btn.disabled = true; label.textContent = '✍ WRITING QUESTIONS…';
-  const model = 'meta/llama-3.1-8b-instruct';
-  const t0 = performance.now();
+  const model = $('#modelSel').value, t0 = performance.now();
   try{
     setStatus('▸ Building the exam brief…');
     const prompt = buildPrompt(sampleText(state.text));
     setStatus('▸ Asking ' + esc(model) + ' to write the paper… this can take 10–40s.');
     
     // NO API KEY PASSED HERE! The worker handles it securely.
-    const raw = await callNVIDIA(prompt); 
+    const raw = await callNVIDIA(model, prompt); 
     
     setStatus('▸ Checking the generator\'s homework…');
     const quiz = parseQuiz(raw);
