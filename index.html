@@ -454,7 +454,9 @@ async function handleFile(file){
     else if(name.endsWith('.docx')) text = await extractDOCX(file);
     else if(name.endsWith('.pptx')) text = await extractPPTX(file);
     else                            text = await file.text();
-    if(!text || text.trim().length < 80) throw new Error('Couldn\'t find readable text in that file (scanned PDFs need OCR).');
+    
+    // READABLE TEXT CHECK DELETED AS REQUESTED
+    
     state.file = file; state.text = text;
     const words = text.split(/\s+/).filter(Boolean).length;
     $('#chipName').textContent = file.name;
