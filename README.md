@@ -1,8 +1,8 @@
-# 🧠 OmniQuiz-AI
+# 🧠 OmniQuiz-AI 2.0(1.0 deleted and this is it's rework version)
 
 > **Drop a file. Get a quiz.**  
 > Upload any study document and let AI generate a complete exam paper — multiple choice + short answer — instantly in your browser.
-
+[![Least version](https://img.shields.io/badge/demo-online-brightgreen.svg)](https://s250038-hub.github.io/OmniQuiz-AI-2/)
 ![GitHub Pages](https://img.shields.io/badge/Hosted%20on-GitHub%20Pages-blue)
 ![AI Engine](https://img.shields.io/badge/AI-NVIDIA%20NIM-76b900)
 ![Security](https://img.shields.io/badge/Proxy-Cloudflare%20Workers-orange)
