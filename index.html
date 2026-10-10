@@ -236,8 +236,8 @@
 
 <div class="ticker" aria-hidden="true">
   <div class="tt">
-    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ MULTIPLE CHOICE ✦ SHORT ANSWER ✦ INSTANT ANSWER KEY ✦ AUTO-GRADING ✦ EXPORT MARKDOWN ✦ 100% IN-BROWSER ✦ NO SERVER ✦&nbsp;</span>
-    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ MULTIPLE CHOICE ✦ SHORT ANSWER ✦ INSTANT ANSWER KEY ✦ AUTO-GRADING ✦ EXPORT MARKDOWN ✦ 100% IN-BROWSER ✦ NO SERVER ✦&nbsp;</span>
+    <span class="tg">PDF ✦ DOCX  PPTX ✦ TXT ✦ MULTIPLE CHOICE ✦ SHORT ANSWER ✦ INSTANT ANSWER KEY ✦ AUTO-GRADING ✦ EXPORT MARKDOWN ✦ 100% IN-BROWSER ✦ NO SERVER ✦&nbsp;</span>
+    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ MULTIPLE CHOICE ✦ SHORT ANSWER ✦ INSTANT ANSWER KEY ✦ AUTO-GRADING ✦ EXPORT MARKDOWN ✦ 100% IN-BROWSER ✦ NO SERVER &nbsp;</span>
   </div>
 </div>
 
@@ -345,7 +345,7 @@
         </div>
       </div>
       <div id="paperBody"></div>
-      <div class="paper-end">✦ ✦ ✦ &nbsp; END OF PAPER &nbsp; ✦ ✦ ✦</div>
+      <div class="paper-end">✦ ✦  &nbsp; END OF PAPER &nbsp; ✦ ✦ ✦</div>
     </article>
   </section>
 </main>
@@ -468,7 +468,6 @@ async function handleFile(file){
 }
 
 function sampleText(text){
-  // REDUCED LIMIT TO 12,000 CHARS TO PREVENT TIMEOUT (524 ERROR)
   const MAX = 12000;
   let t = text.replace(/\r/g,'').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();
   if(t.length <= MAX) return t;
@@ -492,65 +491,81 @@ function buildPrompt(material){
   const lang = $('#langIn').value.trim(), focus = $('#focusIn').value.trim();
   return [
     'You are an expert exam writer and teacher.',
-    'Create a quiz strictly from the STUDY MATERIAL below.',
+    'Create a brand-new quiz strictly from the STUDY MATERIAL at the end of this prompt.',
     'Requirements:',
-    `- Exactly ${mc} multiple-choice questions. Each has exactly 4 options and exactly one correct answer. Vary the position of the correct option.`,
-    `- Exactly ${sh} short-answer questions, each with a concise model answer (1-3 sentences).`,
+    `- Write exactly ${mc} multiple-choice questions. Each has exactly 4 options and exactly one correct answer. Vary the position of the correct option.`,
+    `- Write exactly ${sh} short-answer questions, each with a concise model answer (1-3 sentences).`,
     `- Difficulty: ${flavor}.`,
-    '- Use ONLY facts present in the material. Never invent facts.',
-    lang ? `- Write the quiz in this language: ${lang}.` : '- Write the quiz in the same language as the material.',
+    '- Use ONLY facts present in the study material. Never invent facts.',
+    lang ? `- Write the quiz in this language: ${lang}.` : '- Write the quiz in the same language as the study material.',
     focus ? `- Give extra emphasis to this topic: ${focus}.` : '',
     '- Distractors must be plausible to a skimmer but clearly wrong to someone who studied.',
-    'Return STRICT JSON only (no markdown fences, no commentary), exactly in this shape:',
-    '{"questions":[{"type":"mc","question":"...","options":["...","...","...","..."],"answerIndex":0,"explanation":"one sentence"},{"type":"short","question":"...","answer":"..."}]}',
+    '',
+    'CRITICAL RULES:',
+    '- Every "question", "options", "answer" and "explanation" string MUST contain REAL content taken from the study material.',
+    '- NEVER output placeholder dots ("..."), ellipses, empty strings, or copy the example below. The example only demonstrates the FORMAT.',
+    '- Output ONLY the JSON object. No markdown fences, no commentary, no thinking text.',
+    '',
+    'FORMAT EXAMPLE (format only — the content here is fake, do NOT reuse it):',
+    '{"questions":[{"type":"mc","question":"What gas do plants absorb during photosynthesis?","options":["Oxygen","Carbon dioxide","Nitrogen","Hydrogen"],"answerIndex":1,"explanation":"Plants absorb carbon dioxide from the air."},{"type":"short","question":"Name the pigment that captures light energy in plants.","answer":"Chlorophyll."}]}',
+    '',
+    'Now write the REAL quiz about the study material below, in the same JSON format:',
     'STUDY MATERIAL:\n"""\n' + material + '\n"""'
   ].filter(Boolean).join('\n');
 }
 
 async function callNVIDIA(prompt){
-  const r = await fetch(WORKER_URL, { 
-    method:'POST',
-    headers:{ 'Content-Type':'application/json' },
-    body: JSON.stringify({
-      model: 'nvidia/nemotron-3.5-lightning-30b-a3b',
-      messages:[
-        { role:'system', content:'You are an expert exam writer. Always respond with strict JSON only.' },
-        { role:'user', content: prompt }
-      ],
-      temperature: 0.7,
-      top_p: 0.7,
-      // REDUCED TOKENS TO 2048 TO PREVENT TIMEOUT (524 ERROR)
-      max_tokens: 2048,
-      stream: false
-    })
+  const base = {
+    model: 'nvidia/nemotron-3.5-lightning-30b-a3b',
+    messages:[
+      { role:'system', content:'You are an expert exam writer. Always respond with a single strict JSON object containing real content. Never output placeholder dots or reasoning text.' },
+      { role:'user', content: prompt }
+    ],
+    temperature: 0.7,
+    top_p: 0.7,
+    max_tokens: 3000,
+    stream: false
+  };
+  // Try with thinking disabled first (much faster); fall back if the endpoint rejects the kwarg
+  let r = await fetch(WORKER_URL, {
+    method:'POST', headers:{ 'Content-Type':'application/json' },
+    body: JSON.stringify(Object.assign({ chat_template_kwargs:{ enable_thinking:false } }, base))
   });
-  const j = await r.json();
+  let j = await r.json().catch(() => ({}));
+  if(!r.ok && (r.status === 400 || r.status === 422)){
+    r = await fetch(WORKER_URL, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(base) });
+    j = await r.json().catch(() => ({}));
+  }
   if(!r.ok) throw new Error(j?.error?.message || ('NVIDIA NIM error ' + r.status));
   return j?.choices?.[0]?.message?.content || '';
 }
+
+// Detects placeholder junk like "...", "…", empty strings
+const isPh = v => { const s = String(v ?? '').trim(); return !s || /^[\u2026.·•_\-\s]+$/.test(s); };
 
 function parseQuiz(raw){
   let t = (raw || '').trim().replace(/^```(?:json)?\s*/i,'').replace(/```\s*$/,'');
   const s = t.indexOf('{'), e = t.lastIndexOf('}');
   if(s > -1 && e > s) t = t.slice(s, e + 1);
   let j;
-  try{ j = JSON.parse(t); }catch(_){ throw new Error('The model returned unreadable output — try again.'); }
+  try{ j = JSON.parse(t); }catch(_){ throw new Error('The model returned unreadable output — retrying.'); }
   const list = j.questions || [];
   const mc = [], short = [];
   for(const q of list){
-    if(!q || typeof q.question !== 'string') continue;
+    if(!q || typeof q.question !== 'string' || isPh(q.question)) continue;
     if(String(q.type || '').toLowerCase() === 'mc' || Array.isArray(q.options)){
       const opts = (q.options || []).map(o => String(o)).slice(0, 6);
-      if(opts.length < 2) continue;
+      if(opts.length < 2 || opts.some(isPh)) continue;   // reject placeholder options
       let ai = Number(q.answerIndex);
       if(!Number.isFinite(ai) && typeof q.answer === 'string') ai = q.answer.trim().toUpperCase().charCodeAt(0) - 65;
       if(!Number.isFinite(ai) || ai < 0 || ai >= opts.length) ai = 0;
-      mc.push({ question:q.question, options:opts, answerIndex:ai, explanation:q.explanation || '' });
+      mc.push({ question:q.question, options:opts, answerIndex:ai, explanation:(q.explanation && !isPh(q.explanation)) ? q.explanation : '' });
     }else{
-      short.push({ question:q.question, answer:q.answer || q.modelAnswer || '' });
+      if(isPh(q.answer)) continue;                        // reject placeholder answers
+      short.push({ question:q.question, answer:q.answer });
     }
   }
-  if(!mc.length && !short.length) throw new Error('No usable questions returned — try again, or use a longer document.');
+  if(!mc.length && !short.length) throw new Error('The model returned placeholder questions — retrying.');
   return { mc, short };
 }
 
@@ -566,12 +581,20 @@ async function generate(){
   try{
     setStatus('▸ Building the exam brief…');
     const prompt = buildPrompt(sampleText(state.text));
-    setStatus('▸ Asking ' + esc(model) + ' to write the paper… this can take 10–40s.');
-    
-    const raw = await callNVIDIA(prompt); 
-    
-    setStatus('▸ Checking the generator\'s homework…');
-    const quiz = parseQuiz(raw);
+
+    // Auto-retry up to 2 attempts if the model echoes placeholders
+    let quiz = null;
+    for(let attempt = 1; attempt <= 2; attempt++){
+      setStatus('▸ Asking ' + esc(model) + ' to write the paper… (attempt ' + attempt + '/2)');
+      const raw = await callNVIDIA(prompt);
+      setStatus('▸ Checking the generator\'s homework…');
+      try{ quiz = parseQuiz(raw); break; }
+      catch(err){
+        if(attempt === 2) throw err;
+        setStatus('▸ The model sent placeholder dots — regenerating…');
+      }
+    }
+
     state.quiz = quiz; state.graded = false;
     state.meta = {
       file: state.file ? state.file.name : 'text',
