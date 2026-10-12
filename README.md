@@ -43,52 +43,9 @@ Here's what the AI generates from a single PDF upload:
 >
 > *Answer: A — Duple metre means 2 beats in each bar.*
 
----
-┌──────────────────────────────────────────────────────────┐
-│ USER'S BROWSER / APP │
-│ │
-│ ┌──────────┐ ┌──────────────┐ ┌──────────────────┐ │
-│ │ Upload │──▶│ Parse File │──▶│ Build Prompt │ │
-│ │ PDF/DOCX/ │ │ (pdf.js / │ │ (no API key) │ │
-│ │ PPTX/TXT │ │ mammoth.js) │ └────────┬─────────┘ │
-│ └──────────┘ └──────────────┘ │ │
-└──────────────────────────────────────────────┼───────────┘
-│
-▼
-┌──────────────────────────────┐
-│ CLOUDFLARE WORKER │
-│ (Serverless Proxy) │
-│ │
-│ • Injects hidden API key │
-│ • Forwards to NVIDIA NIM │
-│ • Returns JSON + retry on │
-│ placeholder detection │
-└──────────────┬───────────────┘
-│
-▼
-┌──────────────────────────────┐
-│ NVIDIA NIM API │
-│ Model: Nemotron Lightning │
-│ → Generates quiz JSON │
-└──────────────┬───────────────┘
-│
-▼
-┌──────────────────────────────┐
-│ RENDER & EXPORT │
-│ │
-│ • Interactive question paper│
-│ • Auto-grading + stamp │
-│ • PDF / Markdown export │
-│ • Mobile APK/IPA builds │
-└──────────────────────────────┘
-
----
-
 ## 🚀 Live Demo
 
 👉 **[https://s250038-hub.github.io/OmniQuiz-AI-2/](https://s250038-hub.github.io/OmniQuiz-AI-2/)**
-
----
 
 ## 📱 Mobile Apps
 
