@@ -52,14 +52,24 @@ jobs:
 
       - name: Find and copy app bundle
         run: |
-          APP_PATH=$(find ios/App -name "*.app" -path "*/Debug-iphonesimulator/*" | head -1)
+          echo "Searching for .app files..."
+          find ios/App -name "*.app" -type d 2>/dev/null || echo "No .app found in ios/App"
+          
+          echo ""
+          echo "Searching entire repository for .app files..."
+          find . -name "*.app" -type d 2>/dev/null | head -20 || echo "No .app found anywhere"
+          
+          APP_PATH=$(find . -name "App.app" -type d 2>/dev/null | head -1)
+          
           if [ -n "$APP_PATH" ]; then
+            echo "Found app at: $APP_PATH"
             cp -r "$APP_PATH" download/ios/App.app
             cd download/ios
             zip -r app.app.zip App.app
             rm -rf App.app
+            echo "✓ Successfully created app.app.zip"
           else
-            echo "App bundle not found"
+            echo "✗ App bundle not found anywhere"
             exit 1
           fi
 
