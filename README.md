@@ -118,23 +118,3 @@ Every push to `main` automatically rebuilds both mobile apps via GitHub Actions:
 | Mobile Wrapper | [Capacitor](https://capacitorjs.com/) |
 | CI/CD | GitHub Actions (auto-builds APK + iOS on push) |
 | Hosting | GitHub Pages (free) |
-
----
-
-## 📁 Project Structure
-OmniQuiz-AI-2/
-├── index.html ← Complete web app (single file)
-├── package.json ← Capacitor dependencies
-├── capacitor.config.json ← Mobile wrapper config
-├── .github/
-│ └── workflows/
-│ ├── build-android.yml ← Auto-builds APK on every push
-│ └── build-ios.yml ← Auto-builds iOS app on every push
-├── download/
-│ ├── android/
-│ │ └── app.apk ← Auto-committed Android APK
-│ └── ios/
-│ └── app.app.zip ← Auto-committed iOS app
-└── README.md ← This file
-
-## 🏗️ Architecture
