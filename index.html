@@ -229,15 +229,15 @@
     </div>
     <div class="top-meta">
       <span class="form-meta">FORM A · SEC. 1 · <span id="today"></span></span>
-      <a class="gh" id="ghLink" href="#" target="_blank" rel="noopener">★ Star on GitHub</a>
+      <a class="gh" id="ghLink" href="https://github.com/s250038-hub/OmniQuiz-AI-2" target="_blank" rel="noopener">★ Star on GitHub</a>
     </div>
   </div>
 </header>
 
 <div class="ticker" aria-hidden="true">
   <div class="tt">
-    <span class="tg">PDF ✦ DOCX  PPTX ✦ TXT ✦ MULTIPLE CHOICE ✦ SHORT ANSWER ✦ LONG / ESSAY ✦ INSTANT ANSWER KEY ✦ AUTO-GRADING ✦ EXPORT PDF ✦ 100% IN-BROWSER ✦&nbsp;</span>
-    <span class="tg">PDF ✦ DOCX  PPTX ✦ TXT ✦ MULTIPLE CHOICE ✦ SHORT ANSWER ✦ LONG / ESSAY ✦ INSTANT ANSWER KEY ✦ AUTO-GRADING ✦ EXPORT PDF ✦ 100% IN-BROWSER ✦&nbsp;</span>
+    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ MULTIPLE CHOICE ✦ SHORT ANSWER ✦ LONG / ESSAY ✦ INSTANT ANSWER KEY ✦ AUTO-GRADING ✦ EXPORT PDF ✦ 100% IN-BROWSER ✦&nbsp;</span>
+    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ MULTIPLE CHOICE ✦ SHORT ANSWER ✦ LONG / ESSAY ✦ INSTANT ANSWER KEY ✦ AUTO-GRADING ✦ EXPORT PDF ✦ 100% IN-BROWSER ✦&nbsp;</span>
   </div>
 </div>
 
@@ -262,7 +262,8 @@
         <div class="dz-small">or click to browse</div>
         <div class="fmts"><i>PDF</i><i>DOCX</i><i>PPTX</i><i>TXT</i></div>
       </div>
-      <input type="file" id="fileInput" accept=".pdf,.docx,.pptx,.txt,.md" hidden>
+      <!-- Updated with MIME types for better mobile support -->
+      <input type="file" id="fileInput" accept="application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.presentationml.presentation, text/plain, text/markdown, .pdf, .docx, .pptx, .txt, .md" hidden>
       <div class="chip" id="chip" hidden>
         <span class="fico" aria-hidden="true"></span>
         <span class="cmeta"><span class="cname" id="chipName"></span><br><span class="cinfo" id="chipMeta"></span></span>
@@ -347,7 +348,7 @@
         </div>
       </div>
       <div id="paperBody"></div>
-      <div class="paper-end">✦ ✦  &nbsp; END OF PAPER &nbsp; ✦ ✦ ✦</div>
+      <div class="paper-end">✦ ✦ ✦ &nbsp; END OF PAPER &nbsp; ✦ ✦ ✦</div>
     </article>
   </section>
 </main>
@@ -403,6 +404,8 @@ $('#diffSeg').addEventListener('click', e => {
 
 const dz = $('#dz'), fileInput = $('#fileInput');
 dz.addEventListener('click', () => fileInput.click());
+// Added touchend for better mobile file picker support
+dz.addEventListener('touchend', (e) => { e.preventDefault(); fileInput.click(); });
 dz.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); fileInput.click(); }});
 ['dragover','drop'].forEach(ev => window.addEventListener(ev, e => e.preventDefault()));
 dz.addEventListener('dragover', () => dz.classList.add('over'));
