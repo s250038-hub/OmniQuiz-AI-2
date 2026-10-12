@@ -176,7 +176,7 @@
   .amodel{display:none;margin:11px 0 2px 47px;background:#fffdf0;border:1.5px solid rgba(32,38,31,.22);border-left:4px solid var(--yellow);border-radius:8px;padding:12px 15px}
   .q.open .amodel,.show-key .amodel{display:block;animation:fade .3s both}
   .amodel-tag{font:700 .58rem var(--mono);letter-spacing:.2em;color:var(--ink2);display:block;margin-bottom:5px}
-  .amodel p{font-size:.94rem;line-height:1.55}
+  .amodel p{font-size:.94rem;line-height:1.55;white-space:pre-line}
   .paper-end{text-align:center;font:700 .68rem var(--mono);letter-spacing:.3em;color:var(--ink2);margin-top:36px}
 
   footer{border-top:1px dashed rgba(233,242,233,.18);padding:22px 0 34px}
@@ -236,8 +236,8 @@
 
 <div class="ticker" aria-hidden="true">
   <div class="tt">
-    <span class="tg">PDF ✦ DOCX  PPTX ✦ TXT ✦ MULTIPLE CHOICE ✦ SHORT ANSWER ✦ INSTANT ANSWER KEY ✦ AUTO-GRADING ✦ EXPORT PDF ✦ 100% IN-BROWSER ✦ NO SERVER ✦&nbsp;</span>
-    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ MULTIPLE CHOICE ✦ SHORT ANSWER ✦ INSTANT ANSWER KEY ✦ AUTO-GRADING ✦ EXPORT PDF  100% IN-BROWSER ✦ NO SERVER &nbsp;</span>
+    <span class="tg">PDF ✦ DOCX  PPTX ✦ TXT ✦ MULTIPLE CHOICE ✦ SHORT ANSWER ✦ LONG / ESSAY ✦ INSTANT ANSWER KEY ✦ AUTO-GRADING ✦ EXPORT PDF ✦ 100% IN-BROWSER ✦&nbsp;</span>
+    <span class="tg">PDF ✦ DOCX  PPTX ✦ TXT ✦ MULTIPLE CHOICE ✦ SHORT ANSWER ✦ LONG / ESSAY ✦ INSTANT ANSWER KEY ✦ AUTO-GRADING ✦ EXPORT PDF ✦ 100% IN-BROWSER ✦&nbsp;</span>
   </div>
 </div>
 
@@ -277,6 +277,8 @@
       <input type="range" id="mcRange" min="0" max="20" value="6">
       <div class="lab"><span style="letter-spacing:.08em">Short answer</span><span class="val" id="shOut">3 Qs</span></div>
       <input type="range" id="shRange" min="0" max="10" value="3">
+      <div class="lab"><span style="letter-spacing:.08em">Long / essay</span><span class="val" id="lgOut">1 Qs</span></div>
+      <input type="range" id="lgRange" min="0" max="5" value="1">
       <div class="lab"><span style="letter-spacing:.08em">Difficulty</span></div>
       <div class="seg" id="diffSeg" role="group" aria-label="Difficulty">
         <button type="button" data-v="easy">Easy</button>
@@ -300,7 +302,7 @@
       </div>
       <div class="lab"><span style="letter-spacing:.08em">Model</span></div>
       <select class="in" id="modelSel" disabled><option>nvidia/nemotron-3.5-lightning-30b-a3b</option></select>
-      <p class="micro">Using NVIDIA Nemotron Lightning securely via a hidden server proxy.</p>
+      <p class="micro">NVIDIA Nemotron Lightning via hidden proxy · fair-use: 100 generations per IP per 24h.</p>
     </div>
 
     <button class="gen" id="genBtn" type="button"><span id="genLabel">⚡ GENERATE QUIZ</span></button>
@@ -373,7 +375,7 @@ const LETTERS = 'ABCDEF';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-const state = { file:null, text:'', quiz:null, meta:null, graded:false };
+const state = { file:null, text:'', quiz:null, meta:null, graded:false, remaining:null };
 let difficulty = 'medium';
 
 // SECURE CLOUDFLARE WORKER URL
@@ -392,6 +394,7 @@ $('#today').textContent = new Date().toLocaleDateString(undefined,{year:'numeric
 
 $('#mcRange').addEventListener('input', e => $('#mcOut').textContent = e.target.value + ' Qs');
 $('#shRange').addEventListener('input', e => $('#shOut').textContent = e.target.value + ' Qs');
+$('#lgRange').addEventListener('input', e => $('#lgOut').textContent = e.target.value + ' Qs');
 $('#diffSeg').addEventListener('click', e => {
   const b = e.target.closest('button'); if(!b) return;
   $('#diffSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
@@ -482,9 +485,8 @@ function sampleText(text){
   return parts.join('\n[…excerpt…]\n');
 }
 
-/* mode: 'both' | 'mc' | 'short' */
-function buildPrompt(material, mode){
-  const mc = +$('#mcRange').value, sh = +$('#shRange').value;
+/* want = { mc:n, short:n, long:n } — only types with n>0 are requested */
+function buildPrompt(material, want){
   const flavor = {
     easy:   'foundational recall — clear, confidence-building questions',
     medium: 'a balanced mix of recall and application',
@@ -496,15 +498,16 @@ function buildPrompt(material, mode){
     'Create a brand-new quiz strictly from the STUDY MATERIAL at the end of this prompt.',
     'Requirements:'
   ];
-  if(mode !== 'mc')   lines.push(`- Write exactly ${sh} short-answer questions, each with a concise model answer (1-3 sentences). Put these FIRST in the "questions" array.`);
-  if(mode !== 'short')lines.push(`- Write exactly ${mc} multiple-choice questions. Each has exactly 4 options and exactly one correct answer. Vary the position of the correct option.`);
+  if(want.short > 0) lines.push(`- Write exactly ${want.short} short-answer question(s) with a concise model answer (1-2 sentences). Put these FIRST in the "questions" array.`);
+  if(want.long  > 0) lines.push(`- Write exactly ${want.long} long-form / essay question(s). Each must be a detailed, multi-part or scenario-based question, with a thorough model answer of 4-8 sentences (or a clear bullet-point outline). Put these SECOND in the array.`);
+  if(want.mc    > 0) lines.push(`- Write exactly ${want.mc} multiple-choice question(s). Each has exactly 4 options and exactly one correct answer. Vary the position of the correct option. Question stems may be long and detailed. Put these LAST in the array.`);
   lines.push(
     `- Difficulty: ${flavor}.`,
     '- Use ONLY facts present in the study material. Never invent facts.',
     lang ? `- Write the quiz in this language: ${lang}.` : '- Write the quiz in the same language as the study material.',
     focus ? `- Give extra emphasis to this topic: ${focus}.` : '',
     '- MC distractors must be plausible to a skimmer but clearly wrong to someone who studied.',
-    '- Keep every explanation to ONE short sentence so the whole quiz fits in the reply.',
+    '- Keep MC explanations to ONE short sentence so the whole quiz fits in one reply.',
     '',
     'CRITICAL RULES:',
     '- Every "question", "options", "answer" and "explanation" string MUST contain REAL content taken from the study material.',
@@ -514,13 +517,11 @@ function buildPrompt(material, mode){
     '',
     'FORMAT EXAMPLE (format only — the content here is fake, do NOT reuse it):'
   );
-  if(mode === 'mc'){
-    lines.push('{"questions":[{"type":"mc","question":"What gas do plants absorb during photosynthesis?","options":["Oxygen","Carbon dioxide","Nitrogen","Hydrogen"],"answerIndex":1,"explanation":"Plants absorb carbon dioxide from the air."}]}');
-  }else if(mode === 'short'){
-    lines.push('{"questions":[{"type":"short","question":"Name the pigment that captures light energy in plants.","answer":"Chlorophyll."}]}');
-  }else{
-    lines.push('{"questions":[{"type":"short","question":"Name the pigment that captures light energy in plants.","answer":"Chlorophyll."},{"type":"mc","question":"What gas do plants absorb during photosynthesis?","options":["Oxygen","Carbon dioxide","Nitrogen","Hydrogen"],"answerIndex":1,"explanation":"Plants absorb carbon dioxide from the air."}]}');
-  }
+  const ex = [];
+  if(want.short > 0) ex.push('{"type":"short","question":"Name the pigment that captures light energy in plants.","answer":"Chlorophyll."}');
+  if(want.long  > 0) ex.push('{"type":"long","question":"Explain the process of photosynthesis, including where it takes place and its two main stages.","answer":"Photosynthesis takes place in the chloroplasts of plant cells. In the light-dependent reactions, light energy splits water and produces ATP and NADPH. In the light-independent Calvin cycle, carbon dioxide is fixed into glucose using those products. The overall equation is 6CO2 + 6H2O -> C6H12O6 + 6O2."}');
+  if(want.mc    > 0) ex.push('{"type":"mc","question":"What gas do plants absorb during photosynthesis?","options":["Oxygen","Carbon dioxide","Nitrogen","Hydrogen"],"answerIndex":1,"explanation":"Plants absorb carbon dioxide from the air."}');
+  lines.push('{"questions":[' + ex.join(',') + ']}');
   lines.push('', 'Now write the REAL quiz about the study material below, in the same JSON format:',
     'STUDY MATERIAL:\n"""\n' + material + '\n"""');
   return lines.filter(Boolean).join('\n');
@@ -535,7 +536,7 @@ async function callNVIDIA(prompt){
     ],
     temperature: 0.7,
     top_p: 0.7,
-    max_tokens: 4096,
+    max_tokens: 5000,
     stream: false
   };
   let r = await fetch(WORKER_URL, {
@@ -547,6 +548,8 @@ async function callNVIDIA(prompt){
     r = await fetch(WORKER_URL, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(base) });
     j = await r.json().catch(() => ({}));
   }
+  const rem = r.headers.get('X-RateLimit-Remaining');
+  if(rem !== null && rem !== '') state.remaining = +rem;
   if(!r.ok) throw new Error(j?.error?.message || ('NVIDIA NIM error ' + r.status));
   return j?.choices?.[0]?.message?.content || '';
 }
@@ -571,30 +574,34 @@ function parseQuiz(raw){
   const j = tryParse(t);
   if(!j) throw new Error('The model returned unreadable output — retrying.');
   const list = j.questions || [];
-  const mc = [], short = [];
+  const mc = [], short = [], long = [];
   for(const q of list){
     if(!q || typeof q.question !== 'string' || isPh(q.question)) continue;
-    if(String(q.type || '').toLowerCase() === 'mc' || Array.isArray(q.options)){
+    const type = String(q.type || '').toLowerCase();
+    if(type === 'mc' || Array.isArray(q.options)){
       const opts = (q.options || []).map(o => String(o)).slice(0, 6);
       if(opts.length < 2 || opts.some(isPh)) continue;
       let ai = Number(q.answerIndex);
       if(!Number.isFinite(ai) && typeof q.answer === 'string') ai = q.answer.trim().toUpperCase().charCodeAt(0) - 65;
       if(!Number.isFinite(ai) || ai < 0 || ai >= opts.length) ai = 0;
       mc.push({ question:q.question, options:opts, answerIndex:ai, explanation:(q.explanation && !isPh(q.explanation)) ? q.explanation : '' });
+    }else if(type === 'long'){
+      if(isPh(q.answer)) continue;
+      long.push({ question:q.question, answer:q.answer });
     }else{
       if(isPh(q.answer)) continue;
       short.push({ question:q.question, answer:q.answer });
     }
   }
-  if(!mc.length && !short.length) throw new Error('The model returned placeholder questions — retrying.');
-  return { mc, short };
+  if(!mc.length && !short.length && !long.length) throw new Error('The model returned placeholder questions — retrying.');
+  return { mc, short, long };
 }
 
 $('#genBtn').addEventListener('click', generate);
 async function generate(){
-  const wantMC = +$('#mcRange').value, wantSH = +$('#shRange').value;
+  const wantMC = +$('#mcRange').value, wantSH = +$('#shRange').value, wantLG = +$('#lgRange').value;
   if(!state.text){ toast('Drop a file first — PDF, DOCX, PPTX or TXT.'); return; }
-  if(wantMC + wantSH === 0){ toast('Set at least one question in the quiz mix.'); return; }
+  if(wantMC + wantSH + wantLG === 0){ toast('Set at least one question in the quiz mix.'); return; }
 
   const btn = $('#genBtn'), label = $('#genLabel');
   btn.disabled = true; label.textContent = '✍ WRITING QUESTIONS…';
@@ -603,9 +610,9 @@ async function generate(){
   try{
     setStatus('▸ Building the exam brief…');
     const material = sampleText(state.text);
-    const prompt = buildPrompt(material, 'both');
+    const prompt = buildPrompt(material, { mc:wantMC, short:wantSH, long:wantLG });
 
-    let quiz = { mc:[], short:[] };
+    let quiz = { mc:[], short:[], long:[] };
     for(let attempt = 1; attempt <= 2; attempt++){
       setStatus('▸ Asking ' + esc(model) + ' to write the paper… (attempt ' + attempt + '/2)');
       const raw = await callNVIDIA(prompt);
@@ -616,25 +623,20 @@ async function generate(){
 
     quiz.mc = quiz.mc.slice(0, wantMC);
     quiz.short = quiz.short.slice(0, wantSH);
+    quiz.long = quiz.long.slice(0, wantLG);
 
-    // TOP-UP: if a whole section is missing, write it with a second focused call
-    if(wantSH && quiz.short.length === 0){
-      setStatus('▸ Part B missing — writing short-answer questions…');
+    // TOP-UP: one extra focused call for whatever is still missing
+    const deficit = { mc: wantMC - quiz.mc.length, short: wantSH - quiz.short.length, long: wantLG - quiz.long.length };
+    if(deficit.mc > 0 || deficit.short > 0 || deficit.long > 0){
+      setStatus('▸ Topping up missing questions…');
       try{
-        const q2 = parseQuiz(await callNVIDIA(buildPrompt(material, 'short')));
-        quiz.short = q2.short.slice(0, wantSH);
-        if(!quiz.mc.length) quiz.mc = q2.mc.slice(0, wantMC);
+        const q2 = parseQuiz(await callNVIDIA(buildPrompt(material, deficit)));
+        quiz.mc    = quiz.mc.concat(q2.mc).slice(0, wantMC);
+        quiz.short = quiz.short.concat(q2.short).slice(0, wantSH);
+        quiz.long  = quiz.long.concat(q2.long).slice(0, wantLG);
       }catch(_){}
     }
-    if(wantMC && quiz.mc.length === 0){
-      setStatus('▸ Part A missing — writing multiple-choice questions…');
-      try{
-        const q2 = parseQuiz(await callNVIDIA(buildPrompt(material, 'mc')));
-        quiz.mc = q2.mc.slice(0, wantMC);
-        if(!quiz.short.length) quiz.short = q2.short.slice(0, wantSH);
-      }catch(_){}
-    }
-    if(!quiz.mc.length && !quiz.short.length) throw new Error('No usable questions returned — try again.');
+    if(!quiz.mc.length && !quiz.short.length && !quiz.long.length) throw new Error('No usable questions returned — try again.');
 
     state.quiz = quiz; state.graded = false;
     state.meta = {
@@ -644,7 +646,8 @@ async function generate(){
       date: new Date().toLocaleDateString(undefined,{ year:'numeric', month:'short', day:'numeric' })
     };
     renderQuiz();
-    setStatus('✔ Paper ready — ' + quiz.mc.length + ' MC · ' + quiz.short.length + ' short answer. Good luck.');
+    setStatus('✔ Paper ready — ' + quiz.mc.length + ' MC · ' + quiz.short.length + ' short · ' + quiz.long.length + ' long.' +
+      (state.remaining !== null ? ' (' + state.remaining + ' generations left today)' : ''));
   }catch(err){
     setStatus('✖ ' + esc(err.message));
     toast(err.message);
@@ -654,11 +657,11 @@ async function generate(){
 }
 
 function renderQuiz(){
-  const { mc, short } = state.quiz, m = state.meta;
+  const { mc, short, long } = state.quiz, m = state.meta;
   $('#mFile').textContent = m.file.length > 26 ? m.file.slice(0,24) + '…' : m.file;
   $('#mModel').textContent = m.model;
   $('#mTime').textContent = m.secs + 's · ' + m.date;
-  $('#mCount').textContent = (mc.length + short.length) + ' QUESTIONS';
+  $('#mCount').textContent = (mc.length + short.length + long.length) + ' QUESTIONS';
 
   let html = '';
   if(mc.length){
@@ -678,7 +681,18 @@ function renderQuiz(){
       html += `<div class="q" data-type="short">
         <div class="qhead"><span class="qnum">${mc.length ? 'B' + (i+1) : String(i+1).padStart(2,'0')}</span><p class="qtext">${esc(q.question)}</p></div>
         <button type="button" class="reveal">REVEAL MODEL ANSWER</button>
-        <div class="amodel"><span class="amodel-tag">MODEL ANSWER</span><p>${esc(q.answer) || '<em>No model answer provided.</em>'}</p></div>
+        <div class="amodel"><span class="amodel-tag">MODEL ANSWER</span><p>${esc(q.answer)}</p></div>
+      </div>`;
+    });
+    html += '</div>';
+  }
+  if(long.length){
+    html += '<div class="part"><span class="part-tag">PART C — LONG / ESSAY</span>';
+    long.forEach((q, i) => {
+      html += `<div class="q" data-type="long">
+        <div class="qhead"><span class="qnum">C${i+1}</span><p class="qtext">${esc(q.question)}</p></div>
+        <button type="button" class="reveal">REVEAL MODEL ANSWER</button>
+        <div class="amodel"><span class="amodel-tag">MODEL ANSWER</span><p>${esc(q.answer)}</p></div>
       </div>`;
     });
     html += '</div>';
@@ -770,6 +784,14 @@ function quizMarkdown(withAnswers = true){
       out.push('');
     });
   }
+  if(q.long.length){
+    out.push('## Part C — Long / Essay', '');
+    q.long.forEach((x, i) => {
+      out.push(`${i+1}. ${x.question}`);
+      if(withAnswers && x.answer) out.push(`   _Model answer: ${x.answer}_`);
+      out.push('');
+    });
+  }
   return out.join('\n');
 }
 $('#copyBtn').addEventListener('click', async () => {
@@ -797,7 +819,7 @@ $('#dlBtn').addEventListener('click', () => {
     for(const ln of lines){ pageBreak(size * 0.5); doc.text(ln, M + indent, y); y += size * 0.5; }
     y += gap;
   };
-  const { mc, short } = state.quiz, m = state.meta;
+  const { mc, short, long } = state.quiz, m = state.meta;
 
   write('OMNQUIZ-AI — EXAMINATION PAPER', 16, 'bold', 3);
   write('Source: ' + m.file + '   ·   Model: ' + m.model + '   ·   ' + m.date, 9, 'normal', 4, 0, [110,115,105]);
@@ -823,6 +845,16 @@ $('#dlBtn').addEventListener('click', () => {
       y += 3;
     });
   }
+  if(long.length){
+    write('PART C — LONG / ESSAY', 12, 'bold', 4);
+    long.forEach((q, i) => {
+      pageBreak(46);
+      write('C' + (i+1) + '. ' + q.question, 11, 'bold', 4);
+      doc.setDrawColor(150,150,150); doc.setLineWidth(0.3);
+      for(let k = 0; k < 7; k++){ pageBreak(10); doc.line(M + 8, y, W - M, y); y += 9; }
+      y += 3;
+    });
+  }
 
   doc.addPage(); y = 20;
   write('ANSWER KEY', 14, 'bold', 4);
@@ -834,6 +866,11 @@ $('#dlBtn').addEventListener('click', () => {
   if(short.length){
     write('Part B', 11, 'bold', 2);
     short.forEach((q, i) => write((mc.length ? 'B' + (i+1) : (i+1)) + '. ' + q.answer, 10, 'normal', 2));
+    y += 4;
+  }
+  if(long.length){
+    write('Part C', 11, 'bold', 2);
+    long.forEach((q, i) => write('C' + (i+1) + '. ' + q.answer, 10, 'normal', 3));
   }
 
   const pages = doc.getNumberOfPages();
