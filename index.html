@@ -82,8 +82,7 @@
   .dz:hover .fmts i{color:var(--yellow);border-color:rgba(255,210,63,.4)}
 
   .chip{display:flex;align-items:center;gap:11px;background:#0c251d;border:1.5px solid var(--line);border-radius:11px;padding:11px 13px;margin-top:12px;animation:rise .35s both}
-  .chip .fico{width:30px;height:36px;background:var(--paper);border-radius:4px 8px 4px 4px;position:relative;flex:none;box-shadow:2px 2px 0 rgba(0,0,0,.35)}
-  .chip .fico::after{content:"¶";position:absolute;inset:0;display:grid;place-items:center;color:var(--ink2);font-size:15px}
+  .chip .fico{width:30px;height:36px;background:var(--paper);border-radius:4px 8px 4px 4px;position:relative;flex:none;box-shadow:2px 2px 0 rgba(0,0,0,.35);display:grid;place-items:center;color:var(--ink2);font-size:15px}
   .chip .cmeta{min-width:0;flex:1}
   .chip .cname{font-weight:600;font-size:.86rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .chip .cinfo{font:400 .66rem var(--mono);color:var(--chalk2);margin-top:2px}
@@ -236,8 +235,8 @@
 
 <div class="ticker" aria-hidden="true">
   <div class="tt">
-    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ MULTIPLE CHOICE ✦ SHORT ANSWER ✦ LONG / ESSAY ✦ INSTANT ANSWER KEY ✦ AUTO-GRADING ✦ EXPORT PDF ✦ 100% IN-BROWSER ✦&nbsp;</span>
-    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ MULTIPLE CHOICE ✦ SHORT ANSWER ✦ LONG / ESSAY ✦ INSTANT ANSWER KEY ✦ AUTO-GRADING ✦ EXPORT PDF ✦ 100% IN-BROWSER ✦&nbsp;</span>
+    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ WEBP ✦ MULTIPLE FILES ✦ MC ✦ SHORT ✦ LONG ✦ AUTO-GRADING ✦ PDF EXPORT ✦&nbsp;</span>
+    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ WEBP ✦ MULTIPLE FILES ✦ MC ✦ SHORT ✦ LONG ✦ AUTO-GRADING ✦ PDF EXPORT ✦&nbsp;</span>
   </div>
 </div>
 
@@ -245,12 +244,12 @@
 
   <section class="input-panel" aria-label="Quiz setup">
     <span class="sec-tag">SECTION A · SETUP</span>
-    <h1>Drop a file.<br><span class="hl">Get a quiz.</span></h1>
-    <p class="sub">Feed it lecture notes, a slide deck or a chapter — OmniQuiz writes the exam paper while you sharpen your pencil.</p>
+    <h1>Drop files.<br><span class="hl">Get a quiz.</span></h1>
+    <p class="sub">Feed it documents, slides, or photos — OmniQuiz reads text <em>and</em> images, then writes the exam paper.</p>
 
     <div class="step">
-      <div class="lab"><span>01 · Source file</span></div>
-      <div class="dz" id="dz" role="button" tabindex="0" aria-label="Upload a document">
+      <div class="lab"><span>01 · Source files</span></div>
+      <div class="dz" id="dz" role="button" tabindex="0" aria-label="Upload documents">
         <span class="dz-ico">
           <svg width="46" height="54" viewBox="0 0 46 54" fill="none" aria-hidden="true">
             <path d="M4 3h26l12 12v36H4V3z" fill="#fbf8ee" stroke="#e9f2e9" stroke-width="2"/>
@@ -258,17 +257,12 @@
             <text x="23" y="42" text-anchor="middle" font-family="Georgia" font-size="22" font-weight="900" fill="#20261f">?</text>
           </svg>
         </span>
-        <div class="dz-big">Drag &amp; drop your study file</div>
+        <div class="dz-big">Drag &amp; drop files (multiple allowed)</div>
         <div class="dz-small">or click to browse</div>
-        <div class="fmts"><i>PDF</i><i>DOCX</i><i>PPTX</i><i>TXT</i></div>
+        <div class="fmts"><i>PDF</i><i>DOCX</i><i>PPTX</i><i>TXT</i><i>PNG</i><i>JPG</i><i>WEBP</i></div>
       </div>
-      <!-- Updated with MIME types for better mobile support -->
-      <input type="file" id="fileInput" accept="application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.presentationml.presentation, text/plain, text/markdown, .pdf, .docx, .pptx, .txt, .md" hidden>
-      <div class="chip" id="chip" hidden>
-        <span class="fico" aria-hidden="true"></span>
-        <span class="cmeta"><span class="cname" id="chipName"></span><br><span class="cinfo" id="chipMeta"></span></span>
-        <button type="button" id="chipX" title="Remove file" aria-label="Remove file">✕</button>
-      </div>
+      <input type="file" id="fileInput" multiple accept="application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.presentationml.presentation, text/plain, text/markdown, image/png, image/jpeg, image/webp, image/gif, image/bmp, .pdf, .docx, .pptx, .txt, .md, .png, .jpg, .jpeg, .webp, .gif, .bmp" hidden>
+      <div id="chipContainer"></div>
       <p class="status" id="status" aria-live="polite">▸ Awaiting submission…</p>
     </div>
 
@@ -302,8 +296,8 @@
         <button type="button" data-v="nvidia" class="on">NVIDIA NIM</button>
       </div>
       <div class="lab"><span style="letter-spacing:.08em">Model</span></div>
-      <select class="in" id="modelSel" disabled><option>nvidia/nemotron-3.5-lightning-30b-a3b</option></select>
-      <p class="micro">Using NVIDIA Nemotron Lightning securely via a hidden server proxy.</p>
+      <select class="in" id="modelSel" disabled><option>nvidia/nemotron-3-nano-omni-30b-a3b-reasoning</option></select>
+      <p class="micro">Using NVIDIA Nemotron Omni (multimodal reasoning) via hidden proxy.</p>
     </div>
 
     <button class="gen" id="genBtn" type="button"><span id="genLabel">⚡ GENERATE QUIZ</span></button>
@@ -328,7 +322,7 @@
         <div class="gs-opts"><i></i><i></i><i></i><i></i></div>
       </div>
       <p class="empty-title">No paper on the desk yet</p>
-      <p>Feed it a document on the left — the quiz prints itself here.</p>
+      <p>Feed it documents or images on the left — the quiz prints itself here.</p>
     </div>
 
     <article class="paper" id="paper" hidden>
@@ -356,7 +350,7 @@
 <footer>
   <div class="wrap foot">
     <span>🔒 Files are parsed entirely in your browser. The AI is queried securely via a hidden server proxy.</span>
-    <span>OMNIZQ-AI · SECURE EDITION</span>
+    <span>OMNIZQ-AI · MULTIMODAL EDITION</span>
   </div>
 </footer>
 
@@ -376,11 +370,12 @@ const LETTERS = 'ABCDEF';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-const state = { file:null, text:'', quiz:null, meta:null, graded:false };
+// state.files: array of {name, kind: 'text'|'image', text?, dataUrl?}
+const state = { files:[], quiz:null, meta:null, graded:false };
 let difficulty = 'medium';
 
-// SECURE CLOUDFLARE WORKER URL
-const WORKER_URL = "https://ehjkwqngbrf.s250038.workers.dev"; 
+const WORKER_URL = "https://ehjkwqngbrf.s250038.workers.dev";
+const MODEL = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning';
 
 function toast(msg){
   const t = document.createElement('div');
@@ -404,19 +399,13 @@ $('#diffSeg').addEventListener('click', e => {
 
 const dz = $('#dz'), fileInput = $('#fileInput');
 dz.addEventListener('click', () => fileInput.click());
-// Added touchend for better mobile file picker support
 dz.addEventListener('touchend', (e) => { e.preventDefault(); fileInput.click(); });
 dz.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); fileInput.click(); }});
 ['dragover','drop'].forEach(ev => window.addEventListener(ev, e => e.preventDefault()));
 dz.addEventListener('dragover', () => dz.classList.add('over'));
 dz.addEventListener('dragleave', () => dz.classList.remove('over'));
-dz.addEventListener('drop', e => { dz.classList.remove('over'); handleFile(e.dataTransfer.files[0]); });
-fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
-$('#chipX').addEventListener('click', () => {
-  state.file = null; state.text = '';
-  $('#chip').hidden = true; fileInput.value = '';
-  setStatus('▸ Awaiting submission…');
-});
+dz.addEventListener('drop', e => { dz.classList.remove('over'); handleFiles(e.dataTransfer.files); });
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
 
 const decodeXML = s => s.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&#(\d+);/g,(m,n)=>String.fromCodePoint(+n)).replace(/&amp;/g,'&');
 
@@ -448,47 +437,123 @@ async function extractPPTX(file){
   return out.join('\n\n');
 }
 
-async function handleFile(file){
-  if(!file) return;
+// Resize image to max 1024px on longest side, convert to JPEG q=0.7 -> base64 data URL
+async function compressImage(file){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const MAX = 1024;
+      let { width, height } = img;
+      if(width > MAX || height > MAX){
+        if(width > height){ height = Math.round(height * MAX / width); width = MAX; }
+        else              { width  = Math.round(width  * MAX / height); height = MAX; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, width, height);
+      ctx.drawImage(img, 0, 0, width, height);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+      resolve(dataUrl);
+    };
+    img.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
+    img.src = url;
+  });
+}
+
+async function processFile(file){
   const name = file.name.toLowerCase();
-  if(!/\.(pdf|docx|pptx|txt|md)$/.test(name)){
-    toast('Unsupported file — use PDF, DOCX, PPTX or TXT.'); return;
+  const type = file.type.toLowerCase();
+  
+  // Image files
+  if(type.startsWith('image/') || /\.(png|jpe?g|webp|gif|bmp)$/.test(name)){
+    const dataUrl = await compressImage(file);
+    return { name: file.name, kind: 'image', dataUrl, size: file.size };
   }
-  setStatus('▸ Reading ' + esc(file.name) + '…');
-  try{
-    let text = '';
-    if(name.endsWith('.pdf'))       text = await extractPDF(file);
-    else if(name.endsWith('.docx')) text = await extractDOCX(file);
-    else if(name.endsWith('.pptx')) text = await extractPPTX(file);
-    else                            text = await file.text();
-    
-    state.file = file; state.text = text;
-    const words = text.split(/\s+/).filter(Boolean).length;
-    $('#chipName').textContent = file.name;
-    $('#chipMeta').textContent = Math.max(1, Math.round(file.size/1024)) + ' KB · ' + words.toLocaleString() + ' words extracted';
-    $('#chip').hidden = false;
-    setStatus('✔ ' + words.toLocaleString() + ' words extracted. Configure the mix and hit generate.');
-  }catch(err){
-    setStatus('✖ ' + esc(err.message));
-    toast(err.message);
-  }
+  // Text-based files
+  let text = '';
+  if(name.endsWith('.pdf'))       text = await extractPDF(file);
+  else if(name.endsWith('.docx')) text = await extractDOCX(file);
+  else if(name.endsWith('.pptx')) text = await extractPPTX(file);
+  else                            text = await file.text();
+  return { name: file.name, kind: 'text', text, size: file.size };
 }
 
-function sampleText(text){
-  const MAX = 12000;
-  let t = text.replace(/\r/g,'').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();
-  if(t.length <= MAX) return t;
-  const headLen = Math.floor(MAX * 0.45);
-  const parts = [t.slice(0, headLen)];
-  const rest = t.length - headLen, n = 6, size = Math.floor((MAX - headLen) / n);
-  for(let i = 0; i < n; i++){
-    const start = headLen + Math.floor(rest * i / n);
-    parts.push(t.slice(start, start + size));
+async function handleFiles(fileList){
+  if(!fileList || fileList.length === 0) return;
+  const files = Array.from(fileList);
+  
+  // Validate all files first
+  for(const f of files){
+    const name = f.name.toLowerCase();
+    const type = f.type.toLowerCase();
+    const okExt  = /\.(pdf|docx|pptx|txt|md|png|jpe?g|webp|gif|bmp)$/.test(name);
+    const okMime = type.startsWith('image/') ||
+                   type === 'application/pdf' ||
+                   type.includes('wordprocessingml') ||
+                   type.includes('presentationml') ||
+                   type.startsWith('text/');
+    if(!okExt && !okMime){
+      toast('Unsupported file skipped: ' + f.name);
+      continue;
+    }
   }
-  return parts.join('\n[…excerpt…]\n');
+  
+  setStatus('▸ Reading ' + files.length + ' file(s)…');
+  const processed = [];
+  for(const f of files){
+    try{
+      const entry = await processFile(f);
+      processed.push(entry);
+    }catch(err){
+      toast('Failed to read ' + f.name + ': ' + err.message);
+    }
+  }
+  
+  // Append to existing files (allow adding more)
+  state.files = state.files.concat(processed);
+  renderChips();
+  
+  const textCount = state.files.filter(f => f.kind === 'text').length;
+  const imgCount  = state.files.filter(f => f.kind === 'image').length;
+  const totalWords = state.files
+    .filter(f => f.kind === 'text')
+    .reduce((sum, f) => sum + (f.text || '').split(/\s+/).filter(Boolean).length, 0);
+  
+  setStatus('✔ ' + state.files.length + ' file(s) loaded — ' + 
+            totalWords.toLocaleString() + ' words · ' + imgCount + ' image(s). Configure and generate.');
 }
 
-/* want = { mc:n, short:n, long:n } — only types with n>0 are requested */
+function renderChips(){
+  const container = $('#chipContainer');
+  container.innerHTML = '';
+  state.files.forEach((f, idx) => {
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    const icon = f.kind === 'image' ? '🖼' : '¶';
+    const info = f.kind === 'image' 
+      ? Math.max(1, Math.round(f.size/1024)) + ' KB · image'
+      : Math.max(1, Math.round(f.size/1024)) + ' KB · ' + (f.text || '').split(/\s+/).filter(Boolean).length + ' words';
+    chip.innerHTML = `
+      <span class="fico" aria-hidden="true">${icon}</span>
+      <span class="cmeta">
+        <span class="cname">${esc(f.name)}</span><br>
+        <span class="cinfo">${info}</span>
+      </span>
+      <button type="button" title="Remove file" aria-label="Remove file">✕</button>
+    `;
+    chip.querySelector('button').addEventListener('click', () => {
+      state.files.splice(idx, 1);
+      renderChips();
+      if(state.files.length === 0) setStatus('▸ Awaiting submission…');
+    });
+    container.appendChild(chip);
+  });
+}
+
 function buildPrompt(material, want){
   const flavor = {
     easy:   'foundational recall — clear, confidence-building questions',
@@ -498,7 +563,8 @@ function buildPrompt(material, want){
   const lang = $('#langIn').value.trim(), focus = $('#focusIn').value.trim();
   const lines = [
     'You are an expert exam writer and teacher.',
-    'Create a brand-new quiz strictly from the STUDY MATERIAL at the end of this prompt.',
+    'Create a brand-new quiz strictly from the STUDY MATERIAL below (which may include text and images).',
+    'When images are provided, carefully read their visual content — diagrams, handwritten notes, slides, charts, textbook pages — and use that content to create questions.',
     'Requirements:'
   ];
   if(want.short > 0) lines.push(`- Write exactly ${want.short} short-answer question(s) with a concise model answer (1-2 sentences). Put these FIRST in the "questions" array.`);
@@ -514,51 +580,108 @@ function buildPrompt(material, want){
     '',
     'CRITICAL RULES:',
     '- Every "question", "options", "answer" and "explanation" string MUST contain REAL content taken from the study material.',
-    '- NEVER output placeholder dots ("..."), ellipses, empty strings, or copy the example below. The example only demonstrates the FORMAT.',
+    '- NEVER output placeholder dots ("..."), ellipses, empty strings, or copy the example below.',
     '- The "questions" array MUST contain the exact number of each requested type. Do not stop early.',
     '- Output ONLY the JSON object. No markdown fences, no commentary, no thinking text.',
     '',
-    'FORMAT EXAMPLE (format only — the content here is fake, do NOT reuse it):'
+    'FORMAT EXAMPLE (format only — do NOT reuse):'
   );
   const ex = [];
   if(want.short > 0) ex.push('{"type":"short","question":"Name the pigment that captures light energy in plants.","answer":"Chlorophyll."}');
   if(want.long  > 0) ex.push('{"type":"long","question":"Explain the process of photosynthesis, including where it takes place and its two main stages.","answer":"Photosynthesis takes place in the chloroplasts of plant cells. In the light-dependent reactions, light energy splits water and produces ATP and NADPH. In the light-independent Calvin cycle, carbon dioxide is fixed into glucose using those products. The overall equation is 6CO2 + 6H2O -> C6H12O6 + 6O2."}');
   if(want.mc    > 0) ex.push('{"type":"mc","question":"What gas do plants absorb during photosynthesis?","options":["Oxygen","Carbon dioxide","Nitrogen","Hydrogen"],"answerIndex":1,"explanation":"Plants absorb carbon dioxide from the air."}');
   lines.push('{"questions":[' + ex.join(',') + ']}');
-  lines.push('', 'Now write the REAL quiz about the study material below, in the same JSON format:',
-    'STUDY MATERIAL:\n"""\n' + material + '\n"""');
+  lines.push('', 'Now write the REAL quiz about the study material below, in the same JSON format.');
+  lines.push('STUDY MATERIAL TEXT:\n"""\n' + material + '\n"""');
   return lines.filter(Boolean).join('\n');
 }
 
-async function callNVIDIA(prompt){
+function sampleText(text){
+  const MAX = 10000; // slightly less to leave room for images in payload
+  let t = text.replace(/\r/g,'').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();
+  if(t.length <= MAX) return t;
+  const headLen = Math.floor(MAX * 0.45);
+  const parts = [t.slice(0, headLen)];
+  const rest = t.length - headLen, n = 5, size = Math.floor((MAX - headLen) / n);
+  for(let i = 0; i < n; i++){
+    const start = headLen + Math.floor(rest * i / n);
+    parts.push(t.slice(start, start + size));
+  }
+  return parts.join('\n[…excerpt…]\n');
+}
+
+async function callNVIDIA(textMaterial){
+  // Build content array for multimodal message
+  const content = [];
+  
+  // Collect text from all text files
+  const allText = state.files
+    .filter(f => f.kind === 'text')
+    .map(f => '=== ' + f.name + ' ===\n' + (f.text || ''))
+    .join('\n\n');
+  
+  // Collect image data URLs
+  const images = state.files.filter(f => f.kind === 'image');
+  
+  // Build the user message content as an array (multimodal format)
+  const userContent = [];
+  
+  // Add prompt text
+  userContent.push({ type: 'text', text: textMaterial });
+  
+  // Add all text content from files (already in prompt, but also as explicit file sections)
+  if(allText && !textMaterial.includes(allText.slice(0, 100))){
+    // text already embedded in prompt via sampleText
+  }
+  
+  // Add images (limit to first 6 to avoid payload size issues)
+  const MAX_IMAGES = 6;
+  const imagesToSend = images.slice(0, MAX_IMAGES);
+  if(images.length > MAX_IMAGES){
+    userContent.push({ 
+      type: 'text', 
+      text: `\n[Note: ${images.length - MAX_IMAGES} additional images were uploaded but omitted to keep payload size manageable.]\n` 
+    });
+  }
+  for(const img of imagesToSend){
+    userContent.push({
+      type: 'image_url',
+      image_url: { url: img.dataUrl }
+    });
+  }
+  
+  // If no images, just use plain text content (not array) to be safe
+  const finalContent = imagesToSend.length > 0 ? userContent : textMaterial;
+  
   const base = {
-    model: 'nvidia/nemotron-3.5-lightning-30b-a3b',
+    model: MODEL,
     messages:[
       { role:'system', content:'You are an expert exam writer. Always respond with a single strict JSON object containing real content. Never output placeholder dots or reasoning text.' },
-      { role:'user', content: prompt }
+      { role:'user', content: finalContent }
     ],
     temperature: 0.7,
     top_p: 0.7,
     max_tokens: 5000,
     stream: false
   };
+  
   let r = await fetch(WORKER_URL, {
     method:'POST', headers:{ 'Content-Type':'application/json' },
-    body: JSON.stringify(Object.assign({ chat_template_kwargs:{ enable_thinking:false } }, base))
+    body: JSON.stringify(base)
   });
   let j = await r.json().catch(() => ({}));
   if(!r.ok && (r.status === 400 || r.status === 422)){
-    r = await fetch(WORKER_URL, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(base) });
+    // Fallback: try without system message in case reasoning model has issues
+    const fallback = { ...base, messages: base.messages.slice(1) };
+    r = await fetch(WORKER_URL, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(fallback) });
     j = await r.json().catch(() => ({}));
   }
   if(!r.ok) throw new Error(j?.error?.message || ('NVIDIA NIM error ' + r.status));
   return j?.choices?.[0]?.message?.content || '';
 }
 
-// Detects placeholder junk like "...", "…", empty strings
 const isPh = v => { const s = String(v ?? '').trim(); return !s || /^[\u2026.·•_\-\s]+$/.test(s); };
 
-// Tries to parse; if the JSON was truncated mid-reply, salvage the completed part
 function tryParse(t){
   const cands = [t];
   const cut = t.lastIndexOf('}');
@@ -601,21 +724,31 @@ function parseQuiz(raw){
 $('#genBtn').addEventListener('click', generate);
 async function generate(){
   const wantMC = +$('#mcRange').value, wantSH = +$('#shRange').value, wantLG = +$('#lgRange').value;
-  if(!state.text){ toast('Drop a file first — PDF, DOCX, PPTX or TXT.'); return; }
+  if(state.files.length === 0){ toast('Drop at least one file first.'); return; }
   if(wantMC + wantSH + wantLG === 0){ toast('Set at least one question in the quiz mix.'); return; }
 
   const btn = $('#genBtn'), label = $('#genLabel');
   btn.disabled = true; label.textContent = '✍ WRITING QUESTIONS…';
-  const model = 'nvidia/nemotron-3.5-lightning-30b-a3b';
   const t0 = performance.now();
   try{
     setStatus('▸ Building the exam brief…');
-    const material = sampleText(state.text);
+    
+    // Combine text from all text files
+    const allText = state.files
+      .filter(f => f.kind === 'text')
+      .map(f => '=== ' + f.name + ' ===\n' + (f.text || ''))
+      .join('\n\n');
+    const imgCount = state.files.filter(f => f.kind === 'image').length;
+    
+    const material = sampleText(allText) + 
+      (imgCount > 0 ? `\n\n[${imgCount} image(s) attached — please examine them carefully for content.]` : '');
+    
     const prompt = buildPrompt(material, { mc:wantMC, short:wantSH, long:wantLG });
 
     let quiz = { mc:[], short:[], long:[] };
     for(let attempt = 1; attempt <= 2; attempt++){
-      setStatus('▸ Asking ' + esc(model) + ' to write the paper… (attempt ' + attempt + '/2)');
+      setStatus('▸ Asking ' + MODEL + ' to write the paper… (attempt ' + attempt + '/2)' + 
+                (imgCount > 0 ? ' · reading ' + Math.min(imgCount, 6) + ' image(s)' : ''));
       const raw = await callNVIDIA(prompt);
       setStatus('▸ Checking the generator\'s homework…');
       try{ quiz = parseQuiz(raw); break; }
@@ -626,7 +759,6 @@ async function generate(){
     quiz.short = quiz.short.slice(0, wantSH);
     quiz.long = quiz.long.slice(0, wantLG);
 
-    // TOP-UP: one extra focused call for whatever is still missing
     const deficit = { mc: wantMC - quiz.mc.length, short: wantSH - quiz.short.length, long: wantLG - quiz.long.length };
     if(deficit.mc > 0 || deficit.short > 0 || deficit.long > 0){
       setStatus('▸ Topping up missing questions…');
@@ -640,9 +772,10 @@ async function generate(){
     if(!quiz.mc.length && !quiz.short.length && !quiz.long.length) throw new Error('No usable questions returned — try again.');
 
     state.quiz = quiz; state.graded = false;
+    const sourceNames = state.files.map(f => f.name).join(', ');
     state.meta = {
-      file: state.file ? state.file.name : 'text',
-      model,
+      file: sourceNames.length > 80 ? sourceNames.slice(0, 77) + '…' : sourceNames,
+      model: MODEL,
       secs: ((performance.now() - t0) / 1000).toFixed(1),
       date: new Date().toLocaleDateString(undefined,{ year:'numeric', month:'short', day:'numeric' })
     };
@@ -659,7 +792,7 @@ async function generate(){
 function renderQuiz(){
   const { mc, short, long } = state.quiz, m = state.meta;
   $('#mFile').textContent = m.file.length > 26 ? m.file.slice(0,24) + '…' : m.file;
-  $('#mModel').textContent = m.model;
+  $('#mModel').textContent = m.model.split('/').pop();
   $('#mTime').textContent = m.secs + 's · ' + m.date;
   $('#mCount').textContent = (mc.length + short.length + long.length) + ' QUESTIONS';
 
@@ -804,7 +937,6 @@ $('#copyBtn').addEventListener('click', async () => {
   }
 });
 
-/* ---------- PDF DOWNLOAD ---------- */
 $('#dlBtn').addEventListener('click', () => {
   if(!state.quiz) return;
   const { jsPDF } = window.jspdf;
@@ -878,7 +1010,7 @@ $('#dlBtn').addEventListener('click', () => {
     doc.setPage(p); doc.setFontSize(9); doc.setTextColor(140,140,140);
     doc.text('OmniQuiz-AI  ·  Page ' + p + ' / ' + pages, W - M, 292, { align:'right' });
   }
-  doc.save('quiz-' + (m.file.replace(/\.[^.]+$/,'') || 'paper').slice(0,40) + '.pdf');
+  doc.save('quiz-' + (m.file.replace(/\.[^.]+$/,'').replace(/[^a-zA-Z0-9]/g,'_') || 'paper').slice(0,40) + '.pdf');
   toast('Downloading PDF…');
 });
 
