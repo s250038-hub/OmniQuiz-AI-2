@@ -89,13 +89,19 @@
   .notes-area::placeholder{color:#5d7a6c}
   .word-count{font:400 .7rem var(--mono);color:var(--chalk2);margin-top:6px;text-align:right}
 
-  .chip{display:flex;align-items:center;gap:11px;background:#0c251d;border:1.5px solid var(--line);border-radius:11px;padding:11px 13px;margin-top:12px;animation:rise .35s both}
+  .chip{display:flex;align-items:flex-start;gap:11px;background:#0c251d;border:1.5px solid var(--line);border-radius:11px;padding:11px 13px;margin-top:12px;animation:rise .35s both}
   .chip .fico{width:30px;height:36px;background:var(--paper);border-radius:4px 8px 4px 4px;position:relative;flex:none;box-shadow:2px 2px 0 rgba(0,0,0,.35);display:grid;place-items:center;color:var(--ink2);font-size:15px}
   .chip .cmeta{min-width:0;flex:1}
   .chip .cname{font-weight:600;font-size:.86rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .chip .cinfo{font:400 .66rem var(--mono);color:var(--chalk2);margin-top:2px}
-  .chip button{background:none;border:0;color:var(--chalk2);font-size:1rem;cursor:pointer;padding:4px 6px;border-radius:6px;transition:.15s}
-  .chip button:hover{color:var(--red);background:rgba(255,93,82,.12)}
+  .chip .cpreview{font:400 .72rem var(--body);color:var(--chalk2);margin-top:6px;line-height:1.4;max-height:3em;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;opacity:.85;border-left:2px solid var(--line);padding-left:8px}
+  .chip .cactions{display:flex;gap:6px;margin-top:6px}
+  .chip .cactions button{background:none;border:1px solid var(--line);color:var(--chalk2);font:600 .66rem var(--mono);letter-spacing:.1em;padding:4px 8px;border-radius:5px;cursor:pointer;transition:.15s}
+  .chip .cactions button:hover{color:var(--yellow);border-color:var(--yellow)}
+  .chip .cactions .del:hover{color:var(--red);border-color:var(--red)}
+  .chip.processing{opacity:.7;border-style:dashed}
+  .chip.processing .fico::after{content:"";width:14px;height:14px;border:2px solid var(--yellow);border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
 
   .status{font:400 .76rem var(--mono);color:var(--yellow);min-height:1.5em;margin-top:12px;line-height:1.5}
   .status::after{content:"▍";animation:blink 1.1s steps(2) infinite;margin-left:2px}
@@ -186,6 +192,19 @@
   .amodel p{font-size:.94rem;line-height:1.55;white-space:pre-line}
   .paper-end{text-align:center;font:700 .68rem var(--mono);letter-spacing:.3em;color:var(--ink2);margin-top:36px}
 
+  /* Edit modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+  .modal-bg.on{display:flex}
+  .modal{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:24px;max-width:600px;width:100%;max-height:80vh;display:flex;flex-direction:column;gap:14px}
+  .modal h3{font:800 1.1rem var(--disp);color:#fff}
+  .modal textarea{flex:1;min-height:280px;background:#0c251d;border:1.5px solid var(--line);color:#fff;border-radius:10px;padding:12px;font:500 .9rem var(--body);line-height:1.5;resize:vertical}
+  .modal textarea:focus{outline:none;border-color:var(--yellow)}
+  .modal-actions{display:flex;gap:10px;justify-content:flex-end}
+  .modal-actions button{font:600 .85rem var(--body);padding:10px 18px;border-radius:8px;cursor:pointer;border:1.5px solid var(--line);background:transparent;color:var(--chalk);transition:.15s}
+  .modal-actions button:hover{border-color:var(--yellow);color:var(--yellow)}
+  .modal-actions .save{background:var(--yellow);color:#14110a;border-color:#14110a}
+  .modal-actions .save:hover{transform:translateY(-1px)}
+
   footer{border-top:1px dashed rgba(233,242,233,.18);padding:22px 0 34px}
   .foot{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font:400 .7rem/1.7 var(--mono);color:var(--chalk2);letter-spacing:.04em}
 
@@ -208,7 +227,7 @@
   }
   @media print{
     body{background:#fff}
-    body::after,.bgfx,.ticker,header.top,.input-panel,.toolbar,footer,.paper-empty,#toasts{display:none!important}
+    body::after,.bgfx,.ticker,header.top,.input-panel,.toolbar,footer,.paper-empty,#toasts,.modal-bg{display:none!important}
     main{display:block;padding:0}
     .paper{box-shadow:none;border-radius:0;animation:none}
   }
@@ -243,8 +262,8 @@
 
 <div class="ticker" aria-hidden="true">
   <div class="tt">
-    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MANUAL NOTES ✦ MULTIPLE FILES ✦ MC ✦ SHORT ✦ LONG ✦ AUTO-GRADING ✦ PDF EXPORT ✦&nbsp;</span>
-    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MANUAL NOTES ✦ MULTIPLE FILES ✦ MC ✦ SHORT ✦ LONG ✦ AUTO-GRADING ✦ PDF EXPORT ✦&nbsp;</span>
+    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ OCR ✦ TYPED NOTES ✦ MULTIPLE FILES ✦ MC ✦ SHORT ✦ LONG ✦ AUTO-GRADING ✦ PDF EXPORT ✦&nbsp;</span>
+    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ OCR ✦ TYPED NOTES ✦ MULTIPLE FILES ✦ MC ✦ SHORT ✦ LONG ✦ AUTO-GRADING ✦ PDF EXPORT ✦&nbsp;</span>
   </div>
 </div>
 
@@ -253,7 +272,7 @@
   <section class="input-panel" aria-label="Quiz setup">
     <span class="sec-tag">SECTION A · SETUP</span>
     <h1>Drop files or type notes.<br><span class="hl">Get a quiz.</span></h1>
-    <p class="sub">Upload documents, photos, or just type your notes — OmniQuiz reads everything and writes the exam paper.</p>
+    <p class="sub">Upload documents, photos (OCR auto-reads text), or just type your notes.</p>
 
     <div class="step">
       <div class="lab"><span>01 · Source material</span></div>
@@ -266,7 +285,7 @@
           </svg>
         </span>
         <div class="dz-big">Upload files (optional)</div>
-        <div class="dz-small">PDF, DOCX, PPTX, TXT, or images</div>
+        <div class="dz-small">Images auto-OCR · PDF/DOCX/PPTX/TXT supported</div>
         <div class="fmts"><i>PDF</i><i>DOCX</i><i>PPTX</i><i>TXT</i><i>PNG</i><i>JPG</i><i>WEBP</i></div>
       </div>
       <input type="file" id="fileInput" multiple accept="application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.presentationml.presentation, text/plain, text/markdown, image/png, image/jpeg, image/webp, image/gif, image/bmp, .pdf, .docx, .pptx, .txt, .md, .png, .jpg, .jpeg, .webp, .gif, .bmp" hidden>
@@ -274,7 +293,7 @@
       
       <div class="divider">or type your notes</div>
       
-      <textarea id="notesInput" class="notes-area" placeholder="Type or paste your study notes here...&#10;&#10;Example: Photosynthesis is the process by which plants convert light energy into chemical energy. It occurs in the chloroplasts and requires carbon dioxide, water, and sunlight..."></textarea>
+      <textarea id="notesInput" class="notes-area" placeholder="Type or paste your study notes here...&#10;&#10;Example: Photosynthesis is the process by which plants convert light energy into chemical energy..."></textarea>
       <div class="word-count" id="wordCount">0 words</div>
       
       <p class="status" id="status" aria-live="polite">▸ Awaiting submission…</p>
@@ -299,9 +318,27 @@
     <div class="step">
       <div class="lab"><span>03 · Language &amp; focus</span></div>
       <div class="grid2">
-        <input class="in" id="langIn" type="text" placeholder="Language (auto)">
+        <input class="in" id="langIn" type="text" placeholder="Quiz language (auto)">
         <input class="in" id="focusIn" type="text" placeholder="Focus topic (opt.)">
       </div>
+      <div class="lab" style="margin-top:14px"><span style="letter-spacing:.08em">OCR language (for images)</span></div>
+      <select class="in" id="ocrLang">
+        <option value="eng" selected>English</option>
+        <option value="chi_sim">Chinese (Simplified)</option>
+        <option value="chi_tra">Chinese (Traditional)</option>
+        <option value="jpn">Japanese</option>
+        <option value="kor">Korean</option>
+        <option value="spa">Spanish</option>
+        <option value="fra">French</option>
+        <option value="deu">German</option>
+        <option value="ita">Italian</option>
+        <option value="por">Portuguese</option>
+        <option value="rus">Russian</option>
+        <option value="ara">Arabic</option>
+        <option value="hin">Hindi</option>
+        <option value="vie">Vietnamese</option>
+        <option value="tha">Thai</option>
+      </select>
     </div>
 
     <div class="step">
@@ -311,7 +348,7 @@
       </div>
       <div class="lab"><span style="letter-spacing:.08em">Model</span></div>
       <select class="in" id="modelSel" disabled><option>nvidia/nemotron-3.5-lightning-30b-a3b</option></select>
-      <p class="micro">Using NVIDIA Nemotron Lightning via hidden proxy.</p>
+      <p class="micro">Fast text model · Images are OCR'd first, then sent as text (no rate limits).</p>
     </div>
 
     <button class="gen" id="genBtn" type="button"><span id="genLabel">⚡ GENERATE QUIZ</span></button>
@@ -363,10 +400,23 @@
 
 <footer>
   <div class="wrap foot">
-    <span>🔒 Files are parsed entirely in your browser. The AI is queried securely via a hidden server proxy.</span>
-    <span>OMNIZQ-AI · MULTIMODAL EDITION</span>
+    <span>🔒 Files parsed in-browser (OCR via Tesseract.js). AI queried securely via hidden proxy.</span>
+    <span>OMNIZQ-AI · OCR EDITION</span>
   </div>
 </footer>
+
+<!-- Edit OCR modal -->
+<div class="modal-bg" id="editModal">
+  <div class="modal">
+    <h3>Edit extracted text</h3>
+    <p style="font-size:.85rem;color:var(--chalk2);line-height:1.5">OCR isn't perfect — fix any mistakes below before generating the quiz. This edited text will be used instead of the raw OCR output.</p>
+    <textarea id="editArea"></textarea>
+    <div class="modal-actions">
+      <button type="button" id="editCancel">Cancel</button>
+      <button type="button" id="editSave" class="save">Save changes</button>
+    </div>
+  </div>
+</div>
 
 <div id="toasts"></div>
 
@@ -374,6 +424,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script>
 (() => {
 "use strict";
@@ -384,9 +435,10 @@ const LETTERS = 'ABCDEF';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-// state.files: array of {name, kind: 'text'|'image', text?, dataUrl?}
-const state = { files:[], notes:'', quiz:null, meta:null, graded:false };
+// state.files: array of {name, kind: 'text', text, size, isOcr?, processing?}
+const state = { files:[], notes:'', quiz:null, meta:null, graded:false, ocrWorkers:0 };
 let difficulty = 'medium';
+let editingIndex = -1;
 
 const WORKER_URL = "https://ehjkwqngbrf.s250038.workers.dev";
 const MODEL = 'nvidia/nemotron-3.5-lightning-30b-a3b';
@@ -411,7 +463,6 @@ $('#diffSeg').addEventListener('click', e => {
   difficulty = b.dataset.v;
 });
 
-// Notes textarea handler
 $('#notesInput').addEventListener('input', e => {
   state.notes = e.target.value;
   const words = state.notes.trim().split(/\s+/).filter(Boolean).length;
@@ -428,6 +479,22 @@ dz.addEventListener('dragover', () => dz.classList.add('over'));
 dz.addEventListener('dragleave', () => dz.classList.remove('over'));
 dz.addEventListener('drop', e => { dz.classList.remove('over'); handleFiles(e.dataTransfer.files); });
 fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+// Edit modal handlers
+$('#editCancel').addEventListener('click', () => {
+  $('#editModal').classList.remove('on');
+  editingIndex = -1;
+});
+$('#editSave').addEventListener('click', () => {
+  if(editingIndex >= 0 && editingIndex < state.files.length){
+    state.files[editingIndex].text = $('#editArea').value;
+    renderChips();
+    updateStatus();
+    toast('Text updated ✓');
+  }
+  $('#editModal').classList.remove('on');
+  editingIndex = -1;
+});
 
 const decodeXML = s => s.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&#(\d+);/g,(m,n)=>String.fromCodePoint(+n)).replace(/&amp;/g,'&');
 
@@ -459,59 +526,40 @@ async function extractPPTX(file){
   return out.join('\n\n');
 }
 
-// Resize image to max 1024px on longest side, convert to JPEG q=0.7 -> base64 data URL
-async function compressImage(file){
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      const MAX = 1024;
-      let { width, height } = img;
-      if(width > MAX || height > MAX){
-        if(width > height){ height = Math.round(height * MAX / width); width = MAX; }
-        else              { width  = Math.round(width  * MAX / height); height = MAX; }
+// OCR an image file using Tesseract.js
+async function extractImageText(file, lang){
+  const result = await Tesseract.recognize(file, lang, {
+    logger: m => {
+      if(m.status === 'recognizing text'){
+        const pct = Math.round((m.progress || 0) * 100);
+        setStatus('▸ OCR reading ' + esc(file.name) + '… ' + pct + '%');
       }
-      const canvas = document.createElement('canvas');
-      canvas.width = width; canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, width, height);
-      ctx.drawImage(img, 0, 0, width, height);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-      resolve(dataUrl);
-    };
-    img.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
-    img.src = url;
+    }
   });
+  return (result.data.text || '').trim();
 }
 
-async function processFile(file){
+async function processTextFile(file){
   const name = file.name.toLowerCase();
-  const type = file.type.toLowerCase();
-  
-  // Image files
-  if(type.startsWith('image/') || /\.(png|jpe?g|webp|gif|bmp)$/.test(name)){
-    const dataUrl = await compressImage(file);
-    return { name: file.name, kind: 'image', dataUrl, size: file.size };
-  }
-  // Text-based files
   let text = '';
   if(name.endsWith('.pdf'))       text = await extractPDF(file);
   else if(name.endsWith('.docx')) text = await extractDOCX(file);
   else if(name.endsWith('.pptx')) text = await extractPPTX(file);
   else                            text = await file.text();
-  return { name: file.name, kind: 'text', text, size: file.size };
+  return { name: file.name, kind: 'text', text, size: file.size, isOcr: false };
 }
 
 async function handleFiles(fileList){
   if(!fileList || fileList.length === 0) return;
   const files = Array.from(fileList);
+  const lang = $('#ocrLang').value;
   
-  // Validate all files first
+  // Validate + immediately add placeholders (so UI updates during OCR)
+  const placeholders = [];
   for(const f of files){
     const name = f.name.toLowerCase();
     const type = f.type.toLowerCase();
+    const isImage = type.startsWith('image/') || /\.(png|jpe?g|webp|gif|bmp)$/.test(name);
     const okExt  = /\.(pdf|docx|pptx|txt|md|png|jpe?g|webp|gif|bmp)$/.test(name);
     const okMime = type.startsWith('image/') ||
                    type === 'application/pdf' ||
@@ -519,26 +567,56 @@ async function handleFiles(fileList){
                    type.includes('presentationml') ||
                    type.startsWith('text/');
     if(!okExt && !okMime){
-      toast('Unsupported file skipped: ' + f.name);
+      toast('Skipped: ' + f.name);
       continue;
     }
+    const idx = state.files.length + placeholders.length;
+    placeholders.push({
+      name: f.name,
+      kind: 'text',
+      text: '',
+      size: f.size,
+      isOcr: isImage,
+      processing: true,
+      _srcFile: f
+    });
   }
   
-  setStatus('▸ Reading ' + files.length + ' file(s)…');
-  const processed = [];
-  for(const f of files){
-    try{
-      const entry = await processFile(f);
-      processed.push(entry);
-    }catch(err){
-      toast('Failed to read ' + f.name + ': ' + err.message);
-    }
-  }
-  
-  // Append to existing files (allow adding more)
-  state.files = state.files.concat(processed);
+  if(placeholders.length === 0) return;
+  state.files = state.files.concat(placeholders);
   renderChips();
   updateStatus();
+  
+  // Process each one (OCR images, extract text from docs)
+  for(let i = 0; i < placeholders.length; i++){
+    const p = placeholders[i];
+    const realIdx = state.files.indexOf(p);
+    try{
+      let text = '';
+      if(p.isOcr){
+        setStatus('▸ OCR reading ' + esc(p.name) + '…');
+        text = await extractImageText(p._srcFile, lang);
+        if(!text){
+          toast('No text found in ' + p.name + ' (try a clearer image).');
+        }
+      }else{
+        setStatus('▸ Reading ' + esc(p.name) + '…');
+        text = await processTextFile(p._srcFile).then(e => e.text);
+      }
+      state.files[realIdx].text = text;
+      state.files[realIdx].processing = false;
+      delete state.files[realIdx]._srcFile;
+      renderChips();
+      updateStatus();
+    }catch(err){
+      state.files[realIdx].text = '';
+      state.files[realIdx].processing = false;
+      delete state.files[realIdx]._srcFile;
+      toast('Failed: ' + p.name + ' — ' + err.message);
+      renderChips();
+      updateStatus();
+    }
+  }
 }
 
 function renderChips(){
@@ -546,47 +624,69 @@ function renderChips(){
   container.innerHTML = '';
   state.files.forEach((f, idx) => {
     const chip = document.createElement('div');
-    chip.className = 'chip';
-    const icon = f.kind === 'image' ? '🖼' : '¶';
-    const info = f.kind === 'image' 
-      ? Math.max(1, Math.round(f.size/1024)) + ' KB · image'
-      : Math.max(1, Math.round(f.size/1024)) + ' KB · ' + (f.text || '').split(/\s+/).filter(Boolean).length + ' words';
+    chip.className = 'chip' + (f.processing ? ' processing' : '');
+    const icon = f.isOcr ? '🖼' : '¶';
+    const words = (f.text || '').split(/\s+/).filter(Boolean).length;
+    const info = f.processing 
+      ? 'Reading…' 
+      : (f.isOcr 
+          ? Math.max(1, Math.round(f.size/1024)) + ' KB · OCR · ' + words + ' words'
+          : Math.max(1, Math.round(f.size/1024)) + ' KB · ' + words + ' words');
+    const preview = !f.processing && f.text 
+      ? `<div class="cpreview">${esc(f.text.slice(0, 200))}</div>` 
+      : '';
+    const actions = f.processing ? '' : `
+      <div class="cactions">
+        ${f.isOcr ? '<button type="button" class="edit">✎ EDIT TEXT</button>' : ''}
+        <button type="button" class="del">✕ REMOVE</button>
+      </div>`;
     chip.innerHTML = `
       <span class="fico" aria-hidden="true">${icon}</span>
       <span class="cmeta">
         <span class="cname">${esc(f.name)}</span><br>
         <span class="cinfo">${info}</span>
+        ${preview}
+        ${actions}
       </span>
-      <button type="button" title="Remove file" aria-label="Remove file">✕</button>
     `;
-    chip.querySelector('button').addEventListener('click', () => {
+    const delBtn = chip.querySelector('.del');
+    if(delBtn) delBtn.addEventListener('click', () => {
       state.files.splice(idx, 1);
       renderChips();
       updateStatus();
+    });
+    const editBtn = chip.querySelector('.edit');
+    if(editBtn) editBtn.addEventListener('click', () => {
+      editingIndex = idx;
+      $('#editArea').value = f.text || '';
+      $('#editModal').classList.add('on');
     });
     container.appendChild(chip);
   });
 }
 
 function updateStatus(){
-  const textCount = state.files.filter(f => f.kind === 'text').length;
-  const imgCount  = state.files.filter(f => f.kind === 'image').length;
-  const fileWords = state.files
-    .filter(f => f.kind === 'text')
-    .reduce((sum, f) => sum + (f.text || '').split(/\s+/).filter(Boolean).length, 0);
+  const anyProcessing = state.files.some(f => f.processing);
+  const readyFiles = state.files.filter(f => !f.processing);
+  const totalWords = readyFiles.reduce((sum, f) => sum + (f.text || '').split(/\s+/).filter(Boolean).length, 0);
   const notesWords = state.notes.trim().split(/\s+/).filter(Boolean).length;
-  const totalWords = fileWords + notesWords;
+  const combined = totalWords + notesWords;
+  const ocrCount = readyFiles.filter(f => f.isOcr).length;
+  const docCount = readyFiles.filter(f => !f.isOcr).length;
   
-  const parts = [];
-  if(state.files.length > 0) parts.push(state.files.length + ' file(s)');
-  if(notesWords > 0) parts.push(notesWords + ' words (typed)');
-  
-  if(parts.length === 0){
-    setStatus('▸ Awaiting submission…');
-  }else{
-    setStatus('✔ ' + parts.join(' + ') + ' loaded — ' + 
-              totalWords.toLocaleString() + ' total words · ' + imgCount + ' image(s). Configure and generate.');
+  if(anyProcessing){
+    setStatus('▸ Processing files… (' + readyFiles.length + '/' + state.files.length + ' done)');
+    return;
   }
+  if(state.files.length === 0 && notesWords === 0){
+    setStatus('▸ Awaiting submission…');
+    return;
+  }
+  const parts = [];
+  if(docCount > 0) parts.push(docCount + ' document(s)');
+  if(ocrCount > 0) parts.push(ocrCount + ' image(s) OCR\'d');
+  if(notesWords > 0) parts.push(notesWords + ' typed words');
+  setStatus('✔ ' + parts.join(' + ') + ' — ' + combined.toLocaleString() + ' total words ready. Configure and generate.');
 }
 
 function buildPrompt(material, want){
@@ -598,20 +698,21 @@ function buildPrompt(material, want){
   const lang = $('#langIn').value.trim(), focus = $('#focusIn').value.trim();
   const lines = [
     'You are an expert exam writer and teacher.',
-    'Create a brand-new quiz strictly from the STUDY MATERIAL below (which may include text and images).',
-    'When images are provided, carefully read their visual content — diagrams, handwritten notes, slides, charts, textbook pages — and use that content to create questions.',
+    'Create a brand-new quiz strictly from the STUDY MATERIAL below.',
+    'The material comes from a mix of documents, OCR\'d images, and typed notes — treat all of it equally as source truth.',
     'Requirements:'
   ];
   if(want.short > 0) lines.push(`- Write exactly ${want.short} short-answer question(s) with a concise model answer (1-2 sentences). Put these FIRST in the "questions" array.`);
-  if(want.long  > 0) lines.push(`- Write exactly ${want.long} long-form / essay question(s). Each must be a detailed, multi-part or scenario-based question, with a thorough model answer of 4-8 sentences (or a clear bullet-point outline). Put these SECOND in the array.`);
-  if(want.mc    > 0) lines.push(`- Write exactly ${want.mc} multiple-choice question(s). Each has exactly 4 options and exactly one correct answer. Vary the position of the correct option. Question stems may be long and detailed. Put these LAST in the array.`);
+  if(want.long  > 0) lines.push(`- Write exactly ${want.long} long-form / essay question(s). Each must be a detailed, multi-part or scenario-based question, with a thorough model answer of 4-8 sentences. Put these SECOND in the array.`);
+  if(want.mc    > 0) lines.push(`- Write exactly ${want.mc} multiple-choice question(s). Each has exactly 4 options and exactly one correct answer. Vary the position of the correct option. Put these LAST in the array.`);
   lines.push(
     `- Difficulty: ${flavor}.`,
     '- Use ONLY facts present in the study material. Never invent facts.',
+    '- OCR text may contain minor errors — infer the correct meaning but do not quiz on obvious OCR mistakes.',
     lang ? `- Write the quiz in this language: ${lang}.` : '- Write the quiz in the same language as the study material.',
     focus ? `- Give extra emphasis to this topic: ${focus}.` : '',
     '- MC distractors must be plausible to a skimmer but clearly wrong to someone who studied.',
-    '- Keep MC explanations to ONE short sentence so the whole quiz fits in one reply.',
+    '- Keep MC explanations to ONE short sentence.',
     '',
     'CRITICAL RULES:',
     '- Every "question", "options", "answer" and "explanation" string MUST contain REAL content taken from the study material.',
@@ -627,17 +728,17 @@ function buildPrompt(material, want){
   if(want.mc    > 0) ex.push('{"type":"mc","question":"What gas do plants absorb during photosynthesis?","options":["Oxygen","Carbon dioxide","Nitrogen","Hydrogen"],"answerIndex":1,"explanation":"Plants absorb carbon dioxide from the air."}');
   lines.push('{"questions":[' + ex.join(',') + ']}');
   lines.push('', 'Now write the REAL quiz about the study material below, in the same JSON format.');
-  lines.push('STUDY MATERIAL TEXT:\n"""\n' + material + '\n"""');
+  lines.push('STUDY MATERIAL:\n"""\n' + material + '\n"""');
   return lines.filter(Boolean).join('\n');
 }
 
 function sampleText(text){
-  const MAX = 10000;
+  const MAX = 12000;
   let t = text.replace(/\r/g,'').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();
   if(t.length <= MAX) return t;
   const headLen = Math.floor(MAX * 0.45);
   const parts = [t.slice(0, headLen)];
-  const rest = t.length - headLen, n = 5, size = Math.floor((MAX - headLen) / n);
+  const rest = t.length - headLen, n = 6, size = Math.floor((MAX - headLen) / n);
   for(let i = 0; i < n; i++){
     const start = headLen + Math.floor(rest * i / n);
     parts.push(t.slice(start, start + size));
@@ -645,67 +746,23 @@ function sampleText(text){
   return parts.join('\n[…excerpt…]\n');
 }
 
-async function callNVIDIA(textMaterial){
-  // Build content array for multimodal message
-  const content = [];
-  
-  // Collect text from all text files
-  const allText = state.files
-    .filter(f => f.kind === 'text')
-    .map(f => '=== ' + f.name + ' ===\n' + (f.text || ''))
-    .join('\n\n');
-  
-  // Collect image data URLs
-  const images = state.files.filter(f => f.kind === 'image');
-  
-  // Build the user message content as an array (multimodal format)
-  const userContent = [];
-  
-  // Add prompt text
-  userContent.push({ type: 'text', text: textMaterial });
-  
-  // Add images (limit to first 6 to avoid payload size issues)
-  const MAX_IMAGES = 6;
-  const imagesToSend = images.slice(0, MAX_IMAGES);
-  if(images.length > MAX_IMAGES){
-    userContent.push({ 
-      type: 'text', 
-      text: `\n[Note: ${images.length - MAX_IMAGES} additional images were uploaded but omitted to keep payload size manageable.]\n` 
-    });
-  }
-  for(const img of imagesToSend){
-    userContent.push({
-      type: 'image_url',
-      image_url: { url: img.dataUrl }
-    });
-  }
-  
-  // If no images, just use plain text content (not array) to be safe
-  const finalContent = imagesToSend.length > 0 ? userContent : textMaterial;
-  
+async function callNVIDIA(prompt){
   const base = {
     model: MODEL,
     messages:[
       { role:'system', content:'You are an expert exam writer. Always respond with a single strict JSON object containing real content. Never output placeholder dots or reasoning text.' },
-      { role:'user', content: finalContent }
+      { role:'user', content: prompt }
     ],
     temperature: 0.7,
     top_p: 0.7,
     max_tokens: 5000,
     stream: false
   };
-  
-  let r = await fetch(WORKER_URL, {
+  const r = await fetch(WORKER_URL, {
     method:'POST', headers:{ 'Content-Type':'application/json' },
     body: JSON.stringify(base)
   });
-  let j = await r.json().catch(() => ({}));
-  if(!r.ok && (r.status === 400 || r.status === 422)){
-    // Fallback: try without system message in case reasoning model has issues
-    const fallback = { ...base, messages: base.messages.slice(1) };
-    r = await fetch(WORKER_URL, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(fallback) });
-    j = await r.json().catch(() => ({}));
-  }
+  const j = await r.json().catch(() => ({}));
   if(!r.ok) throw new Error(j?.error?.message || ('NVIDIA NIM error ' + r.status));
   return j?.choices?.[0]?.message?.content || '';
 }
@@ -755,8 +812,13 @@ $('#genBtn').addEventListener('click', generate);
 async function generate(){
   const wantMC = +$('#mcRange').value, wantSH = +$('#shRange').value, wantLG = +$('#lgRange').value;
   
-  // Check if we have any content (files OR notes)
-  const hasFiles = state.files.length > 0;
+  if(state.files.some(f => f.processing)){
+    toast('Still processing files — please wait a moment.');
+    return;
+  }
+  
+  const readyFiles = state.files.filter(f => !f.processing && (f.text || '').trim().length > 0);
+  const hasFiles = readyFiles.length > 0;
   const hasNotes = state.notes.trim().length > 0;
   
   if(!hasFiles && !hasNotes){ 
@@ -771,28 +833,22 @@ async function generate(){
   try{
     setStatus('▸ Building the exam brief…');
     
-    // Combine text from all text files + manual notes
-    const fileText = state.files
-      .filter(f => f.kind === 'text')
-      .map(f => '=== ' + f.name + ' ===\n' + (f.text || ''))
-      .join('\n\n');
+    const fileText = readyFiles.map(f => {
+      const header = f.isOcr ? `[OCR from image: ${f.name}]` : `[Document: ${f.name}]`;
+      return header + '\n' + (f.text || '');
+    }).join('\n\n');
     
     const allText = [
       fileText,
-      hasNotes ? '=== TYPED NOTES ===\n' + state.notes.trim() : ''
+      hasNotes ? '[Typed notes]\n' + state.notes.trim() : ''
     ].filter(Boolean).join('\n\n');
     
-    const imgCount = state.files.filter(f => f.kind === 'image').length;
-    
-    const material = sampleText(allText) + 
-      (imgCount > 0 ? `\n\n[${imgCount} image(s) attached — please examine them carefully for content.]` : '');
-    
+    const material = sampleText(allText);
     const prompt = buildPrompt(material, { mc:wantMC, short:wantSH, long:wantLG });
 
     let quiz = { mc:[], short:[], long:[] };
     for(let attempt = 1; attempt <= 2; attempt++){
-      setStatus('▸ Asking ' + MODEL + ' to write the paper… (attempt ' + attempt + '/2)' + 
-                (imgCount > 0 ? ' · reading ' + Math.min(imgCount, 6) + ' image(s)' : ''));
+      setStatus('▸ Asking ' + MODEL + ' to write the paper… (attempt ' + attempt + '/2)');
       const raw = await callNVIDIA(prompt);
       setStatus('▸ Checking the generator\'s homework…');
       try{ quiz = parseQuiz(raw); break; }
@@ -817,7 +873,7 @@ async function generate(){
 
     state.quiz = quiz; state.graded = false;
     const sourceNames = hasFiles 
-      ? state.files.map(f => f.name).join(', ') 
+      ? readyFiles.map(f => (f.isOcr ? '🖼 ' : '') + f.name).join(', ') 
       : 'Typed notes';
     state.meta = {
       file: sourceNames.length > 80 ? sourceNames.slice(0, 77) + '…' : sourceNames,
