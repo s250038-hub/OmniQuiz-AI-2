@@ -236,8 +236,8 @@
 
 <div class="ticker" aria-hidden="true">
   <div class="tt">
-    <span class="tg">PDF ✦ DOCX  PPTX ✦ TXT ✦ MULTIPLE CHOICE ✦ SHORT ANSWER ✦ INSTANT ANSWER KEY ✦ AUTO-GRADING ✦ EXPORT MARKDOWN ✦ 100% IN-BROWSER ✦ NO SERVER ✦&nbsp;</span>
-    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ MULTIPLE CHOICE ✦ SHORT ANSWER ✦ INSTANT ANSWER KEY ✦ AUTO-GRADING ✦ EXPORT MARKDOWN ✦ 100% IN-BROWSER ✦ NO SERVER &nbsp;</span>
+    <span class="tg">PDF ✦ DOCX  PPTX ✦ TXT ✦ MULTIPLE CHOICE ✦ SHORT ANSWER ✦ INSTANT ANSWER KEY ✦ AUTO-GRADING ✦ EXPORT PDF ✦ 100% IN-BROWSER ✦ NO SERVER ✦&nbsp;</span>
+    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ MULTIPLE CHOICE ✦ SHORT ANSWER ✦ INSTANT ANSWER KEY ✦ AUTO-GRADING ✦ EXPORT PDF  100% IN-BROWSER ✦ NO SERVER &nbsp;</span>
   </div>
 </div>
 
@@ -313,7 +313,7 @@
       <button class="tb" id="gradeBtn" disabled>✔ GRADE IT</button>
       <button class="tb" id="keyBtn" disabled>✎ ANSWER KEY</button>
       <button class="tb" id="copyBtn" disabled>⧉ COPY MD</button>
-      <button class="tb" id="dlBtn" disabled>↓ DOWNLOAD</button>
+      <button class="tb" id="dlBtn" disabled>↓ PDF</button>
       <button class="tb" id="printBtn" disabled>⎙ PRINT</button>
     </div>
 
@@ -362,6 +362,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 (() => {
 "use strict";
@@ -481,7 +482,8 @@ function sampleText(text){
   return parts.join('\n[…excerpt…]\n');
 }
 
-function buildPrompt(material){
+/* mode: 'both' | 'mc' | 'short' */
+function buildPrompt(material, mode){
   const mc = +$('#mcRange').value, sh = +$('#shRange').value;
   const flavor = {
     easy:   'foundational recall — clear, confidence-building questions',
@@ -489,29 +491,39 @@ function buildPrompt(material){
     hard:   'application and analysis, with tricky but fair distractors'
   }[difficulty];
   const lang = $('#langIn').value.trim(), focus = $('#focusIn').value.trim();
-  return [
+  const lines = [
     'You are an expert exam writer and teacher.',
     'Create a brand-new quiz strictly from the STUDY MATERIAL at the end of this prompt.',
-    'Requirements:',
-    `- Write exactly ${mc} multiple-choice questions. Each has exactly 4 options and exactly one correct answer. Vary the position of the correct option.`,
-    `- Write exactly ${sh} short-answer questions, each with a concise model answer (1-3 sentences).`,
+    'Requirements:'
+  ];
+  if(mode !== 'mc')   lines.push(`- Write exactly ${sh} short-answer questions, each with a concise model answer (1-3 sentences). Put these FIRST in the "questions" array.`);
+  if(mode !== 'short')lines.push(`- Write exactly ${mc} multiple-choice questions. Each has exactly 4 options and exactly one correct answer. Vary the position of the correct option.`);
+  lines.push(
     `- Difficulty: ${flavor}.`,
     '- Use ONLY facts present in the study material. Never invent facts.',
     lang ? `- Write the quiz in this language: ${lang}.` : '- Write the quiz in the same language as the study material.',
     focus ? `- Give extra emphasis to this topic: ${focus}.` : '',
-    '- Distractors must be plausible to a skimmer but clearly wrong to someone who studied.',
+    '- MC distractors must be plausible to a skimmer but clearly wrong to someone who studied.',
+    '- Keep every explanation to ONE short sentence so the whole quiz fits in the reply.',
     '',
     'CRITICAL RULES:',
     '- Every "question", "options", "answer" and "explanation" string MUST contain REAL content taken from the study material.',
     '- NEVER output placeholder dots ("..."), ellipses, empty strings, or copy the example below. The example only demonstrates the FORMAT.',
+    '- The "questions" array MUST contain the exact number of each requested type. Do not stop early.',
     '- Output ONLY the JSON object. No markdown fences, no commentary, no thinking text.',
     '',
-    'FORMAT EXAMPLE (format only — the content here is fake, do NOT reuse it):',
-    '{"questions":[{"type":"mc","question":"What gas do plants absorb during photosynthesis?","options":["Oxygen","Carbon dioxide","Nitrogen","Hydrogen"],"answerIndex":1,"explanation":"Plants absorb carbon dioxide from the air."},{"type":"short","question":"Name the pigment that captures light energy in plants.","answer":"Chlorophyll."}]}',
-    '',
-    'Now write the REAL quiz about the study material below, in the same JSON format:',
-    'STUDY MATERIAL:\n"""\n' + material + '\n"""'
-  ].filter(Boolean).join('\n');
+    'FORMAT EXAMPLE (format only — the content here is fake, do NOT reuse it):'
+  );
+  if(mode === 'mc'){
+    lines.push('{"questions":[{"type":"mc","question":"What gas do plants absorb during photosynthesis?","options":["Oxygen","Carbon dioxide","Nitrogen","Hydrogen"],"answerIndex":1,"explanation":"Plants absorb carbon dioxide from the air."}]}');
+  }else if(mode === 'short'){
+    lines.push('{"questions":[{"type":"short","question":"Name the pigment that captures light energy in plants.","answer":"Chlorophyll."}]}');
+  }else{
+    lines.push('{"questions":[{"type":"short","question":"Name the pigment that captures light energy in plants.","answer":"Chlorophyll."},{"type":"mc","question":"What gas do plants absorb during photosynthesis?","options":["Oxygen","Carbon dioxide","Nitrogen","Hydrogen"],"answerIndex":1,"explanation":"Plants absorb carbon dioxide from the air."}]}');
+  }
+  lines.push('', 'Now write the REAL quiz about the study material below, in the same JSON format:',
+    'STUDY MATERIAL:\n"""\n' + material + '\n"""');
+  return lines.filter(Boolean).join('\n');
 }
 
 async function callNVIDIA(prompt){
@@ -523,10 +535,9 @@ async function callNVIDIA(prompt){
     ],
     temperature: 0.7,
     top_p: 0.7,
-    max_tokens: 3000,
+    max_tokens: 4096,
     stream: false
   };
-  // Try with thinking disabled first (much faster); fall back if the endpoint rejects the kwarg
   let r = await fetch(WORKER_URL, {
     method:'POST', headers:{ 'Content-Type':'application/json' },
     body: JSON.stringify(Object.assign({ chat_template_kwargs:{ enable_thinking:false } }, base))
@@ -543,25 +554,35 @@ async function callNVIDIA(prompt){
 // Detects placeholder junk like "...", "…", empty strings
 const isPh = v => { const s = String(v ?? '').trim(); return !s || /^[\u2026.·•_\-\s]+$/.test(s); };
 
+// Tries to parse; if the JSON was truncated mid-reply, salvage the completed part
+function tryParse(t){
+  const cands = [t];
+  const cut = t.lastIndexOf('}');
+  if(cut > -1){ cands.push(t.slice(0, cut+1) + ']}', t.slice(0, cut+1) + ']}]}'); }
+  cands.push(t + ']}', t + '}');
+  for(const c of cands){ try{ return JSON.parse(c); }catch(_){} }
+  return null;
+}
+
 function parseQuiz(raw){
   let t = (raw || '').trim().replace(/^```(?:json)?\s*/i,'').replace(/```\s*$/,'');
   const s = t.indexOf('{'), e = t.lastIndexOf('}');
   if(s > -1 && e > s) t = t.slice(s, e + 1);
-  let j;
-  try{ j = JSON.parse(t); }catch(_){ throw new Error('The model returned unreadable output — retrying.'); }
+  const j = tryParse(t);
+  if(!j) throw new Error('The model returned unreadable output — retrying.');
   const list = j.questions || [];
   const mc = [], short = [];
   for(const q of list){
     if(!q || typeof q.question !== 'string' || isPh(q.question)) continue;
     if(String(q.type || '').toLowerCase() === 'mc' || Array.isArray(q.options)){
       const opts = (q.options || []).map(o => String(o)).slice(0, 6);
-      if(opts.length < 2 || opts.some(isPh)) continue;   // reject placeholder options
+      if(opts.length < 2 || opts.some(isPh)) continue;
       let ai = Number(q.answerIndex);
       if(!Number.isFinite(ai) && typeof q.answer === 'string') ai = q.answer.trim().toUpperCase().charCodeAt(0) - 65;
       if(!Number.isFinite(ai) || ai < 0 || ai >= opts.length) ai = 0;
       mc.push({ question:q.question, options:opts, answerIndex:ai, explanation:(q.explanation && !isPh(q.explanation)) ? q.explanation : '' });
     }else{
-      if(isPh(q.answer)) continue;                        // reject placeholder answers
+      if(isPh(q.answer)) continue;
       short.push({ question:q.question, answer:q.answer });
     }
   }
@@ -571,8 +592,9 @@ function parseQuiz(raw){
 
 $('#genBtn').addEventListener('click', generate);
 async function generate(){
+  const wantMC = +$('#mcRange').value, wantSH = +$('#shRange').value;
   if(!state.text){ toast('Drop a file first — PDF, DOCX, PPTX or TXT.'); return; }
-  if(+$('#mcRange').value + +$('#shRange').value === 0){ toast('Set at least one question in the quiz mix.'); return; }
+  if(wantMC + wantSH === 0){ toast('Set at least one question in the quiz mix.'); return; }
 
   const btn = $('#genBtn'), label = $('#genLabel');
   btn.disabled = true; label.textContent = '✍ WRITING QUESTIONS…';
@@ -580,20 +602,39 @@ async function generate(){
   const t0 = performance.now();
   try{
     setStatus('▸ Building the exam brief…');
-    const prompt = buildPrompt(sampleText(state.text));
+    const material = sampleText(state.text);
+    const prompt = buildPrompt(material, 'both');
 
-    // Auto-retry up to 2 attempts if the model echoes placeholders
-    let quiz = null;
+    let quiz = { mc:[], short:[] };
     for(let attempt = 1; attempt <= 2; attempt++){
       setStatus('▸ Asking ' + esc(model) + ' to write the paper… (attempt ' + attempt + '/2)');
       const raw = await callNVIDIA(prompt);
       setStatus('▸ Checking the generator\'s homework…');
       try{ quiz = parseQuiz(raw); break; }
-      catch(err){
-        if(attempt === 2) throw err;
-        setStatus('▸ The model sent placeholder dots — regenerating…');
-      }
+      catch(err){ if(attempt === 2) throw err; setStatus('▸ The model sent placeholders — regenerating…'); }
     }
+
+    quiz.mc = quiz.mc.slice(0, wantMC);
+    quiz.short = quiz.short.slice(0, wantSH);
+
+    // TOP-UP: if a whole section is missing, write it with a second focused call
+    if(wantSH && quiz.short.length === 0){
+      setStatus('▸ Part B missing — writing short-answer questions…');
+      try{
+        const q2 = parseQuiz(await callNVIDIA(buildPrompt(material, 'short')));
+        quiz.short = q2.short.slice(0, wantSH);
+        if(!quiz.mc.length) quiz.mc = q2.mc.slice(0, wantMC);
+      }catch(_){}
+    }
+    if(wantMC && quiz.mc.length === 0){
+      setStatus('▸ Part A missing — writing multiple-choice questions…');
+      try{
+        const q2 = parseQuiz(await callNVIDIA(buildPrompt(material, 'mc')));
+        quiz.mc = q2.mc.slice(0, wantMC);
+        if(!quiz.short.length) quiz.short = q2.short.slice(0, wantSH);
+      }catch(_){}
+    }
+    if(!quiz.mc.length && !quiz.short.length) throw new Error('No usable questions returned — try again.');
 
     state.quiz = quiz; state.graded = false;
     state.meta = {
@@ -740,15 +781,70 @@ $('#copyBtn').addEventListener('click', async () => {
     document.execCommand('copy'); ta.remove(); toast('Quiz copied ✓');
   }
 });
+
+/* ---------- PDF DOWNLOAD ---------- */
 $('#dlBtn').addEventListener('click', () => {
-  const blob = new Blob([quizMarkdown(true)], { type:'text/markdown' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'quiz-' + (state.meta.file.replace(/\.[^.]+$/,'') || 'paper').slice(0,40) + '.md';
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-  toast('Downloading quiz…');
+  if(!state.quiz) return;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'mm', format:'a4' });
+  const W = 210, M = 18, CW = W - M*2;
+  let y = 20;
+  const pageBreak = need => { if(y + need > 280){ doc.addPage(); y = 20; } };
+  const write = (text, size, style, gap, indent, color) => {
+    gap = gap ?? 2; indent = indent ?? 0; color = color || [32,38,31];
+    doc.setFont('helvetica', style); doc.setFontSize(size); doc.setTextColor(color[0],color[1],color[2]);
+    const lines = doc.splitTextToSize(text, CW - indent);
+    for(const ln of lines){ pageBreak(size * 0.5); doc.text(ln, M + indent, y); y += size * 0.5; }
+    y += gap;
+  };
+  const { mc, short } = state.quiz, m = state.meta;
+
+  write('OMNQUIZ-AI — EXAMINATION PAPER', 16, 'bold', 3);
+  write('Source: ' + m.file + '   ·   Model: ' + m.model + '   ·   ' + m.date, 9, 'normal', 4, 0, [110,115,105]);
+  doc.setDrawColor(32,38,31); doc.setLineWidth(0.6); doc.line(M, y, W-M, y); y += 8;
+  write('Name: ____________________________     Class: __________     Date: __________', 10, 'normal', 8);
+
+  if(mc.length){
+    write('PART A — MULTIPLE CHOICE', 12, 'bold', 4);
+    mc.forEach((q, i) => {
+      pageBreak(30);
+      write((i+1) + '. ' + q.question, 11, 'bold', 2.5);
+      q.options.forEach((o, j) => write(LETTERS[j] + '.  ' + o, 10.5, 'normal', 1.5, 8));
+      y += 3;
+    });
+  }
+  if(short.length){
+    write('PART B — SHORT ANSWER', 12, 'bold', 4);
+    short.forEach((q, i) => {
+      pageBreak(34);
+      write((mc.length ? 'B' + (i+1) : (i+1)) + '. ' + q.question, 11, 'bold', 4);
+      doc.setDrawColor(150,150,150); doc.setLineWidth(0.3);
+      for(let k = 0; k < 3; k++){ pageBreak(10); doc.line(M + 8, y, W - M, y); y += 9; }
+      y += 3;
+    });
+  }
+
+  doc.addPage(); y = 20;
+  write('ANSWER KEY', 14, 'bold', 4);
+  if(mc.length){
+    write('Part A', 11, 'bold', 2);
+    mc.forEach((q, i) => write((i+1) + '. ' + LETTERS[q.answerIndex] + (q.explanation ? ' — ' + q.explanation : ''), 10, 'normal', 2));
+    y += 4;
+  }
+  if(short.length){
+    write('Part B', 11, 'bold', 2);
+    short.forEach((q, i) => write((mc.length ? 'B' + (i+1) : (i+1)) + '. ' + q.answer, 10, 'normal', 2));
+  }
+
+  const pages = doc.getNumberOfPages();
+  for(let p = 1; p <= pages; p++){
+    doc.setPage(p); doc.setFontSize(9); doc.setTextColor(140,140,140);
+    doc.text('OmniQuiz-AI  ·  Page ' + p + ' / ' + pages, W - M, 292, { align:'right' });
+  }
+  doc.save('quiz-' + (m.file.replace(/\.[^.]+$/,'') || 'paper').slice(0,40) + '.pdf');
+  toast('Downloading PDF…');
 });
+
 $('#printBtn').addEventListener('click', () => window.print());
 })();
 </script>
