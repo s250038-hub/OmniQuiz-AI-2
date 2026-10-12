@@ -38,38 +38,76 @@ jobs:
       - name: Sync web assets
         run: npx cap sync ios
 
+      - name: Verify iOS project structure
+        run: |
+          echo "=== Checking iOS project structure ==="
+          ls -la ios/App/ || echo "ios/App directory not found"
+          ls -la ios/App/App.xcworkspace || echo "App.xcworkspace not found"
+          echo ""
+          echo "=== Checking available schemes ==="
+          cd ios/App && xcodebuild -list || echo "Failed to list schemes"
+
       - name: Build iOS app for simulator
         run: |
           cd ios/App
+          echo "=== Starting xcodebuild ==="
           xcodebuild -workspace App.xcworkspace \
             -scheme App \
             -destination 'platform=iOS Simulator,name=iPhone 17' \
             -configuration Debug \
-            build
+            build \
+            | tee xcodebuild.log
+          
+          echo ""
+          echo "=== Build exit code: $? ==="
+          
+          if [ -f xcodebuild.log ]; then
+            echo ""
+            echo "=== Last 50 lines of build log ==="
+            tail -50 xcodebuild.log
+          fi
+
+      - name: Search for built app
+        run: |
+          echo "=== Searching for .app bundles ==="
+          find ios -name "*.app" -type d 2>/dev/null | tee found_apps.txt
+          
+          echo ""
+          echo "=== Searching for build directories ==="
+          find ios -type d -name "Build" 2>/dev/null
+          
+          echo ""
+          echo "=== Listing ios/App directory structure ==="
+          find ios/App -type d -maxdepth 3 2>/dev/null | head -30
+          
+          echo ""
+          echo "=== Checking if any .app files exist ==="
+          if [ -s found_apps.txt ]; then
+            echo "Found .app files:"
+            cat found_apps.txt
+          else
+            echo "No .app files found"
+          fi
 
       - name: Create download directory
         run: mkdir -p download/ios
 
       - name: Find and copy app bundle
         run: |
-          echo "Searching for .app files..."
-          find ios/App -name "*.app" -type d 2>/dev/null || echo "No .app found in ios/App"
-          
-          echo ""
-          echo "Searching entire repository for .app files..."
-          find . -name "*.app" -type d 2>/dev/null | head -20 || echo "No .app found anywhere"
-          
-          APP_PATH=$(find . -name "App.app" -type d 2>/dev/null | head -1)
+          APP_PATH=$(cat found_apps.txt | head -1)
           
           if [ -n "$APP_PATH" ]; then
-            echo "Found app at: $APP_PATH"
+            echo "✓ Found app at: $APP_PATH"
             cp -r "$APP_PATH" download/ios/App.app
             cd download/ios
             zip -r app.app.zip App.app
             rm -rf App.app
             echo "✓ Successfully created app.app.zip"
           else
-            echo "✗ App bundle not found anywhere"
+            echo "✗ App bundle not found"
+            echo ""
+            echo "=== Diagnostic information ==="
+            echo "Build may have failed. Check the 'Build iOS app for simulator' step logs."
             exit 1
           fi
 
