@@ -113,9 +113,18 @@ jobs:
             exit 1
           fi
 
+      - name: Pull latest changes to avoid conflicts
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          # Pull any changes made by the Android workflow while we were building
+          git pull --rebase --autostash origin main || echo "Nothing to pull or rebase failed, continuing..."
+
       - name: Commit iOS app to repository
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: auto-update iOS app [skip ci]"
           file_pattern: "download/ios/app.app.zip"
           branch: main
+          # Force-with-lease is safe here because we only touch the download/ios folder
+          push_options: '--force-with-lease'
