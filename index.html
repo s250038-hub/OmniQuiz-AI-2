@@ -192,7 +192,6 @@
   .amodel p{font-size:.94rem;line-height:1.55;white-space:pre-line}
   .paper-end{text-align:center;font:700 .68rem var(--mono);letter-spacing:.3em;color:var(--ink2);margin-top:36px}
 
-  /* Edit modal */
   .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
   .modal-bg.on{display:flex}
   .modal{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:24px;max-width:600px;width:100%;max-height:80vh;display:flex;flex-direction:column;gap:14px}
@@ -405,7 +404,6 @@
   </div>
 </footer>
 
-<!-- Edit OCR modal -->
 <div class="modal-bg" id="editModal">
   <div class="modal">
     <h3>Edit extracted text</h3>
@@ -435,8 +433,7 @@ const LETTERS = 'ABCDEF';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-// state.files: array of {name, kind: 'text', text, size, isOcr?, processing?}
-const state = { files:[], notes:'', quiz:null, meta:null, graded:false, ocrWorkers:0 };
+const state = { files:[], notes:'', quiz:null, meta:null, graded:false };
 let difficulty = 'medium';
 let editingIndex = -1;
 
@@ -480,7 +477,6 @@ dz.addEventListener('dragleave', () => dz.classList.remove('over'));
 dz.addEventListener('drop', e => { dz.classList.remove('over'); handleFiles(e.dataTransfer.files); });
 fileInput.addEventListener('change', e => handleFiles(e.target.files));
 
-// Edit modal handlers
 $('#editCancel').addEventListener('click', () => {
   $('#editModal').classList.remove('on');
   editingIndex = -1;
@@ -526,7 +522,6 @@ async function extractPPTX(file){
   return out.join('\n\n');
 }
 
-// OCR an image file using Tesseract.js
 async function extractImageText(file, lang){
   const result = await Tesseract.recognize(file, lang, {
     logger: m => {
@@ -554,7 +549,6 @@ async function handleFiles(fileList){
   const files = Array.from(fileList);
   const lang = $('#ocrLang').value;
   
-  // Validate + immediately add placeholders (so UI updates during OCR)
   const placeholders = [];
   for(const f of files){
     const name = f.name.toLowerCase();
@@ -570,7 +564,6 @@ async function handleFiles(fileList){
       toast('Skipped: ' + f.name);
       continue;
     }
-    const idx = state.files.length + placeholders.length;
     placeholders.push({
       name: f.name,
       kind: 'text',
@@ -587,7 +580,6 @@ async function handleFiles(fileList){
   renderChips();
   updateStatus();
   
-  // Process each one (OCR images, extract text from docs)
   for(let i = 0; i < placeholders.length; i++){
     const p = placeholders[i];
     const realIdx = state.files.indexOf(p);
@@ -703,7 +695,7 @@ function buildPrompt(material, want){
     'Requirements:'
   ];
   if(want.short > 0) lines.push(`- Write exactly ${want.short} short-answer question(s) with a concise model answer (1-2 sentences). Put these FIRST in the "questions" array.`);
-  if(want.long  > 0) lines.push(`- Write exactly ${want.long} long-form / essay question(s). Each must be a detailed, multi-part or scenario-based question, with a thorough model answer of 4-8 sentences. Put these SECOND in the array.`);
+  if(want.long  > 0) lines.push(`- Write exactly ${want.long} long-form / essay question(s). Each must be a detailed, multi-part or scenario-based question, with a thorough model answer of 3-5 sentences. Put these SECOND in the array.`);
   if(want.mc    > 0) lines.push(`- Write exactly ${want.mc} multiple-choice question(s). Each has exactly 4 options and exactly one correct answer. Vary the position of the correct option. Put these LAST in the array.`);
   lines.push(
     `- Difficulty: ${flavor}.`,
@@ -713,6 +705,7 @@ function buildPrompt(material, want){
     focus ? `- Give extra emphasis to this topic: ${focus}.` : '',
     '- MC distractors must be plausible to a skimmer but clearly wrong to someone who studied.',
     '- Keep MC explanations to ONE short sentence.',
+    '- Be concise. Do not ramble. Ensure the entire JSON fits in your response without being cut off.',
     '',
     'CRITICAL RULES:',
     '- Every "question", "options", "answer" and "explanation" string MUST contain REAL content taken from the study material.',
@@ -755,7 +748,7 @@ async function callNVIDIA(prompt){
     ],
     temperature: 0.7,
     top_p: 0.7,
-    max_tokens: 5000,
+    max_tokens: 8192,
     stream: false
   };
   const r = await fetch(WORKER_URL, {
@@ -770,11 +763,22 @@ async function callNVIDIA(prompt){
 const isPh = v => { const s = String(v ?? '').trim(); return !s || /^[\u2026.·•_\-\s]+$/.test(s); };
 
 function tryParse(t){
-  const cands = [t];
-  const cut = t.lastIndexOf('}');
-  if(cut > -1){ cands.push(t.slice(0, cut+1) + ']}', t.slice(0, cut+1) + ']}]}'); }
-  cands.push(t + ']}', t + '}');
-  for(const c of cands){ try{ return JSON.parse(c); }catch(_){} }
+  try { return JSON.parse(t); } catch(_) {}
+  
+  const closers = ['"', '"}', '"}]}', '"}]}]}', '}', ']}', '}]}', '}]}]}', '"}]}]}]}'];
+  for(const c of closers){
+    try { return JSON.parse(t + c); } catch(_) {}
+  }
+  
+  let idx = t.lastIndexOf('},');
+  if(idx > 20){
+    try { return JSON.parse(t.slice(0, idx + 1) + ']}'); } catch(_) {}
+  }
+  idx = t.lastIndexOf('}');
+  if(idx > 20){
+    try { return JSON.parse(t.slice(0, idx + 1) + ']}'); } catch(_) {}
+  }
+  
   return null;
 }
 
