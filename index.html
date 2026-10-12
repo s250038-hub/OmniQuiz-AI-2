@@ -302,7 +302,7 @@
       </div>
       <div class="lab"><span style="letter-spacing:.08em">Model</span></div>
       <select class="in" id="modelSel" disabled><option>nvidia/nemotron-3.5-lightning-30b-a3b</option></select>
-      <p class="micro">NVIDIA Nemotron Lightning via hidden proxy · fair-use: 100 generations per IP per 24h.</p>
+      <p class="micro">Using NVIDIA Nemotron Lightning securely via a hidden server proxy.</p>
     </div>
 
     <button class="gen" id="genBtn" type="button"><span id="genLabel">⚡ GENERATE QUIZ</span></button>
@@ -375,7 +375,7 @@ const LETTERS = 'ABCDEF';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-const state = { file:null, text:'', quiz:null, meta:null, graded:false, remaining:null };
+const state = { file:null, text:'', quiz:null, meta:null, graded:false };
 let difficulty = 'medium';
 
 // SECURE CLOUDFLARE WORKER URL
@@ -548,8 +548,6 @@ async function callNVIDIA(prompt){
     r = await fetch(WORKER_URL, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(base) });
     j = await r.json().catch(() => ({}));
   }
-  const rem = r.headers.get('X-RateLimit-Remaining');
-  if(rem !== null && rem !== '') state.remaining = +rem;
   if(!r.ok) throw new Error(j?.error?.message || ('NVIDIA NIM error ' + r.status));
   return j?.choices?.[0]?.message?.content || '';
 }
@@ -646,8 +644,7 @@ async function generate(){
       date: new Date().toLocaleDateString(undefined,{ year:'numeric', month:'short', day:'numeric' })
     };
     renderQuiz();
-    setStatus('✔ Paper ready — ' + quiz.mc.length + ' MC · ' + quiz.short.length + ' short · ' + quiz.long.length + ' long.' +
-      (state.remaining !== null ? ' (' + state.remaining + ' generations left today)' : ''));
+    setStatus('✔ Paper ready — ' + quiz.mc.length + ' MC · ' + quiz.short.length + ' short · ' + quiz.long.length + ' long. Good luck.');
   }catch(err){
     setStatus('✖ ' + esc(err.message));
     toast(err.message);
