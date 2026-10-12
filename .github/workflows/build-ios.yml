@@ -25,63 +25,74 @@ jobs:
           node-version: 20
 
       - name: Install Capacitor dependencies
-        run: |
-          npm install
-          echo "=== Installed packages ==="
-          npm list --depth=0
+        run: npm install
 
       - name: Prepare web assets folder
         run: |
           mkdir -p www
           cp index.html www/index.html
-          echo "=== Web assets ==="
-          ls -la www/
 
-      - name: Check Capacitor config
+      - name: Clean up any existing iOS platform
         run: |
-          echo "=== capacitor.config.json ==="
-          cat capacitor.config.json
+          echo "=== Cleaning up existing iOS platform ==="
+          if [ -d "ios" ]; then
+            echo "Removing existing ios directory..."
+            rm -rf ios
+            echo "✓ Removed"
+          else
+            echo "No existing ios directory found"
+          fi
 
-      - name: Add iOS platform with verbose output
+      - name: Add iOS platform
         run: |
           echo "=== Adding iOS platform ==="
           npx cap add ios
           EXIT_CODE=$?
-          echo "Exit code: $EXIT_CODE"
           
-          echo ""
-          echo "=== Contents of ios directory ==="
-          if [ -d "ios" ]; then
-            find ios -maxdepth 3 -type f -o -type d | head -50
-          else
-            echo "❌ ios directory was not created"
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "❌ Failed to add iOS platform (exit code: $EXIT_CODE)"
+            exit 1
           fi
+          
+          echo "✓ iOS platform added successfully"
+          echo ""
+          echo "=== iOS directory structure ==="
+          find ios -maxdepth 3 -type f -o -type d | head -50
 
       - name: Sync web assets
         run: |
           echo "=== Syncing web assets ==="
           npx cap sync ios
-          echo "Exit code: $?"
-
-      - name: Check iOS project structure
-        run: |
-          echo "=== Checking ios/App directory ==="
-          if [ -d "ios/App" ]; then
-            ls -la ios/App/
-          else
-            echo "❌ ios/App does not exist"
+          EXIT_CODE=$?
+          
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "❌ Failed to sync iOS (exit code: $EXIT_CODE)"
+            exit 1
           fi
           
-          echo ""
-          echo "=== Searching for workspace/project files ==="
-          find ios -name "*.xcworkspace" 2>/dev/null || echo "No .xcworkspace found"
-          find ios -name "*.xcodeproj" 2>/dev/null || echo "No .xcodeproj found"
-          find ios -name "Podfile" 2>/dev/null || echo "No Podfile found"
+          echo "✓ Sync completed successfully"
 
-      - name: Stop if no iOS project
+      - name: Verify iOS project structure
         run: |
-          if [ ! -f "ios/App/App.xcworkspace" ] && [ ! -f "ios/App/App.xcodeproj" ]; then
-            echo "❌ No iOS project files found. Cannot continue."
+          echo "=== Verifying iOS project structure ==="
+          
+          if [ ! -d "ios/App" ]; then
+            echo "❌ ios/App directory does not exist"
+            exit 1
+          fi
+          
+          # Check for workspace or project
+          if [ -f "ios/App/App.xcworkspace" ]; then
+            echo "✓ Found App.xcworkspace"
+            PROJECT_TYPE="workspace"
+          elif [ -f "ios/App/App.xcodeproj" ]; then
+            echo "✓ Found App.xcodeproj"
+            PROJECT_TYPE="project"
+          else
+            echo "❌ No iOS project files found"
+            echo ""
+            echo "=== Contents of ios/App ==="
+            ls -la ios/App/
             exit 1
           fi
 
@@ -89,9 +100,9 @@ jobs:
         run: |
           cd ios/App
           
-          # Try workspace first, then project
+          echo "=== Building iOS app ==="
           if [ -f "App.xcworkspace" ]; then
-            echo "Using workspace"
+            echo "Using workspace: App.xcworkspace"
             xcodebuild \
               -workspace App.xcworkspace \
               -scheme App \
@@ -103,7 +114,7 @@ jobs:
               CODE_SIGNING_ALLOWED=NO \
               build
           else
-            echo "Using project"
+            echo "Using project: App.xcodeproj"
             xcodebuild \
               -project App.xcodeproj \
               -scheme App \
@@ -115,21 +126,39 @@ jobs:
               CODE_SIGNING_ALLOWED=NO \
               build
           fi
+          
+          EXIT_CODE=$?
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "❌ Build failed (exit code: $EXIT_CODE)"
+            exit 1
+          fi
+          
+          echo "✓ Build completed successfully"
 
       - name: Find and package app bundle
         run: |
+          echo "=== Searching for .app bundle ==="
           APP_PATH=$(find ios -name "*.app" -type d 2>/dev/null | head -1)
           
           if [ -n "$APP_PATH" ]; then
             echo "✓ Found app at: $APP_PATH"
+            
             mkdir -p download/ios
             cp -r "$APP_PATH" download/ios/App.app
+            
             cd download/ios
             zip -r app.app.zip App.app
             rm -rf App.app
+            
             echo "✓ Successfully created app.app.zip"
+            ls -lh app.app.zip
           else
             echo "❌ App bundle not found"
+            echo ""
+            echo "=== Searching for build artifacts ==="
+            find ios -type d -name "Build" 2>/dev/null
+            find ios -type d -name "Products" 2>/dev/null
+            find ios -type d -name "Debug-*" 2>/dev/null
             exit 1
           fi
 
