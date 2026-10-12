@@ -6,11 +6,11 @@ on:
     branches: [ main ]
 
 permissions:
-  contents: write   # allow committing the APK back to the repo
+  contents: write
 
 jobs:
-  build-apk:
-    name: Build and commit APK
+  build-android:
+    name: Build Android APK
     runs-on: ubuntu-latest
 
     steps:
@@ -51,20 +51,14 @@ jobs:
           ./gradlew assembleDebug
 
       - name: Create download directory
-        run: mkdir -p download/APK
+        run: mkdir -p download/android
 
       - name: Copy APK to download folder
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk download/APK/app.apk
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk download/android/app.apk
 
       - name: Commit APK to repository
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: auto-update APK [skip ci]"
-          file_pattern: "download/APK/app.apk"
+          commit_message: "chore: auto-update Android APK [skip ci]"
+          file_pattern: "download/android/app.apk"
           branch: main
-
-      - name: Upload APK artifact (backup)
-        uses: actions/upload-artifact@v4
-        with:
-          name: omniquiz-apk
-          path: download/APK/app.apk
