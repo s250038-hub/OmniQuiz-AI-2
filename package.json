@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "description": "OmniQuiz-AI — turn any document into a quiz",
-  "scripts": {
-    "prepare": "cap sync android"
-  },
   "dependencies": {
     "@capacitor/android": "^6.1.0",
     "@capacitor/core": "^6.1.0"
