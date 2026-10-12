@@ -347,7 +347,7 @@
       </div>
       <div class="lab"><span style="letter-spacing:.08em">Model</span></div>
       <select class="in" id="modelSel" disabled><option>nvidia/nemotron-3.5-lightning-30b-a3b</option></select>
-      <p class="micro">Fast text model · Images are OCR'd first, then sent as text (no rate limits).</p>
+      <p class="micro">Fast text model · Images are OCR'd first, then sent as text.</p>
     </div>
 
     <button class="gen" id="genBtn" type="button"><span id="genLabel">⚡ GENERATE QUIZ</span></button>
@@ -407,7 +407,7 @@
 <div class="modal-bg" id="editModal">
   <div class="modal">
     <h3>Edit extracted text</h3>
-    <p style="font-size:.85rem;color:var(--chalk2);line-height:1.5">OCR isn't perfect — fix any mistakes below before generating the quiz. This edited text will be used instead of the raw OCR output.</p>
+    <p style="font-size:.85rem;color:var(--chalk2);line-height:1.5">OCR isn't perfect — fix any mistakes below before generating the quiz.</p>
     <textarea id="editArea"></textarea>
     <div class="modal-actions">
       <button type="button" id="editCancel">Cancel</button>
@@ -588,9 +588,7 @@ async function handleFiles(fileList){
       if(p.isOcr){
         setStatus('▸ OCR reading ' + esc(p.name) + '…');
         text = await extractImageText(p._srcFile, lang);
-        if(!text){
-          toast('No text found in ' + p.name + ' (try a clearer image).');
-        }
+        if(!text) toast('No text found in ' + p.name);
       }else{
         setStatus('▸ Reading ' + esc(p.name) + '…');
         text = await processTextFile(p._srcFile).then(e => e.text);
@@ -604,7 +602,7 @@ async function handleFiles(fileList){
       state.files[realIdx].text = '';
       state.files[realIdx].processing = false;
       delete state.files[realIdx]._srcFile;
-      toast('Failed: ' + p.name + ' — ' + err.message);
+      toast('Failed: ' + p.name);
       renderChips();
       updateStatus();
     }
@@ -678,50 +676,34 @@ function updateStatus(){
   if(docCount > 0) parts.push(docCount + ' document(s)');
   if(ocrCount > 0) parts.push(ocrCount + ' image(s) OCR\'d');
   if(notesWords > 0) parts.push(notesWords + ' typed words');
-  setStatus('✔ ' + parts.join(' + ') + ' — ' + combined.toLocaleString() + ' total words ready. Configure and generate.');
+  setStatus('✔ ' + parts.join(' + ') + ' — ' + combined.toLocaleString() + ' total words ready.');
 }
 
 function buildPrompt(material, want){
   const flavor = {
-    easy:   'foundational recall — clear, confidence-building questions',
+    easy:   'foundational recall',
     medium: 'a balanced mix of recall and application',
-    hard:   'application and analysis, with tricky but fair distractors'
+    hard:   'application and analysis'
   }[difficulty];
   const lang = $('#langIn').value.trim(), focus = $('#focusIn').value.trim();
   const lines = [
-    'You are an expert exam writer and teacher.',
-    'Create a brand-new quiz strictly from the STUDY MATERIAL below.',
-    'The material comes from a mix of documents, OCR\'d images, and typed notes — treat all of it equally as source truth.',
+    'You are an expert exam writer. Create a quiz strictly from the STUDY MATERIAL below.',
     'Requirements:'
   ];
-  if(want.short > 0) lines.push(`- Write exactly ${want.short} short-answer question(s) with a concise model answer (1-2 sentences). Put these FIRST in the "questions" array.`);
-  if(want.long  > 0) lines.push(`- Write exactly ${want.long} long-form / essay question(s). Each must be a detailed, multi-part or scenario-based question, with a thorough model answer of 3-5 sentences. Put these SECOND in the array.`);
-  if(want.mc    > 0) lines.push(`- Write exactly ${want.mc} multiple-choice question(s). Each has exactly 4 options and exactly one correct answer. Vary the position of the correct option. Put these LAST in the array.`);
+  if(want.short > 0) lines.push(`- Exactly ${want.short} short-answer question(s) with a 1-2 sentence model answer. Put FIRST.`);
+  if(want.long  > 0) lines.push(`- Exactly ${want.long} long-form / essay question(s). Keep the model answer STRICTLY under 60 words (3-4 sentences max) to prevent output truncation. Put SECOND.`);
+  if(want.mc    > 0) lines.push(`- Exactly ${want.mc} multiple-choice question(s). 4 options, 1 correct. Put LAST.`);
   lines.push(
     `- Difficulty: ${flavor}.`,
-    '- Use ONLY facts present in the study material. Never invent facts.',
-    '- OCR text may contain minor errors — infer the correct meaning but do not quiz on obvious OCR mistakes.',
-    lang ? `- Write the quiz in this language: ${lang}.` : '- Write the quiz in the same language as the study material.',
-    focus ? `- Give extra emphasis to this topic: ${focus}.` : '',
-    '- MC distractors must be plausible to a skimmer but clearly wrong to someone who studied.',
-    '- Keep MC explanations to ONE short sentence.',
-    '- Be concise. Do not ramble. Ensure the entire JSON fits in your response without being cut off.',
+    lang ? `- Language: ${lang}.` : '- Language: Same as material.',
+    focus ? `- Focus: ${focus}.` : '',
+    '- Output ONLY the JSON object. No markdown fences, no commentary.',
     '',
-    'CRITICAL RULES:',
-    '- Every "question", "options", "answer" and "explanation" string MUST contain REAL content taken from the study material.',
-    '- NEVER output placeholder dots ("..."), ellipses, empty strings, or copy the example below.',
-    '- The "questions" array MUST contain the exact number of each requested type. Do not stop early.',
-    '- Output ONLY the JSON object. No markdown fences, no commentary, no thinking text.',
+    'FORMAT EXAMPLE:',
+    '{"questions":[{"type":"short","question":"Q?","answer":"A."},{"type":"long","question":"Q?","answer":"A."},{"type":"mc","question":"Q?","options":["A","B","C","D"],"answerIndex":0,"explanation":"E."}]}',
     '',
-    'FORMAT EXAMPLE (format only — do NOT reuse):'
+    'STUDY MATERIAL:\n"""\n' + material + '\n"""'
   );
-  const ex = [];
-  if(want.short > 0) ex.push('{"type":"short","question":"Name the pigment that captures light energy in plants.","answer":"Chlorophyll."}');
-  if(want.long  > 0) ex.push('{"type":"long","question":"Explain the process of photosynthesis, including where it takes place and its two main stages.","answer":"Photosynthesis takes place in the chloroplasts of plant cells. In the light-dependent reactions, light energy splits water and produces ATP and NADPH. In the light-independent Calvin cycle, carbon dioxide is fixed into glucose using those products. The overall equation is 6CO2 + 6H2O -> C6H12O6 + 6O2."}');
-  if(want.mc    > 0) ex.push('{"type":"mc","question":"What gas do plants absorb during photosynthesis?","options":["Oxygen","Carbon dioxide","Nitrogen","Hydrogen"],"answerIndex":1,"explanation":"Plants absorb carbon dioxide from the air."}');
-  lines.push('{"questions":[' + ex.join(',') + ']}');
-  lines.push('', 'Now write the REAL quiz about the study material below, in the same JSON format.');
-  lines.push('STUDY MATERIAL:\n"""\n' + material + '\n"""');
   return lines.filter(Boolean).join('\n');
 }
 
@@ -729,27 +711,17 @@ function sampleText(text){
   const MAX = 12000;
   let t = text.replace(/\r/g,'').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();
   if(t.length <= MAX) return t;
-  const headLen = Math.floor(MAX * 0.45);
-  const parts = [t.slice(0, headLen)];
-  const rest = t.length - headLen, n = 6, size = Math.floor((MAX - headLen) / n);
-  for(let i = 0; i < n; i++){
-    const start = headLen + Math.floor(rest * i / n);
-    parts.push(t.slice(start, start + size));
-  }
-  return parts.join('\n[…excerpt…]\n');
+  return t.slice(0, MAX) + '\n[…excerpt…]\n';
 }
 
 async function callNVIDIA(prompt){
   const base = {
     model: MODEL,
     messages:[
-      { role:'system', content:'You are an expert exam writer. Always respond with a single strict JSON object containing real content. Never output placeholder dots or reasoning text.' },
+      { role:'system', content:'You are an expert exam writer. Always respond with strict JSON only.' },
       { role:'user', content: prompt }
     ],
-    temperature: 0.7,
-    top_p: 0.7,
-    max_tokens: 8192,
-    stream: false
+    temperature: 0.7, top_p: 0.7, max_tokens: 8192, stream: false
   };
   const r = await fetch(WORKER_URL, {
     method:'POST', headers:{ 'Content-Type':'application/json' },
@@ -762,32 +734,40 @@ async function callNVIDIA(prompt){
 
 const isPh = v => { const s = String(v ?? '').trim(); return !s || /^[\u2026.·•_\-\s]+$/.test(s); };
 
-function tryParse(t){
-  try { return JSON.parse(t); } catch(_) {}
+// BULLETPROOF JSON PARSER: Fixes cut-off AI responses
+function tryParse(raw){
+  if (!raw) return null;
+  let t = String(raw).trim();
+  t = t.replace(/```json\s*/gi, '').replace(/```\s*/gi, '');
   
-  const closers = ['"', '"}', '"}]}', '"}]}]}', '}', ']}', '}]}', '}]}]}', '"}]}]}]}'];
-  for(const c of closers){
-    try { return JSON.parse(t + c); } catch(_) {}
+  let start = t.indexOf('{');
+  if (start === -1) return null;
+  t = t.slice(start);
+  
+  try { return JSON.parse(t); } catch (_) {}
+  
+  // Try appending closers for truncated strings/arrays
+  const closers = ['"}]}', '"}]}]}', '"', ']}', '}]}', '}', '"]]}', '"]}]}', '"]', '"]}]}'];
+  for (const c of closers) {
+    try { return JSON.parse(t + c); } catch (_) {}
   }
   
-  let idx = t.lastIndexOf('},');
-  if(idx > 20){
-    try { return JSON.parse(t.slice(0, idx + 1) + ']}'); } catch(_) {}
+  // Truncate to last complete object
+  let cut = Math.max(t.lastIndexOf('"},'), t.lastIndexOf('"}'), t.lastIndexOf('},'), t.lastIndexOf('}'));
+  if (cut > 10) {
+    let truncated = t.slice(0, cut + 1);
+    if (!truncated.endsWith('}')) truncated += '}';
+    const truncClosers = [']}', ']}', ']}]}', ''];
+    for (const c of truncClosers) {
+      try { return JSON.parse(truncated + c); } catch (_) {}
+    }
   }
-  idx = t.lastIndexOf('}');
-  if(idx > 20){
-    try { return JSON.parse(t.slice(0, idx + 1) + ']}'); } catch(_) {}
-  }
-  
   return null;
 }
 
 function parseQuiz(raw){
-  let t = (raw || '').trim().replace(/^```(?:json)?\s*/i,'').replace(/```\s*$/,'');
-  const s = t.indexOf('{'), e = t.lastIndexOf('}');
-  if(s > -1 && e > s) t = t.slice(s, e + 1);
-  const j = tryParse(t);
-  if(!j) throw new Error('The model returned unreadable output — retrying.');
+  const j = tryParse(raw);
+  if(!j) throw new Error('Unreadable output — retrying.');
   const list = j.questions || [];
   const mc = [], short = [], long = [];
   for(const q of list){
@@ -808,88 +788,59 @@ function parseQuiz(raw){
       short.push({ question:q.question, answer:q.answer });
     }
   }
-  if(!mc.length && !short.length && !long.length) throw new Error('The model returned placeholder questions — retrying.');
+  if(!mc.length && !short.length && !long.length) throw new Error('No questions returned — retrying.');
   return { mc, short, long };
 }
 
 $('#genBtn').addEventListener('click', generate);
 async function generate(){
   const wantMC = +$('#mcRange').value, wantSH = +$('#shRange').value, wantLG = +$('#lgRange').value;
-  
-  if(state.files.some(f => f.processing)){
-    toast('Still processing files — please wait a moment.');
-    return;
-  }
-  
+  if(state.files.some(f => f.processing)){ toast('Still processing files.'); return; }
   const readyFiles = state.files.filter(f => !f.processing && (f.text || '').trim().length > 0);
-  const hasFiles = readyFiles.length > 0;
-  const hasNotes = state.notes.trim().length > 0;
-  
-  if(!hasFiles && !hasNotes){ 
-    toast('Upload at least one file OR type some notes first.'); 
-    return; 
-  }
-  if(wantMC + wantSH + wantLG === 0){ toast('Set at least one question in the quiz mix.'); return; }
+  if(readyFiles.length === 0 && state.notes.trim().length === 0){ toast('Upload a file OR type notes.'); return; }
+  if(wantMC + wantSH + wantLG === 0){ toast('Set at least one question.'); return; }
 
   const btn = $('#genBtn'), label = $('#genLabel');
   btn.disabled = true; label.textContent = '✍ WRITING QUESTIONS…';
   const t0 = performance.now();
   try{
     setStatus('▸ Building the exam brief…');
-    
-    const fileText = readyFiles.map(f => {
-      const header = f.isOcr ? `[OCR from image: ${f.name}]` : `[Document: ${f.name}]`;
-      return header + '\n' + (f.text || '');
-    }).join('\n\n');
-    
-    const allText = [
-      fileText,
-      hasNotes ? '[Typed notes]\n' + state.notes.trim() : ''
-    ].filter(Boolean).join('\n\n');
-    
+    const fileText = readyFiles.map(f => `[${f.isOcr?'Image':'Doc'}: ${f.name}]\n${f.text||''}`).join('\n\n');
+    const allText = [fileText, state.notes.trim() ? '[Typed notes]\n' + state.notes.trim() : ''].filter(Boolean).join('\n\n');
     const material = sampleText(allText);
     const prompt = buildPrompt(material, { mc:wantMC, short:wantSH, long:wantLG });
 
     let quiz = { mc:[], short:[], long:[] };
     for(let attempt = 1; attempt <= 2; attempt++){
-      setStatus('▸ Asking ' + MODEL + ' to write the paper… (attempt ' + attempt + '/2)');
+      setStatus('▸ Asking AI… (attempt ' + attempt + '/2)');
       const raw = await callNVIDIA(prompt);
-      setStatus('▸ Checking the generator\'s homework…');
       try{ quiz = parseQuiz(raw); break; }
-      catch(err){ if(attempt === 2) throw err; setStatus('▸ The model sent placeholders — regenerating…'); }
+      catch(err){ if(attempt === 2) throw err; setStatus('▸ Fixing cut-off text, retrying…'); }
     }
 
-    quiz.mc = quiz.mc.slice(0, wantMC);
-    quiz.short = quiz.short.slice(0, wantSH);
-    quiz.long = quiz.long.slice(0, wantLG);
+    quiz.mc = quiz.mc.slice(0, wantMC); quiz.short = quiz.short.slice(0, wantSH); quiz.long = quiz.long.slice(0, wantLG);
 
     const deficit = { mc: wantMC - quiz.mc.length, short: wantSH - quiz.short.length, long: wantLG - quiz.long.length };
     if(deficit.mc > 0 || deficit.short > 0 || deficit.long > 0){
       setStatus('▸ Topping up missing questions…');
       try{
         const q2 = parseQuiz(await callNVIDIA(buildPrompt(material, deficit)));
-        quiz.mc    = quiz.mc.concat(q2.mc).slice(0, wantMC);
+        quiz.mc = quiz.mc.concat(q2.mc).slice(0, wantMC);
         quiz.short = quiz.short.concat(q2.short).slice(0, wantSH);
-        quiz.long  = quiz.long.concat(q2.long).slice(0, wantLG);
+        quiz.long = quiz.long.concat(q2.long).slice(0, wantLG);
       }catch(_){}
     }
-    if(!quiz.mc.length && !quiz.short.length && !quiz.long.length) throw new Error('No usable questions returned — try again.');
 
     state.quiz = quiz; state.graded = false;
-    const sourceNames = hasFiles 
-      ? readyFiles.map(f => (f.isOcr ? '🖼 ' : '') + f.name).join(', ') 
-      : 'Typed notes';
     state.meta = {
-      file: sourceNames.length > 80 ? sourceNames.slice(0, 77) + '…' : sourceNames,
-      model: MODEL,
-      secs: ((performance.now() - t0) / 1000).toFixed(1),
+      file: readyFiles.length > 0 ? readyFiles.map(f=>f.name).join(', ') : 'Typed notes',
+      model: MODEL, secs: ((performance.now() - t0) / 1000).toFixed(1),
       date: new Date().toLocaleDateString(undefined,{ year:'numeric', month:'short', day:'numeric' })
     };
     renderQuiz();
-    setStatus('✔ Paper ready — ' + quiz.mc.length + ' MC · ' + quiz.short.length + ' short · ' + quiz.long.length + ' long. Good luck.');
+    setStatus('✔ Paper ready — ' + quiz.mc.length + ' MC · ' + quiz.short.length + ' short · ' + quiz.long.length + ' long.');
   }catch(err){
-    setStatus('✖ ' + esc(err.message));
-    toast(err.message);
+    setStatus('✖ ' + esc(err.message)); toast(err.message);
   }finally{
     btn.disabled = false; label.textContent = '⚡ GENERATE QUIZ';
   }
@@ -906,218 +857,87 @@ function renderQuiz(){
   if(mc.length){
     html += '<div class="part"><span class="part-tag">PART A — MULTIPLE CHOICE</span>';
     mc.forEach((q, i) => {
-      html += `<div class="q" data-type="mc" data-qi="${i}">
-        <div class="qhead"><span class="qnum">${String(i+1).padStart(2,'0')}</span><p class="qtext">${esc(q.question)}</p></div>
-        <div class="opts">` +
-        q.options.map((o, j) => `<button type="button" class="opt" data-i="${j}"><span class="bub" aria-hidden="true"></span><span class="ltr">${LETTERS[j]}</span><span>${esc(o)}</span></button>`).join('') +
-        `</div><p class="keyhint">✔ Correct: <b>${LETTERS[q.answerIndex]}</b>${q.explanation ? ' — ' + esc(q.explanation) : ''}</p></div>`;
-    });
-    html += '</div>';
+      html += `<div class="q" data-type="mc" data-qi="${i}"><div class="qhead"><span class="qnum">${String(i+1).padStart(2,'0')}</span><p class="qtext">${esc(q.question)}</p></div><div class="opts">` +
+        q.options.map((o, j) => `<button type="button" class="opt" data-i="${j}"><span class="bub"></span><span class="ltr">${LETTERS[j]}</span><span>${esc(o)}</span></button>`).join('') +
+        `</div><p class="keyhint">✔ Correct: <b>${LETTERS[q.answerIndex]}</b>${q.explanation?' — '+esc(q.explanation):''}</p></div>`;
+    }); html += '</div>';
   }
   if(short.length){
     html += '<div class="part"><span class="part-tag">PART B — SHORT ANSWER</span>';
     short.forEach((q, i) => {
-      html += `<div class="q" data-type="short">
-        <div class="qhead"><span class="qnum">${mc.length ? 'B' + (i+1) : String(i+1).padStart(2,'0')}</span><p class="qtext">${esc(q.question)}</p></div>
-        <button type="button" class="reveal">REVEAL MODEL ANSWER</button>
-        <div class="amodel"><span class="amodel-tag">MODEL ANSWER</span><p>${esc(q.answer)}</p></div>
-      </div>`;
-    });
-    html += '</div>';
+      html += `<div class="q" data-type="short"><div class="qhead"><span class="qnum">${mc.length?'B'+(i+1):String(i+1).padStart(2,'0')}</span><p class="qtext">${esc(q.question)}</p></div><button type="button" class="reveal">REVEAL MODEL ANSWER</button><div class="amodel"><span class="amodel-tag">MODEL ANSWER</span><p>${esc(q.answer)}</p></div></div>`;
+    }); html += '</div>';
   }
   if(long.length){
     html += '<div class="part"><span class="part-tag">PART C — LONG / ESSAY</span>';
     long.forEach((q, i) => {
-      html += `<div class="q" data-type="long">
-        <div class="qhead"><span class="qnum">C${i+1}</span><p class="qtext">${esc(q.question)}</p></div>
-        <button type="button" class="reveal">REVEAL MODEL ANSWER</button>
-        <div class="amodel"><span class="amodel-tag">MODEL ANSWER</span><p>${esc(q.answer)}</p></div>
-      </div>`;
-    });
-    html += '</div>';
+      html += `<div class="q" data-type="long"><div class="qhead"><span class="qnum">C${i+1}</span><p class="qtext">${esc(q.question)}</p></div><button type="button" class="reveal">REVEAL MODEL ANSWER</button><div class="amodel"><span class="amodel-tag">MODEL ANSWER</span><p>${esc(q.answer)}</p></div></div>`;
+    }); html += '</div>';
   }
   $('#paperBody').innerHTML = html;
-
   $('#empty').hidden = true;
-  const paper = $('#paper');
-  paper.hidden = false;
-  paper.classList.remove('show-key','graded');
-  $('#stamp').classList.remove('on','perfect');
-  $('#keyBtn').classList.remove('on');
-  $('#gradeBtn').disabled = !mc.length;
-  $('#gradeBtn').textContent = '✔ GRADE IT';
+  const paper = $('#paper'); paper.hidden = false;
+  paper.classList.remove('show-key','graded'); $('#stamp').classList.remove('on','perfect');
+  $('#keyBtn').classList.remove('on'); $('#gradeBtn').disabled = !mc.length;
   ['#keyBtn','#copyBtn','#dlBtn','#printBtn'].forEach(s => $(s).disabled = false);
-  if(window.innerWidth < 980) paper.scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
 $('#paperBody').addEventListener('click', e => {
   const opt = e.target.closest('.opt');
-  if(opt && !state.graded){
-    const q = opt.closest('.q');
-    q.querySelectorAll('.opt').forEach(o => o.classList.remove('sel'));
-    opt.classList.add('sel');
-    return;
-  }
+  if(opt && !state.graded){ const q = opt.closest('.q'); q.querySelectorAll('.opt').forEach(o => o.classList.remove('sel')); opt.classList.add('sel'); return; }
   const rev = e.target.closest('.reveal');
-  if(rev){
-    const q = rev.closest('.q');
-    const open = q.classList.toggle('open');
-    rev.textContent = open ? 'HIDE MODEL ANSWER' : 'REVEAL MODEL ANSWER';
-  }
+  if(rev){ const q = rev.closest('.q'); const open = q.classList.toggle('open'); rev.textContent = open ? 'HIDE MODEL ANSWER' : 'REVEAL MODEL ANSWER'; }
 });
 
 $('#gradeBtn').addEventListener('click', () => {
-  const mc = state.quiz?.mc;
-  if(!mc || !mc.length) return;
+  const mc = state.quiz?.mc; if(!mc || !mc.length) return;
   const paper = $('#paper'), stamp = $('#stamp');
-  if(state.graded){
-    $$('#paperBody .opt').forEach(o => o.classList.remove('sel','good','bad'));
-    paper.classList.remove('graded');
-    stamp.classList.remove('on','perfect');
-    state.graded = false;
-    $('#gradeBtn').textContent = '✔ GRADE IT';
-    return;
-  }
+  if(state.graded){ $$('#paperBody .opt').forEach(o => o.classList.remove('sel','good','bad')); paper.classList.remove('graded'); stamp.classList.remove('on','perfect'); state.graded = false; $('#gradeBtn').textContent = '✔ GRADE IT'; return; }
   let score = 0;
   $$('#paperBody .q[data-type="mc"]').forEach(qEl => {
-    const correct = mc[+qEl.dataset.qi].answerIndex;
-    const sel = qEl.querySelector('.opt.sel');
-    const si = sel ? +sel.dataset.i : -1;
-    qEl.querySelectorAll('.opt').forEach(o => {
-      const i = +o.dataset.i;
-      if(i === correct) o.classList.add('good');
-      else if(o === sel) o.classList.add('bad');
-    });
+    const correct = mc[+qEl.dataset.qi].answerIndex; const sel = qEl.querySelector('.opt.sel'); const si = sel ? +sel.dataset.i : -1;
+    qEl.querySelectorAll('.opt').forEach(o => { const i = +o.dataset.i; if(i === correct) o.classList.add('good'); else if(o === sel) o.classList.add('bad'); });
     if(si === correct) score++;
   });
-  state.graded = true;
-  paper.classList.add('graded');
-  $('#stampScore').textContent = score + ' / ' + mc.length;
-  stamp.classList.add('on');
-  if(score === mc.length) stamp.classList.add('perfect');
-  $('#gradeBtn').textContent = '↺ RESET PICKS';
+  state.graded = true; paper.classList.add('graded');
+  $('#stampScore').textContent = score + ' / ' + mc.length; stamp.classList.add('on');
+  if(score === mc.length) stamp.classList.add('perfect'); $('#gradeBtn').textContent = '↺ RESET PICKS';
 });
 
-$('#keyBtn').addEventListener('click', () => {
-  const on = $('#paper').classList.toggle('show-key');
-  $('#keyBtn').classList.toggle('on', on);
-});
+$('#keyBtn').addEventListener('click', () => { $('#paper').classList.toggle('show-key'); $('#keyBtn').classList.toggle('on'); });
 
-function quizMarkdown(withAnswers = true){
-  const m = state.meta, q = state.quiz, out = [];
-  out.push('# Quiz — ' + m.file, '', `Generated by OmniQuiz-AI · ${m.date} · ${m.model}`, '');
-  if(q.mc.length){
-    out.push('## Part A — Multiple Choice', '');
-    q.mc.forEach((x, i) => {
-      out.push(`${i+1}. ${x.question}`);
-      x.options.forEach((o, j) => out.push(`   - ${LETTERS[j]}. ${o}`));
-      if(withAnswers) out.push(`   **Answer: ${LETTERS[x.answerIndex]}**${x.explanation ? ' — ' + x.explanation : ''}`);
-      out.push('');
-    });
-  }
-  if(q.short.length){
-    out.push('## Part B — Short Answer', '');
-    q.short.forEach((x, i) => {
-      out.push(`${i+1}. ${x.question}`);
-      if(withAnswers && x.answer) out.push(`   _Model answer: ${x.answer}_`);
-      out.push('');
-    });
-  }
-  if(q.long.length){
-    out.push('## Part C — Long / Essay', '');
-    q.long.forEach((x, i) => {
-      out.push(`${i+1}. ${x.question}`);
-      if(withAnswers && x.answer) out.push(`   _Model answer: ${x.answer}_`);
-      out.push('');
-    });
-  }
-  return out.join('\n');
-}
 $('#copyBtn').addEventListener('click', async () => {
-  const md = quizMarkdown(true);
-  try{ await navigator.clipboard.writeText(md); toast('Quiz copied as Markdown ✓'); }
-  catch(_){
-    const ta = document.createElement('textarea');
-    ta.value = md; document.body.appendChild(ta); ta.select();
-    document.execCommand('copy'); ta.remove(); toast('Quiz copied ✓');
-  }
+  const m = state.meta, q = state.quiz; let out = ['# Quiz — ' + m.file, '', `Generated by OmniQuiz-AI · ${m.date}`, ''];
+  if(q.mc.length){ out.push('## Part A — MC', ''); q.mc.forEach((x,i)=>{ out.push(`${i+1}. ${x.question}`); x.options.forEach((o,j)=>out.push(`   - ${LETTERS[j]}. ${o}`)); out.push(`   **Answer: ${LETTERS[x.answerIndex]}**`, ''); }); }
+  if(q.short.length){ out.push('## Part B — Short', ''); q.short.forEach((x,i)=>{ out.push(`${i+1}. ${x.question}`, `   _Ans: ${x.answer}_`, ''); }); }
+  if(q.long.length){ out.push('## Part C — Long', ''); q.long.forEach((x,i)=>{ out.push(`${i+1}. ${x.question}`, `   _Ans: ${x.answer}_`, ''); }); }
+  try{ await navigator.clipboard.writeText(out.join('\n')); toast('Copied ✓'); }catch(_){ toast('Copy failed'); }
 });
 
 $('#dlBtn').addEventListener('click', () => {
   if(!state.quiz) return;
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit:'mm', format:'a4' });
-  const W = 210, M = 18, CW = W - M*2;
-  let y = 20;
+  const { jsPDF } = window.jspdf; const doc = new jsPDF({ unit:'mm', format:'a4' });
+  const W = 210, M = 18, CW = W - M*2; let y = 20;
   const pageBreak = need => { if(y + need > 280){ doc.addPage(); y = 20; } };
   const write = (text, size, style, gap, indent, color) => {
     gap = gap ?? 2; indent = indent ?? 0; color = color || [32,38,31];
     doc.setFont('helvetica', style); doc.setFontSize(size); doc.setTextColor(color[0],color[1],color[2]);
     const lines = doc.splitTextToSize(text, CW - indent);
-    for(const ln of lines){ pageBreak(size * 0.5); doc.text(ln, M + indent, y); y += size * 0.5; }
-    y += gap;
+    for(const ln of lines){ pageBreak(size * 0.5); doc.text(ln, M + indent, y); y += size * 0.5; } y += gap;
   };
   const { mc, short, long } = state.quiz, m = state.meta;
-
   write('OMNQUIZ-AI — EXAMINATION PAPER', 16, 'bold', 3);
-  write('Source: ' + m.file + '   ·   Model: ' + m.model + '   ·   ' + m.date, 9, 'normal', 4, 0, [110,115,105]);
-  doc.setDrawColor(32,38,31); doc.setLineWidth(0.6); doc.line(M, y, W-M, y); y += 8;
-  write('Name: ____________________________     Class: __________     Date: __________', 10, 'normal', 8);
-
-  if(mc.length){
-    write('PART A — MULTIPLE CHOICE', 12, 'bold', 4);
-    mc.forEach((q, i) => {
-      pageBreak(30);
-      write((i+1) + '. ' + q.question, 11, 'bold', 2.5);
-      q.options.forEach((o, j) => write(LETTERS[j] + '.  ' + o, 10.5, 'normal', 1.5, 8));
-      y += 3;
-    });
-  }
-  if(short.length){
-    write('PART B — SHORT ANSWER', 12, 'bold', 4);
-    short.forEach((q, i) => {
-      pageBreak(34);
-      write((mc.length ? 'B' + (i+1) : (i+1)) + '. ' + q.question, 11, 'bold', 4);
-      doc.setDrawColor(150,150,150); doc.setLineWidth(0.3);
-      for(let k = 0; k < 3; k++){ pageBreak(10); doc.line(M + 8, y, W - M, y); y += 9; }
-      y += 3;
-    });
-  }
-  if(long.length){
-    write('PART C — LONG / ESSAY', 12, 'bold', 4);
-    long.forEach((q, i) => {
-      pageBreak(46);
-      write('C' + (i+1) + '. ' + q.question, 11, 'bold', 4);
-      doc.setDrawColor(150,150,150); doc.setLineWidth(0.3);
-      for(let k = 0; k < 7; k++){ pageBreak(10); doc.line(M + 8, y, W - M, y); y += 9; }
-      y += 3;
-    });
-  }
-
-  doc.addPage(); y = 20;
-  write('ANSWER KEY', 14, 'bold', 4);
-  if(mc.length){
-    write('Part A', 11, 'bold', 2);
-    mc.forEach((q, i) => write((i+1) + '. ' + LETTERS[q.answerIndex] + (q.explanation ? ' — ' + q.explanation : ''), 10, 'normal', 2));
-    y += 4;
-  }
-  if(short.length){
-    write('Part B', 11, 'bold', 2);
-    short.forEach((q, i) => write((mc.length ? 'B' + (i+1) : (i+1)) + '. ' + q.answer, 10, 'normal', 2));
-    y += 4;
-  }
-  if(long.length){
-    write('Part C', 11, 'bold', 2);
-    long.forEach((q, i) => write('C' + (i+1) + '. ' + q.answer, 10, 'normal', 3));
-  }
-
-  const pages = doc.getNumberOfPages();
-  for(let p = 1; p <= pages; p++){
-    doc.setPage(p); doc.setFontSize(9); doc.setTextColor(140,140,140);
-    doc.text('OmniQuiz-AI  ·  Page ' + p + ' / ' + pages, W - M, 292, { align:'right' });
-  }
-  doc.save('quiz-' + (m.file.replace(/\.[^.]+$/,'').replace(/[^a-zA-Z0-9]/g,'_') || 'paper').slice(0,40) + '.pdf');
-  toast('Downloading PDF…');
+  write('Source: ' + m.file + '   ·   ' + m.date, 9, 'normal', 4, 0, [110,115,105]);
+  doc.setDrawColor(32,38,31); doc.line(M, y, W-M, y); y += 8;
+  write('Name: ____________________________     Class: __________', 10, 'normal', 8);
+  if(mc.length){ write('PART A — MULTIPLE CHOICE', 12, 'bold', 4); mc.forEach((q,i)=>{ pageBreak(30); write((i+1)+'. '+q.question, 11, 'bold', 2.5); q.options.forEach((o,j)=>write(LETTERS[j]+'.  '+o, 10.5, 'normal', 1.5, 8)); y+=3; }); }
+  if(short.length){ write('PART B — SHORT ANSWER', 12, 'bold', 4); short.forEach((q,i)=>{ pageBreak(34); write((mc.length?'B'+(i+1):(i+1))+'. '+q.question, 11, 'bold', 4); doc.setDrawColor(150,150,150); for(let k=0;k<3;k++){ pageBreak(10); doc.line(M+8,y,W-M,y); y+=9; } y+=3; }); }
+  if(long.length){ write('PART C — LONG / ESSAY', 12, 'bold', 4); long.forEach((q,i)=>{ pageBreak(46); write('C'+(i+1)+'. '+q.question, 11, 'bold', 4); doc.setDrawColor(150,150,150); for(let k=0;k<7;k++){ pageBreak(10); doc.line(M+8,y,W-M,y); y+=9; } y+=3; }); }
+  doc.addPage(); y = 20; write('ANSWER KEY', 14, 'bold', 4);
+  if(mc.length){ write('Part A', 11, 'bold', 2); mc.forEach((q,i)=>write((i+1)+'. '+LETTERS[q.answerIndex]+(q.explanation?' — '+q.explanation:''), 10, 'normal', 2)); y+=4; }
+  if(short.length){ write('Part B', 11, 'bold', 2); short.forEach((q,i)=>write((mc.length?'B'+(i+1):(i+1))+'. '+q.answer, 10, 'normal', 2)); y+=4; }
+  if(long.length){ write('Part C', 11, 'bold', 2); long.forEach((q,i)=>write('C'+(i+1)+'. '+q.answer, 10, 'normal', 3)); }
+  doc.save('quiz-' + (m.file.replace(/[^a-zA-Z0-9]/g,'_') || 'paper').slice(0,40) + '.pdf'); toast('Downloading PDF…');
 });
 
 $('#printBtn').addEventListener('click', () => window.print());
