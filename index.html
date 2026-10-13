@@ -198,13 +198,6 @@
   .toast{background:var(--card);border:1.5px solid var(--line);border-left:4px solid var(--yellow);color:var(--chalk);padding:12px 16px;border-radius:10px;font-size:.85rem;box-shadow:0 14px 34px rgba(0,0,0,.5);opacity:0;transform:translateY(16px);transition:.3s}
   .toast.on{opacity:1;transform:none}
 
-  /* Streaming progress */
-  .progress-wrap{margin-top:10px}
-  .progress-bar{width:100%;height:6px;background:rgba(233,242,233,.12);border-radius:3px;overflow:hidden}
-  .progress-fill{height:100%;background:linear-gradient(90deg,var(--yellow),var(--mint));width:0%;transition:width .3s ease;border-radius:3px}
-  .stream-info{font:400 .68rem var(--mono);color:var(--chalk2);margin-top:6px;letter-spacing:.05em}
-  .token-badge{display:inline-block;font:600 .62rem var(--mono);letter-spacing:.1em;color:var(--yellow);border:1px solid rgba(255,210,63,.35);border-radius:4px;padding:2px 7px;margin-top:8px}
-
   @keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
   @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
@@ -255,8 +248,8 @@
 
 <div class="ticker" aria-hidden="true">
   <div class="tt">
-    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MULTIMODAL VISION ✦ TYPED NOTES ✦ MC ✦ SHORT ✦ LONG ✦ AUTO-GRADING ✦ PDF EXPORT ✦ STREAMING ✦&nbsp;</span>
-    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MULTIMODAL VISION ✦ TYPED NOTES ✦ MC ✦ SHORT ✦ LONG ✦ AUTO-GRADING ✦ PDF EXPORT ✦ STREAMING ✦&nbsp;</span>
+    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MULTIMODAL VISION ✦ TYPED NOTES ✦ MC ✦ SHORT ✦ LONG ✦ AUTO-GRADING ✦ PDF EXPORT ✦&nbsp;</span>
+    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MULTIMODAL VISION ✦ TYPED NOTES ✦ MC ✦ SHORT ✦ LONG ✦ AUTO-GRADING ✦ PDF EXPORT ✦&nbsp;</span>
   </div>
 </div>
 
@@ -290,22 +283,17 @@
       <div class="word-count" id="wordCount">0 words</div>
       
       <p class="status" id="status" aria-live="polite">▸ Awaiting submission…</p>
-      <div class="progress-wrap" id="progressWrap" hidden>
-        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-        <div class="stream-info" id="streamInfo"></div>
-      </div>
     </div>
 
     <div class="step">
       <div class="lab"><span>02 · Quiz mix</span></div>
       <div class="lab" style="margin-top:6px"><span style="letter-spacing:.08em">Multiple choice</span><span class="val" id="mcOut">6 Qs</span></div>
-      <input type="range" id="mcRange" min="0" max="50" value="6">
+      <input type="range" id="mcRange" min="0" max="20" value="6">
       <div class="lab"><span style="letter-spacing:.08em">Short answer (1 sentence)</span><span class="val" id="shOut">3 Qs</span></div>
-      <input type="range" id="shRange" min="0" max="30" value="3">
+      <input type="range" id="shRange" min="0" max="10" value="3">
       <div class="lab"><span style="letter-spacing:.08em">Long / essay</span><span class="val" id="lgOut">1 Qs</span></div>
-      <input type="range" id="lgRange" min="0" max="15" value="1">
-      <div class="token-badge" id="tokenEstimate">~0 output tokens</div>
-      <div class="lab" style="margin-top:14px"><span style="letter-spacing:.08em">Difficulty</span></div>
+      <input type="range" id="lgRange" min="0" max="5" value="1">
+      <div class="lab"><span style="letter-spacing:.08em">Difficulty</span></div>
       <div class="seg" id="diffSeg" role="group" aria-label="Difficulty">
         <button type="button" data-v="easy">Easy</button>
         <button type="button" data-v="medium" class="on">Medium</button>
@@ -328,7 +316,7 @@
       </div>
       <div class="lab"><span style="letter-spacing:.08em">Model</span></div>
       <select class="in" id="modelSel" disabled><option>nvidia/nemotron-3-nano-omni-30b-a3b-reasoning</option></select>
-      <p class="micro">Multimodal Vision · Streaming enabled · 64k output / 192k input context</p>
+      <p class="micro">Multimodal Vision model (Thinking mode disabled for speed).</p>
     </div>
 
     <button class="gen" id="genBtn" type="button"><span id="genLabel">⚡ GENERATE QUIZ</span></button>
@@ -381,7 +369,7 @@
 <footer>
   <div class="wrap foot">
     <span>🔒 Files parsed in-browser. AI queried securely via hidden proxy.</span>
-    <span>OMNIZQ-AI · STREAMING EDITION</span>
+    <span>OMNIZQ-AI · MULTIMODAL EDITION</span>
   </div>
 </footer>
 
@@ -401,45 +389,12 @@ const LETTERS = 'ABCDEF';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
+// state.files: array of {name, kind: 'text'|'image', text?, dataUrl?, size}
 const state = { files:[], notes:'', quiz:null, meta:null, graded:false };
 let difficulty = 'medium';
 
 const WORKER_URL = "https://ehjkwqngbrf.s250038.workers.dev";
 const MODEL = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning';
-
-// Token limits
-const MAX_OUTPUT_TOKENS = 64000;
-const MAX_INPUT_TOKENS = 192000;
-const CHARS_PER_TOKEN = 3.5; // conservative for mixed languages
-
-function calculateMaxTokens(want) {
-  const mcTokens = want.mc * 140;
-  const shortTokens = want.short * 80;
-  const longTokens = want.long * 220;
-  const jsonOverhead = 200;
-  const total = mcTokens + shortTokens + longTokens + jsonOverhead;
-  return Math.min(total, MAX_OUTPUT_TOKENS);
-}
-
-function calculateMaxInputChars(want) {
-  const outputTokens = calculateMaxTokens(want);
-  const systemTokens = 800;
-  const inputTokenBudget = MAX_INPUT_TOKENS - outputTokens - systemTokens;
-  return Math.floor(inputTokenBudget * CHARS_PER_TOKEN);
-}
-
-function updateTokenEstimate() {
-  const want = {
-    mc: +$('#mcRange').value,
-    short: +$('#shRange').value,
-    long: +$('#lgRange').value
-  };
-  const outTokens = calculateMaxTokens(want);
-  const inChars = calculateMaxInputChars(want);
-  const inTokensK = Math.round(inChars / CHARS_PER_TOKEN / 1000);
-  const outTokensK = Math.round(outTokens / 1000);
-  $('#tokenEstimate').textContent = `~${inTokensK}k in · ~${outTokensK}k out tokens`;
-}
 
 function toast(msg){
   const t = document.createElement('div');
@@ -452,9 +407,9 @@ const setStatus = html => { $('#status').innerHTML = html; };
 
 $('#today').textContent = new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}).toUpperCase();
 
-$('#mcRange').addEventListener('input', e => { $('#mcOut').textContent = e.target.value + ' Qs'; updateTokenEstimate(); });
-$('#shRange').addEventListener('input', e => { $('#shOut').textContent = e.target.value + ' Qs'; updateTokenEstimate(); });
-$('#lgRange').addEventListener('input', e => { $('#lgOut').textContent = e.target.value + ' Qs'; updateTokenEstimate(); });
+$('#mcRange').addEventListener('input', e => $('#mcOut').textContent = e.target.value + ' Qs');
+$('#shRange').addEventListener('input', e => $('#shOut').textContent = e.target.value + ' Qs');
+$('#lgRange').addEventListener('input', e => $('#lgOut').textContent = e.target.value + ' Qs');
 $('#diffSeg').addEventListener('click', e => {
   const b = e.target.closest('button'); if(!b) return;
   $('#diffSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
@@ -467,8 +422,6 @@ $('#notesInput').addEventListener('input', e => {
   $('#wordCount').textContent = words + ' word' + (words !== 1 ? 's' : '');
   updateStatus();
 });
-
-updateTokenEstimate();
 
 const dz = $('#dz'), fileInput = $('#fileInput');
 dz.addEventListener('click', () => fileInput.click());
@@ -510,6 +463,7 @@ async function extractPPTX(file){
   return out.join('\n\n');
 }
 
+// Compress image to prevent 524 Timeout / 413 Payload Too Large
 async function compressImage(file){
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -695,114 +649,32 @@ function buildPrompt(material, want){
   return lines.filter(Boolean).join('\n');
 }
 
-function sampleText(text, maxChars){
+function sampleText(text){
+  const MAX = 8000; // Leave room for images in payload
   let t = text.replace(/\r/g,'').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();
-  if(t.length <= maxChars) return t;
-  // Keep beginning and end for context
-  const headLen = Math.floor(maxChars * 0.6);
-  const tailLen = maxChars - headLen - 30;
-  return t.slice(0, headLen) + '\n[…middle excerpted…]\n' + t.slice(-tailLen);
+  if(t.length <= MAX) return t;
+  return t.slice(0, MAX) + '\n[…excerpt…]\n';
 }
 
-// Streaming API call
-async function callNVIDIAStream(textMaterial, images, want, onProgress){
+async function callNVIDIA(textMaterial, images){
+  // Build multimodal content array
   const userContent = [{ type: 'text', text: textMaterial }];
-  const MAX_IMAGES = 4;
+  
+  // Limit images to prevent 524 timeout / 413 payload too large
+  const MAX_IMAGES = 4; 
   const imagesToSend = images.slice(0, MAX_IMAGES);
   for(const img of imagesToSend){
     userContent.push({ type: 'image_url', image_url: { url: img.dataUrl } });
   }
 
-  const maxTokens = calculateMaxTokens(want);
-  
-  const base = {
-    model: MODEL,
-    messages:[
-      { role:'system', content:'You are an expert exam writer. Always respond with strict JSON only. No markdown, no commentary.' },
-      { role:'user', content: userContent.length === 1 && userContent[0].type === 'text' ? textMaterial : userContent }
-    ],
-    chat_template_kwargs: { enable_thinking: false },
-    temperature: 0.7, top_p: 0.7, max_tokens: maxTokens, stream: true
-  };
-
-  const response = await fetch(WORKER_URL, {
-    method:'POST', headers:{ 'Content-Type':'application/json' },
-    body: JSON.stringify(base)
-  });
-
-  if(!response.ok){
-    const j = await response.json().catch(() => ({}));
-    throw new Error(j?.error?.message || ('NVIDIA NIM error ' + response.status));
-  }
-
-  const contentType = response.headers.get('content-type') || '';
-  // If worker doesn't support streaming, read as text
-  if(!contentType.includes('text/event-stream') && !response.body){
-    const text = await response.text();
-    try{
-      const j = JSON.parse(text);
-      const content = j?.choices?.[0]?.message?.content || '';
-      onProgress(content, content.length);
-      return content;
-    }catch(_){
-      throw new Error('Invalid non-streaming response');
-    }
-  }
-
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let accumulated = '';
-  let buffer = '';
-  let tokenCount = 0;
-
-  while(true){
-    const { done, value } = await reader.read();
-    if(done) break;
-    
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split('\n');
-    buffer = lines.pop() || '';
-    
-    for(const line of lines){
-      const trimmed = line.trim();
-      if(!trimmed || !trimmed.startsWith('data:')) continue;
-      const data = trimmed.slice(5).trim();
-      if(data === '[DONE]') continue;
-      if(!data) continue;
-      try{
-        const parsed = JSON.parse(data);
-        const delta = parsed.choices?.[0]?.delta?.content || '';
-        if(delta){
-          accumulated += delta;
-          tokenCount += Math.max(1, Math.ceil(delta.length / 4));
-          onProgress(accumulated, tokenCount);
-        }
-      }catch(_){}
-    }
-  }
-
-  return accumulated;
-}
-
-// Non-streaming fallback
-async function callNVIDIA(textMaterial, images, want){
-  const userContent = [{ type: 'text', text: textMaterial }];
-  const MAX_IMAGES = 4;
-  const imagesToSend = images.slice(0, MAX_IMAGES);
-  for(const img of imagesToSend){
-    userContent.push({ type: 'image_url', image_url: { url: img.dataUrl } });
-  }
-
-  const maxTokens = calculateMaxTokens(want);
-  
   const base = {
     model: MODEL,
     messages:[
       { role:'system', content:'You are an expert exam writer. Always respond with strict JSON only.' },
       { role:'user', content: userContent.length === 1 && userContent[0].type === 'text' ? textMaterial : userContent }
     ],
-    chat_template_kwargs: { enable_thinking: false },
-    temperature: 0.7, top_p: 0.7, max_tokens: maxTokens, stream: false
+    chat_template_kwargs: { enable_thinking: false }, // Thinking disabled for speed
+    temperature: 0.7, top_p: 0.7, max_tokens: 8192, stream: false
   };
 
   const r = await fetch(WORKER_URL, {
@@ -816,6 +688,7 @@ async function callNVIDIA(textMaterial, images, want){
 
 const isPh = v => { const s = String(v ?? '').trim(); return !s || /^[\u2026.·•_\-\s]+$/.test(s); };
 
+// BULLETPROOF JSON PARSER
 function tryParse(raw){
   if (!raw) return null;
   let t = String(raw).trim();
@@ -866,64 +739,28 @@ function parseQuiz(raw){
 $('#genBtn').addEventListener('click', generate);
 async function generate(){
   const wantMC = +$('#mcRange').value, wantSH = +$('#shRange').value, wantLG = +$('#lgRange').value;
-  const want = { mc: wantMC, short: wantSH, long: wantLG };
-  
   if(state.files.some(f => f.processing)){ toast('Still processing files.'); return; }
   const readyFiles = state.files.filter(f => !f.processing && ((f.text && f.text.trim().length > 0) || f.dataUrl));
   if(readyFiles.length === 0 && state.notes.trim().length === 0){ toast('Upload a file OR type notes.'); return; }
   if(wantMC + wantSH + wantLG === 0){ toast('Set at least one question.'); return; }
 
   const btn = $('#genBtn'), label = $('#genLabel');
-  const progressBar = $('#progressWrap'), progressFill = $('#progressFill'), streamInfo = $('#streamInfo');
-  
   btn.disabled = true; label.textContent = '✍ WRITING QUESTIONS…';
-  progressBar.hidden = false;
-  progressFill.style.width = '0%';
-  
   const t0 = performance.now();
   try{
     setStatus('▸ Building the exam brief…');
-    const maxInputChars = calculateMaxInputChars(want);
     const fileText = readyFiles.filter(f=>f.kind==='text').map(f => `[Doc: ${f.name}]\n${f.text||''}`).join('\n\n');
     const allText = [fileText, state.notes.trim() ? '[Typed notes]\n' + state.notes.trim() : ''].filter(Boolean).join('\n\n');
-    const material = sampleText(allText, maxInputChars);
-    const prompt = buildPrompt(material, want);
+    const material = sampleText(allText);
+    const prompt = buildPrompt(material, { mc:wantMC, short:wantSH, long:wantLG });
     const images = readyFiles.filter(f => f.kind === 'image');
-    
-    const estimatedTokens = calculateMaxTokens(want);
-    let raw = '';
-    let usedStreaming = false;
 
-    // Try streaming first
-    try{
-      setStatus('▸ Streaming from AI…');
-      raw = await callNVIDIAStream(prompt, images, want, (accumulated, tokens) => {
-        const pct = Math.min(95, Math.round((tokens / estimatedTokens) * 100));
-        progressFill.style.width = pct + '%';
-        streamInfo.textContent = `${tokens.toLocaleString()} tokens received · ${accumulated.length.toLocaleString()} chars`;
-      });
-      usedStreaming = true;
-      progressFill.style.width = '100%';
-      streamInfo.textContent = 'Stream complete · parsing…';
-    }catch(streamErr){
-      console.warn('[OmniQuiz] Streaming failed, falling back to non-streaming:', streamErr.message);
-      setStatus('▸ Streaming failed, retrying without stream…');
-      raw = await callNVIDIA(prompt, images, want);
-    }
-
-    setStatus('▸ Parsing quiz…');
-    let quiz;
+    let quiz = { mc:[], short:[], long:[] };
     for(let attempt = 1; attempt <= 2; attempt++){
+      setStatus('▸ Asking AI… (attempt ' + attempt + '/2)' + (images.length>0 ? ' · analyzing images' : ''));
+      const raw = await callNVIDIA(prompt, images);
       try{ quiz = parseQuiz(raw); break; }
-      catch(err){
-        if(attempt === 2) throw err;
-        setStatus('▸ Parse failed, retrying…');
-        if(usedStreaming){
-          raw = await callNVIDIA(prompt, images, want);
-        }else{
-          raw = await callNVIDIA(prompt, images, want);
-        }
-      }
+      catch(err){ if(attempt === 2) throw err; setStatus('▸ Fixing cut-off text, retrying…'); }
     }
 
     quiz.mc = quiz.mc.slice(0, wantMC); quiz.short = quiz.short.slice(0, wantSH); quiz.long = quiz.long.slice(0, wantLG);
@@ -932,7 +769,7 @@ async function generate(){
     if(deficit.mc > 0 || deficit.short > 0 || deficit.long > 0){
       setStatus('▸ Topping up missing questions…');
       try{
-        const q2 = parseQuiz(await callNVIDIA(buildPrompt(material, deficit), images, want));
+        const q2 = parseQuiz(await callNVIDIA(buildPrompt(material, deficit), images));
         quiz.mc = quiz.mc.concat(q2.mc).slice(0, wantMC);
         quiz.short = quiz.short.concat(q2.short).slice(0, wantSH);
         quiz.long = quiz.long.concat(q2.long).slice(0, wantLG);
@@ -951,7 +788,6 @@ async function generate(){
     setStatus('✖ ' + esc(err.message)); toast(err.message);
   }finally{
     btn.disabled = false; label.textContent = '⚡ GENERATE QUIZ';
-    setTimeout(() => { progressBar.hidden = true; progressFill.style.width = '0%'; streamInfo.textContent = ''; }, 1500);
   }
 }
 
