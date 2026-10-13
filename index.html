@@ -9,290 +9,120 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;0,9..144,900;1,9..144,900&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#0d2b22; --card:#10352b; --line:#2b5a49;
-    --paper:#fbf8ee; --ink:#20261f; --ink2:#6a7166;
-    --rule:rgba(70,95,125,.09);
-    --yellow:#ffd23f; --red:#ff5d52; --red2:#d94036; --mint:#22a06b;
-    --chalk:#e9f2e9; --chalk2:#a9c6b5;
-    --mono:'Space Mono',monospace; --disp:'Fraunces',serif; --body:'Space Grotesk',sans-serif;
-  }
-  *{margin:0;padding:0;box-sizing:border-box}
-  html{scroll-behavior:smooth}
-  body{
-    font-family:var(--body); color:var(--chalk); min-height:100vh; overflow-x:hidden;
-    background:
-      radial-gradient(1100px 700px at 88% -12%, rgba(255,210,63,.08), transparent 60%),
-      radial-gradient(900px 620px at -12% 112%, rgba(111,224,168,.09), transparent 60%),
-      linear-gradient(160deg,#103428,#0b241c 72%);
-  }
-  body::after{
-    content:""; position:fixed; inset:0; pointer-events:none; opacity:.06; z-index:0;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-  ::selection{background:var(--yellow);color:#14110a}
-  button{font-family:inherit}
-  :focus-visible{outline:3px dashed var(--yellow);outline-offset:3px;border-radius:4px}
-
-  .bgfx{position:fixed;inset:0;z-index:0;pointer-events:none}
-  .bgfx span{position:fixed;font-family:var(--disp);font-style:italic;font-weight:900;color:rgba(233,242,233,.05);user-select:none;animation:drift ease-in-out infinite alternate;line-height:1}
-  @keyframes drift{from{transform:translateY(-20px) rotate(-5deg)}to{transform:translateY(24px) rotate(6deg)}}
-
-  header.top,main,footer,.ticker{position:relative;z-index:1}
-  .wrap{max-width:1240px;margin:0 auto;padding:0 24px}
-
-  header.top{border-bottom:1px dashed rgba(233,242,233,.18)}
-  .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 0;flex-wrap:wrap}
-  .brand{display:flex;align-items:center;gap:14px}
-  .mark{width:42px;height:42px;background:var(--yellow);border:2.5px solid #14110a;border-radius:10px;display:grid;place-items:center;font:900 26px var(--disp);color:#14110a;transform:rotate(-6deg);box-shadow:3px 3px 0 rgba(0,0,0,.45);transition:transform .25s}
-  .brand:hover .mark{transform:rotate(4deg) scale(1.06)}
-  .brand-name{font:800 1.5rem/1 var(--disp);color:#fff;letter-spacing:.01em}
-  .brand-name em{font:700 .62rem var(--mono);font-style:normal;color:var(--red);border:1.5px solid var(--red);border-radius:4px;padding:2px 6px;vertical-align:super;letter-spacing:.12em;margin-left:6px}
-  .top-meta{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-  .form-meta{font:400 .68rem var(--mono);letter-spacing:.16em;color:var(--chalk2)}
-  .gh{font:600 .74rem var(--mono);letter-spacing:.06em;color:var(--chalk);text-decoration:none;border:1.5px solid var(--line);border-radius:9px;padding:8px 13px;transition:.18s}
-  .gh:hover{border-color:var(--yellow);color:var(--yellow);transform:translateY(-2px)}
-
-  .ticker{overflow:hidden;background:var(--yellow);border-block:2px solid #14110a}
-  .tt{display:flex;width:max-content;animation:tick 28s linear infinite}
-  .tg{white-space:nowrap;font:700 .72rem var(--mono);letter-spacing:.22em;color:#14110a;padding:9px 0}
-  @keyframes tick{to{transform:translateX(-50%)}}
-
+  :root{--bg:#0d2b22;--card:#10352b;--line:#2b5a49;--paper:#fbf8ee;--ink:#20261f;--ink2:#6a7166;--rule:rgba(70,95,125,.09);--yellow:#ffd23f;--red:#ff5d52;--red2:#d94036;--mint:#22a06b;--chalk:#e9f2e9;--chalk2:#a9c6b5;--mono:'Space Mono',monospace;--disp:'Fraunces',serif;--body:'Space Grotesk',sans-serif}
+  *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+  body{font-family:var(--body);color:var(--chalk);min-height:100vh;overflow-x:hidden;background:radial-gradient(1100px 700px at 88% -12%,rgba(255,210,63,.08),transparent 60%),radial-gradient(900px 620px at -12% 112%,rgba(111,224,168,.09),transparent 60%),linear-gradient(160deg,#103428,#0b241c 72%)}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.06;z-index:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+  ::selection{background:var(--yellow);color:#14110a}button{font-family:inherit}:focus-visible{outline:3px dashed var(--yellow);outline-offset:3px;border-radius:4px}
+  .bgfx{position:fixed;inset:0;z-index:0;pointer-events:none}.bgfx span{position:fixed;font-family:var(--disp);font-style:italic;font-weight:900;color:rgba(233,242,233,.05);user-select:none;animation:drift ease-in-out infinite alternate;line-height:1}@keyframes drift{from{transform:translateY(-20px) rotate(-5deg)}to{transform:translateY(24px) rotate(6deg)}}
+  header.top,main,footer,.ticker{position:relative;z-index:1}.wrap{max-width:1240px;margin:0 auto;padding:0 24px}
+  header.top{border-bottom:1px dashed rgba(233,242,233,.18)}.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 0;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:14px}.mark{width:42px;height:42px;background:var(--yellow);border:2.5px solid #14110a;border-radius:10px;display:grid;place-items:center;font:900 26px var(--disp);color:#14110a;transform:rotate(-6deg);box-shadow:3px 3px 0 rgba(0,0,0,.45);transition:transform .25s}.brand:hover .mark{transform:rotate(4deg) scale(1.06)}
+  .brand-name{font:800 1.5rem/1 var(--disp);color:#fff;letter-spacing:.01em}.brand-name em{font:700 .62rem var(--mono);font-style:normal;color:var(--red);border:1.5px solid var(--red);border-radius:4px;padding:2px 6px;vertical-align:super;letter-spacing:.12em;margin-left:6px}
+  .top-meta{display:flex;align-items:center;gap:16px;flex-wrap:wrap}.form-meta{font:400 .68rem var(--mono);letter-spacing:.16em;color:var(--chalk2)}
+  .gh{font:600 .74rem var(--mono);letter-spacing:.06em;color:var(--chalk);text-decoration:none;border:1.5px solid var(--line);border-radius:9px;padding:8px 13px;transition:.18s}.gh:hover{border-color:var(--yellow);color:var(--yellow);transform:translateY(-2px)}
+  .ticker{overflow:hidden;background:var(--yellow);border-block:2px solid #14110a}.tt{display:flex;width:max-content;animation:tick 28s linear infinite}.tg{white-space:nowrap;font:700 .72rem var(--mono);letter-spacing:.22em;color:#14110a;padding:9px 0}@keyframes tick{to{transform:translateX(-50%)}}
   main{display:grid;grid-template-columns:400px 1fr;gap:32px;padding:38px 0 70px;align-items:start}
   .sec-tag{display:inline-block;font:700 .64rem var(--mono);letter-spacing:.18em;color:var(--yellow);border:1.5px solid rgba(255,210,63,.45);border-radius:5px;padding:4px 9px;transform:rotate(-1.2deg);margin-bottom:14px}
-
   .input-panel{background:linear-gradient(180deg,rgba(255,255,255,.035),transparent 40%),var(--card);border:1px solid var(--line);border-radius:18px;padding:28px 26px;position:sticky;top:22px;box-shadow:0 26px 60px rgba(0,0,0,.4);animation:rise .55s .05s both}
-  h1{font:900 clamp(2rem,3.2vw,2.7rem)/1.04 var(--disp);color:#fff;margin-bottom:10px}
-  h1 .hl{background:linear-gradient(transparent 58%, rgba(255,210,63,.9) 58%);padding:0 3px}
+  h1{font:900 clamp(2rem,3.2vw,2.7rem)/1.04 var(--disp);color:#fff;margin-bottom:10px}h1 .hl{background:linear-gradient(transparent 58%,rgba(255,210,63,.9) 58%);padding:0 3px}
   .sub{color:var(--chalk2);font-size:.94rem;line-height:1.5;margin-bottom:24px}
-  .lab{display:flex;justify-content:space-between;align-items:baseline;font:700 .64rem var(--mono);letter-spacing:.18em;color:var(--chalk2);text-transform:uppercase;margin:20px 0 8px}
-  .lab .val{color:var(--yellow);font-size:.72rem}
-  .step{border-top:1px dashed rgba(233,242,233,.14);padding-top:16px;margin-top:18px}
-  .step:first-of-type{border-top:0;margin-top:0;padding-top:0}
-
-  .dz{border:2px dashed #3e7a62;border-radius:14px;padding:26px 16px 20px;text-align:center;cursor:pointer;background:rgba(255,255,255,.02);transition:.2s}
-  .dz:hover,.dz.over{border-color:var(--yellow);background:rgba(255,210,63,.07)}
-  .dz:hover .dz-ico{transform:translateY(-4px) rotate(-3deg)}
-  .dz.over{transform:scale(1.01)}
-  .dz-ico{transition:transform .25s;display:inline-block;margin-bottom:8px}
-  .dz-big{font-weight:700;color:#fff;font-size:1rem}
-  .dz-small{color:var(--chalk2);font-size:.8rem;margin-top:3px}
-  .fmts{display:flex;gap:6px;justify-content:center;margin-top:12px;flex-wrap:wrap}
-  .fmts i{font:700 .58rem var(--mono);letter-spacing:.12em;font-style:normal;color:var(--chalk2);border:1px solid var(--line);border-radius:4px;padding:3px 7px;transition:.15s}
-  .dz:hover .fmts i{color:var(--yellow);border-color:rgba(255,210,63,.4)}
-
-  .divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--chalk2);font-size:.75rem}
-  .divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
-
-  .notes-area{width:100%;min-height:120px;max-height:300px;background:#0c251d;border:1.5px solid var(--line);color:#fff;border-radius:10px;padding:12px;font:500 .9rem var(--body);line-height:1.5;resize:vertical;transition:.18s}
-  .notes-area:focus{outline:none;border-color:var(--yellow);box-shadow:0 0 0 3px rgba(255,210,63,.16)}
-  .notes-area::placeholder{color:#5d7a6c}
+  .lab{display:flex;justify-content:space-between;align-items:baseline;font:700 .64rem var(--mono);letter-spacing:.18em;color:var(--chalk2);text-transform:uppercase;margin:20px 0 8px}.lab .val{color:var(--yellow);font-size:.72rem}
+  .step{border-top:1px dashed rgba(233,242,233,.14);padding-top:16px;margin-top:18px}.step:first-of-type{border-top:0;margin-top:0;padding-top:0}
+  .dz{border:2px dashed #3e7a62;border-radius:14px;padding:26px 16px 20px;text-align:center;cursor:pointer;background:rgba(255,255,255,.02);transition:.2s}.dz:hover,.dz.over{border-color:var(--yellow);background:rgba(255,210,63,.07)}.dz:hover .dz-ico{transform:translateY(-4px) rotate(-3deg)}.dz.over{transform:scale(1.01)}.dz-ico{transition:transform .25s;display:inline-block;margin-bottom:8px}
+  .dz-big{font-weight:700;color:#fff;font-size:1rem}.dz-small{color:var(--chalk2);font-size:.8rem;margin-top:3px}
+  .fmts{display:flex;gap:6px;justify-content:center;margin-top:12px;flex-wrap:wrap}.fmts i{font:700 .58rem var(--mono);letter-spacing:.12em;font-style:normal;color:var(--chalk2);border:1px solid var(--line);border-radius:4px;padding:3px 7px;transition:.15s}.dz:hover .fmts i{color:var(--yellow);border-color:rgba(255,210,63,.4)}
+  .divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--chalk2);font-size:.75rem}.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
+  .notes-area{width:100%;min-height:120px;max-height:300px;background:#0c251d;border:1.5px solid var(--line);color:#fff;border-radius:10px;padding:12px;font:500 .9rem var(--body);line-height:1.5;resize:vertical;transition:.18s}.notes-area:focus{outline:none;border-color:var(--yellow);box-shadow:0 0 0 3px rgba(255,210,63,.16)}.notes-area::placeholder{color:#5d7a6c}
   .word-count{font:400 .7rem var(--mono);color:var(--chalk2);margin-top:6px;text-align:right}
-
   .chip{display:flex;align-items:flex-start;gap:11px;background:#0c251d;border:1.5px solid var(--line);border-radius:11px;padding:11px 13px;margin-top:12px;animation:rise .35s both}
   .chip .fico{width:30px;height:36px;background:var(--paper);border-radius:4px 8px 4px 4px;position:relative;flex:none;box-shadow:2px 2px 0 rgba(0,0,0,.35);display:grid;place-items:center;color:var(--ink2);font-size:15px}
-  .chip .cmeta{min-width:0;flex:1}
-  .chip .cname{font-weight:600;font-size:.86rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .chip .cinfo{font:400 .66rem var(--mono);color:var(--chalk2);margin-top:2px}
+  .chip .cmeta{min-width:0;flex:1}.chip .cname{font-weight:600;font-size:.86rem;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chip .cinfo{font:400 .66rem var(--mono);color:var(--chalk2);margin-top:2px}
   .chip .cpreview{font:400 .72rem var(--body);color:var(--chalk2);margin-top:6px;line-height:1.4;max-height:3em;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;opacity:.85;border-left:2px solid var(--line);padding-left:8px}
-  .chip .cactions{display:flex;gap:6px;margin-top:6px}
-  .chip .cactions button{background:none;border:1px solid var(--line);color:var(--chalk2);font:600 .66rem var(--mono);letter-spacing:.1em;padding:4px 8px;border-radius:5px;cursor:pointer;transition:.15s}
-  .chip .cactions button:hover{color:var(--red);border-color:var(--red)}
-  .chip.processing{opacity:.7;border-style:dashed}
-  .chip.processing .fico::after{content:"";width:14px;height:14px;border:2px solid var(--yellow);border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-
-  .status{font:400 .76rem var(--mono);color:var(--yellow);min-height:1.5em;margin-top:12px;line-height:1.5}
-  .status::after{content:"▍";animation:blink 1.1s steps(2) infinite;margin-left:2px}
-  @keyframes blink{50%{opacity:0}}
-
+  .chip .cactions{display:flex;gap:6px;margin-top:6px}.chip .cactions button{background:none;border:1px solid var(--line);color:var(--chalk2);font:600 .66rem var(--mono);letter-spacing:.1em;padding:4px 8px;border-radius:5px;cursor:pointer;transition:.15s}.chip .cactions button:hover{color:var(--red);border-color:var(--red)}
+  .chip.processing{opacity:.7;border-style:dashed}.chip.processing .fico::after{content:"";width:14px;height:14px;border:2px solid var(--yellow);border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+  .status{font:400 .76rem var(--mono);color:var(--yellow);min-height:1.5em;margin-top:12px;line-height:1.5}.status::after{content:"▍";animation:blink 1.1s steps(2) infinite;margin-left:2px}@keyframes blink{50%{opacity:0}}
   input[type=range]{width:100%;accent-color:var(--yellow);cursor:pointer;height:26px}
-  .seg{display:flex;background:#0c251d;border:1.5px solid var(--line);border-radius:10px;padding:3px;gap:3px}
-  .seg button{flex:1;font:600 .8rem var(--body);color:var(--chalk2);background:transparent;border:0;padding:8px 4px;border-radius:7px;cursor:pointer;transition:.18s}
-  .seg button:hover{color:#fff}
-  .seg button.on{background:var(--yellow);color:#20261f;box-shadow:0 2px 0 rgba(0,0,0,.35)}
-  .in{width:100%;background:#0c251d;border:1.5px solid var(--line);color:#fff;border-radius:10px;padding:10px 12px;font:500 .9rem var(--body);transition:.18s}
-  .in:focus{outline:none;border-color:var(--yellow);box-shadow:0 0 0 3px rgba(255,210,63,.16)}
-  .in::placeholder{color:#5d7a6c}
+  .seg{display:flex;background:#0c251d;border:1.5px solid var(--line);border-radius:10px;padding:3px;gap:3px}.seg button{flex:1;font:600 .8rem var(--body);color:var(--chalk2);background:transparent;border:0;padding:8px 4px;border-radius:7px;cursor:pointer;transition:.18s}.seg button:hover{color:#fff}.seg button.on{background:var(--yellow);color:#20261f;box-shadow:0 2px 0 rgba(0,0,0,.35)}
+  .in{width:100%;background:#0c251d;border:1.5px solid var(--line);color:#fff;border-radius:10px;padding:10px 12px;font:500 .9rem var(--body);transition:.18s}.in:focus{outline:none;border-color:var(--yellow);box-shadow:0 0 0 3px rgba(255,210,63,.16)}.in::placeholder{color:#5d7a6c}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   select.in{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23a9c6b5' stroke-width='1.6' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
-  
   .micro{font-size:.72rem;color:var(--chalk2);margin-top:8px;line-height:1.5}
-
-  .gen{width:100%;margin-top:24px;padding:16px;font:700 1rem var(--body);letter-spacing:.06em;background:var(--yellow);color:#14110a;border:2px solid #14110a;border-radius:12px;cursor:pointer;box-shadow:0 6px 0 #071b14,0 12px 26px rgba(0,0,0,.35);transition:.15s}
-  .gen:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 0 #071b14,0 16px 30px rgba(0,0,0,.4)}
-  .gen:active:not(:disabled){transform:translateY(3px);box-shadow:0 2px 0 #071b14}
-  .gen:disabled{opacity:.55;cursor:wait}
-
+  .gen{width:100%;margin-top:24px;padding:16px;font:700 1rem var(--body);letter-spacing:.06em;background:var(--yellow);color:#14110a;border:2px solid #14110a;border-radius:12px;cursor:pointer;box-shadow:0 6px 0 #071b14,0 12px 26px rgba(0,0,0,.35);transition:.15s}.gen:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 0 #071b14,0 16px 30px rgba(0,0,0,.4)}.gen:active:not(:disabled){transform:translateY(3px);box-shadow:0 2px 0 #071b14}.gen:disabled{opacity:.55;cursor:wait}
   .output-panel{animation:rise .55s .15s both;min-width:0}
-  .toolbar{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px}
-  .tb{font:700 .7rem var(--mono);letter-spacing:.1em;padding:9px 13px;border-radius:9px;border:1.5px solid var(--line);color:var(--chalk);background:rgba(255,255,255,.04);cursor:pointer;transition:.18s}
-  .tb:hover:not(:disabled){border-color:var(--yellow);color:var(--yellow);transform:translateY(-2px)}
-  .tb.on{background:var(--yellow);color:#14110a;border-color:#14110a}
-  .tb:disabled{opacity:.35;cursor:not-allowed}
-
+  .toolbar{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px}.tb{font:700 .7rem var(--mono);letter-spacing:.1em;padding:9px 13px;border-radius:9px;border:1.5px solid var(--line);color:var(--chalk);background:rgba(255,255,255,.04);cursor:pointer;transition:.18s}.tb:hover:not(:disabled){border-color:var(--yellow);color:var(--yellow);transform:translateY(-2px)}.tb.on{background:var(--yellow);color:#14110a;border-color:#14110a}.tb:disabled{opacity:.35;cursor:not-allowed}
   .paper-empty{border:2px dashed rgba(233,242,233,.24);border-radius:18px;padding:64px 28px;text-align:center;color:var(--chalk2)}
-  .ghost-sheet{width:min(320px,82%);margin:0 auto 28px;background:rgba(251,248,238,.05);border:1.5px dashed rgba(233,242,233,.3);border-radius:12px;padding:26px 22px;display:grid;gap:12px;animation:bob 6s ease-in-out infinite}
-  @keyframes bob{50%{transform:translateY(-9px) rotate(-.6deg)}}
-  .gs-line{height:10px;border-radius:5px;background:rgba(233,242,233,.16)}
-  .w85{width:85%}.w65{width:65%}.w75{width:75%}
-  .gs-opts{display:flex;gap:12px}
-  .gs-opts i{width:16px;height:16px;border-radius:50%;border:2px solid rgba(233,242,233,.28)}
+  .ghost-sheet{width:min(320px,82%);margin:0 auto 28px;background:rgba(251,248,238,.05);border:1.5px dashed rgba(233,242,233,.3);border-radius:12px;padding:26px 22px;display:grid;gap:12px;animation:bob 6s ease-in-out infinite}@keyframes bob{50%{transform:translateY(-9px) rotate(-.6deg)}}
+  .gs-line{height:10px;border-radius:5px;background:rgba(233,242,233,.16)}.w85{width:85%}.w65{width:65%}.w75{width:75%}.gs-opts{display:flex;gap:12px}.gs-opts i{width:16px;height:16px;border-radius:50%;border:2px solid rgba(233,242,233,.28)}
   .empty-title{font:800 1.35rem var(--disp);color:#fff;margin-bottom:6px}
-
-  .paper{background:var(--paper);color:var(--ink);border-radius:6px;position:relative;margin-top:4px;
-    padding:clamp(26px,4vw,46px) clamp(20px,4vw,52px) 44px clamp(58px,6vw,84px);
-    box-shadow:0 32px 70px rgba(0,0,0,.55);animation:rise .5s both;
-    background-image:repeating-linear-gradient(0deg,transparent 0 35px,var(--rule) 35px 36px)}
+  .paper{background:var(--paper);color:var(--ink);border-radius:6px;position:relative;margin-top:4px;padding:clamp(26px,4vw,46px) clamp(20px,4vw,52px) 44px clamp(58px,6vw,84px);box-shadow:0 32px 70px rgba(0,0,0,.55);animation:rise .5s both;background-image:repeating-linear-gradient(0deg,transparent 0 35px,var(--rule) 35px 36px)}
   .paper::before{content:"";position:absolute;top:0;bottom:0;left:clamp(40px,4.6vw,62px);width:2px;background:rgba(217,64,54,.32)}
   .hole{position:absolute;left:14px;width:15px;height:15px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#16453a,#0a2119);box-shadow:inset 0 1px 3px rgba(0,0,0,.7)}
-  .stamp{position:absolute;top:16px;right:20px;text-align:center;border:3px solid var(--red2);color:var(--red2);padding:9px 16px;border-radius:9px;transform:rotate(-9deg) scale(0);opacity:0;pointer-events:none;transition:transform .4s cubic-bezier(.2,2.4,.4,1),opacity .2s;background:rgba(251,248,238,.85);z-index:2}
-  .stamp.on{transform:rotate(-9deg) scale(1);opacity:.94}
-  .stamp.perfect{border-color:var(--mint);color:var(--mint)}
-  .stamp b{font:700 1.35rem var(--mono);display:block}
-  .stamp small{font:700 .56rem var(--mono);letter-spacing:.2em}
-
+  .stamp{position:absolute;top:16px;right:20px;text-align:center;border:3px solid var(--red2);color:var(--red2);padding:9px 16px;border-radius:9px;transform:rotate(-9deg) scale(0);opacity:0;pointer-events:none;transition:transform .4s cubic-bezier(.2,2.4,.4,1),opacity .2s;background:rgba(251,248,238,.85);z-index:2}.stamp.on{transform:rotate(-9deg) scale(1);opacity:.94}.stamp.perfect{border-color:var(--mint);color:var(--mint)}.stamp b{font:700 1.35rem var(--mono);display:block}.stamp small{font:700 .56rem var(--mono);letter-spacing:.2em}
   .paper-head{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:2.5px solid var(--ink);padding-bottom:14px;margin-bottom:6px}
-  .paper-title{font:900 clamp(1.4rem,2.4vw,1.9rem)/1 var(--disp)}
-  .paper-title span{color:var(--red2)}
-  .paper-meta{font:400 .66rem/1.9 var(--mono);color:var(--ink2);text-align:right;letter-spacing:.05em}
-  .paper-meta b{color:var(--ink);font-weight:700}
-
+  .paper-title{font:900 clamp(1.4rem,2.4vw,1.9rem)/1 var(--disp)}.paper-title span{color:var(--red2)}
+  .paper-meta{font:400 .66rem/1.9 var(--mono);color:var(--ink2);text-align:right;letter-spacing:.05em}.paper-meta b{color:var(--ink);font-weight:700}
   .part-tag{display:inline-block;font:700 .68rem var(--mono);letter-spacing:.2em;background:var(--ink);color:var(--yellow);padding:6px 11px;border-radius:4px;transform:rotate(-.7deg);margin:30px 0 4px}
-  .q{padding:18px 0 8px;border-top:1.5px dashed rgba(32,38,31,.16);margin-top:16px}
-  .part .q:first-of-type{border-top:0;margin-top:8px}
-  .qhead{display:flex;gap:13px;align-items:flex-start}
-  .qnum{font:700 .82rem var(--mono);background:var(--yellow);border:1.5px solid var(--ink);min-width:34px;height:28px;display:grid;place-items:center;border-radius:6px;box-shadow:2px 2px 0 rgba(32,38,31,.75);transform:rotate(-2deg);flex:none;margin-top:1px}
+  .q{padding:18px 0 8px;border-top:1.5px dashed rgba(32,38,31,.16);margin-top:16px}.part .q:first-of-type{border-top:0;margin-top:8px}
+  .qhead{display:flex;gap:13px;align-items:flex-start}.qnum{font:700 .82rem var(--mono);background:var(--yellow);border:1.5px solid var(--ink);min-width:34px;height:28px;display:grid;place-items:center;border-radius:6px;box-shadow:2px 2px 0 rgba(32,38,31,.75);transform:rotate(-2deg);flex:none;margin-top:1px}
   .qtext{font-weight:600;font-size:1.02rem;line-height:1.45}
   .opts{display:grid;gap:8px;margin:13px 0 4px 47px}
-  .opt{display:grid;grid-template-columns:20px 24px 1fr;gap:10px;align-items:center;text-align:left;background:rgba(255,255,255,.55);border:1.5px solid rgba(32,38,31,.2);border-radius:10px;padding:9px 13px;cursor:pointer;font:500 .94rem var(--body);color:var(--ink);transition:.16s}
-  .opt:hover{transform:translateX(5px);border-color:var(--ink);background:#fff}
-  .bub{width:19px;height:19px;border:2px solid var(--ink);border-radius:50%;background:#fff;position:relative;transition:.16s;flex:none}
-  .bub::after{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:11px;font-weight:700}
+  .opt{display:grid;grid-template-columns:20px 24px 1fr;gap:10px;align-items:center;text-align:left;background:rgba(255,255,255,.55);border:1.5px solid rgba(32,38,31,.2);border-radius:10px;padding:9px 13px;cursor:pointer;font:500 .94rem var(--body);color:var(--ink);transition:.16s}.opt:hover{transform:translateX(5px);border-color:var(--ink);background:#fff}
+  .bub{width:19px;height:19px;border:2px solid var(--ink);border-radius:50%;background:#fff;position:relative;transition:.16s;flex:none}.bub::after{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:11px;font-weight:700}
   .ltr{font:700 .78rem var(--mono);color:var(--ink2)}
-  .opt.sel{border-color:var(--ink);background:#fffdf0}
-  .opt.sel .bub{background:var(--ink);box-shadow:inset 0 0 0 3px #fff}
-  .opt.sel .bub::after{content:"●";font-size:8px}
-  .opt.good{border-color:var(--mint);background:#e5f6ec}
-  .opt.good .bub{background:var(--mint);box-shadow:inset 0 0 0 3px #fff}
-  .opt.good .bub::after{content:"✓"}
-  .opt.bad{border-color:var(--red2);background:#fdebe9}
-  .opt.bad .bub{background:var(--red2);box-shadow:inset 0 0 0 3px #fff}
-  .opt.bad .bub::after{content:"✕"}
+  .opt.sel{border-color:var(--ink);background:#fffdf0}.opt.sel .bub{background:var(--ink);box-shadow:inset 0 0 0 3px #fff}.opt.sel .bub::after{content:"●";font-size:8px}
+  .opt.good{border-color:var(--mint);background:#e5f6ec}.opt.good .bub{background:var(--mint);box-shadow:inset 0 0 0 3px #fff}.opt.good .bub::after{content:"✓"}
+  .opt.bad{border-color:var(--red2);background:#fdebe9}.opt.bad .bub{background:var(--red2);box-shadow:inset 0 0 0 3px #fff}.opt.bad .bub::after{content:"✕"}
   .graded .opt{pointer-events:none}
-  .keyhint{display:none;margin:9px 0 0 47px;font:600 .78rem var(--mono);color:var(--red2);line-height:1.6}
-  .show-key .keyhint{display:block;animation:fade .3s both}
-  .reveal{margin:11px 0 2px 47px;font:700 .68rem var(--mono);letter-spacing:.12em;background:transparent;border:1.5px dashed var(--ink2);border-radius:8px;padding:8px 13px;cursor:pointer;color:var(--ink2);transition:.16s}
-  .reveal:hover{color:var(--ink);border-color:var(--ink);transform:translateY(-1px)}
-  .show-key .reveal{display:none}
-  .amodel{display:none;margin:11px 0 2px 47px;background:#fffdf0;border:1.5px solid rgba(32,38,31,.22);border-left:4px solid var(--yellow);border-radius:8px;padding:12px 15px}
-  .q.open .amodel,.show-key .amodel{display:block;animation:fade .3s both}
-  .amodel-tag{font:700 .58rem var(--mono);letter-spacing:.2em;color:var(--ink2);display:block;margin-bottom:5px}
-  .amodel p{font-size:.94rem;line-height:1.55;white-space:pre-line}
+  .keyhint{display:none;margin:9px 0 0 47px;font:600 .78rem var(--mono);color:var(--red2);line-height:1.6}.show-key .keyhint{display:block;animation:fade .3s both}
+  .reveal{margin:11px 0 2px 47px;font:700 .68rem var(--mono);letter-spacing:.12em;background:transparent;border:1.5px dashed var(--ink2);border-radius:8px;padding:8px 13px;cursor:pointer;color:var(--ink2);transition:.16s}.reveal:hover{color:var(--ink);border-color:var(--ink);transform:translateY(-1px)}.show-key .reveal{display:none}
+  .amodel{display:none;margin:11px 0 2px 47px;background:#fffdf0;border:1.5px solid rgba(32,38,31,.22);border-left:4px solid var(--yellow);border-radius:8px;padding:12px 15px}.q.open .amodel,.show-key .amodel{display:block;animation:fade .3s both}
+  .amodel-tag{font:700 .58rem var(--mono);letter-spacing:.2em;color:var(--ink2);display:block;margin-bottom:5px}.amodel p{font-size:.94rem;line-height:1.55;white-space:pre-line}
   .paper-end{text-align:center;font:700 .68rem var(--mono);letter-spacing:.3em;color:var(--ink2);margin-top:36px}
-
-  footer{border-top:1px dashed rgba(233,242,233,.18);padding:22px 0 34px}
-  .foot{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font:400 .7rem/1.7 var(--mono);color:var(--chalk2);letter-spacing:.04em}
-
-  #toasts{position:fixed;right:20px;bottom:20px;z-index:50;display:grid;gap:9px;max-width:min(360px,86vw)}
-  .toast{background:var(--card);border:1.5px solid var(--line);border-left:4px solid var(--yellow);color:var(--chalk);padding:12px 16px;border-radius:10px;font-size:.85rem;box-shadow:0 14px 34px rgba(0,0,0,.5);opacity:0;transform:translateY(16px);transition:.3s}
-  .toast.on{opacity:1;transform:none}
-
-  @keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
-  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-
-  @media (max-width:980px){
-    main{grid-template-columns:1fr}
-    .input-panel{position:static}
-  }
-  @media (max-width:560px){
-    .opts{margin-left:0}
-    .keyhint,.reveal,.amodel{margin-left:0}
-    .paper{padding-left:52px}
-    .paper::before{left:36px}
-  }
-  @media print{
-    body{background:#fff}
-    body::after,.bgfx,.ticker,header.top,.input-panel,.toolbar,footer,.paper-empty,#toasts{display:none!important}
-    main{display:block;padding:0}
-    .paper{box-shadow:none;border-radius:0;animation:none}
-  }
-  @media (prefers-reduced-motion:reduce){
-    *,*::before,*::after{animation:none!important;transition:none!important}
-  }
+  footer{border-top:1px dashed rgba(233,242,233,.18);padding:22px 0 34px}.foot{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font:400 .7rem/1.7 var(--mono);color:var(--chalk2);letter-spacing:.04em}
+  #toasts{position:fixed;right:20px;bottom:20px;z-index:50;display:grid;gap:9px;max-width:min(360px,86vw)}.toast{background:var(--card);border:1.5px solid var(--line);border-left:4px solid var(--yellow);color:var(--chalk);padding:12px 16px;border-radius:10px;font-size:.85rem;box-shadow:0 14px 34px rgba(0,0,0,.5);opacity:0;transform:translateY(16px);transition:.3s}.toast.on{opacity:1;transform:none}
+  @keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @media(max-width:980px){main{grid-template-columns:1fr}.input-panel{position:static}}
+  @media(max-width:560px){.opts{margin-left:0}.keyhint,.reveal,.amodel{margin-left:0}.paper{padding-left:52px}.paper::before{left:36px}}
+  @media print{body{background:#fff}body::after,.bgfx,.ticker,header.top,.input-panel,.toolbar,footer,.paper-empty,#toasts{display:none!important}main{display:block;padding:0}.paper{box-shadow:none;border-radius:0;animation:none}}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
+<div class="bgfx" aria-hidden="true"><span style="top:5%;left:3%;font-size:11rem;animation-duration:34s">?</span><span style="top:58%;left:-3%;font-size:15rem;animation-duration:42s;animation-delay:-9s">∑</span><span style="top:10%;right:5%;font-size:9rem;animation-duration:37s;animation-delay:-16s">A+</span><span style="bottom:6%;right:2%;font-size:12rem;animation-duration:30s;animation-delay:-4s">✓</span><span style="top:42%;right:12%;font-size:8rem;animation-duration:46s;animation-delay:-21s">π</span><span style="bottom:22%;left:14%;font-size:7rem;animation-duration:36s;animation-delay:-12s">?</span></div>
 
-<div class="bgfx" aria-hidden="true">
-  <span style="top:5%;left:3%;font-size:11rem;animation-duration:34s">?</span>
-  <span style="top:58%;left:-3%;font-size:15rem;animation-duration:42s;animation-delay:-9s">∑</span>
-  <span style="top:10%;right:5%;font-size:9rem;animation-duration:37s;animation-delay:-16s">A+</span>
-  <span style="bottom:6%;right:2%;font-size:12rem;animation-duration:30s;animation-delay:-4s">✓</span>
-  <span style="top:42%;right:12%;font-size:8rem;animation-duration:46s;animation-delay:-21s">π</span>
-  <span style="bottom:22%;left:14%;font-size:7rem;animation-duration:36s;animation-delay:-12s">?</span>
-</div>
+<header class="top"><div class="wrap topbar"><div class="brand"><div class="mark">?</div><div class="brand-name">OmniQuiz<em>AI</em></div></div><div class="top-meta"><span class="form-meta">FORM A · SEC. 1 · <span id="today"></span></span><a class="gh" id="ghLink" href="https://github.com/s250038-hub/OmniQuiz-AI-2" target="_blank" rel="noopener">★ Star on GitHub</a></div></div></header>
 
-<header class="top">
-  <div class="wrap topbar">
-    <div class="brand">
-      <div class="mark">?</div>
-      <div class="brand-name">OmniQuiz<em>AI</em></div>
-    </div>
-    <div class="top-meta">
-      <span class="form-meta">FORM A · SEC. 1 · <span id="today"></span></span>
-      <a class="gh" id="ghLink" href="https://github.com/s250038-hub/OmniQuiz-AI-2" target="_blank" rel="noopener">★ Star on GitHub</a>
-    </div>
-  </div>
-</header>
-
-<div class="ticker" aria-hidden="true">
-  <div class="tt">
-    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MULTIMODAL VISION ✦ TYPED NOTES ✦ MC ✦ SHORT ✦ LONG ✦ AUTO-GRADING ✦ PDF EXPORT ✦&nbsp;</span>
-    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MULTIMODAL VISION ✦ TYPED NOTES ✦ MC ✦ SHORT ✦ LONG ✦ AUTO-GRADING ✦ PDF EXPORT ✦&nbsp;</span>
-  </div>
-</div>
+<div class="ticker" aria-hidden="true"><div class="tt"><span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MULTIMODAL VISION ✦ TYPED NOTES ✦ MC ✦ SHORT ✦ LONG ✦ AUTO-GRADING ✦ PDF EXPORT ✦&nbsp;</span><span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MULTIMODAL VISION ✦ TYPED NOTES ✦ MC ✦ SHORT ✦ LONG ✦ AUTO-GRADING ✦ PDF EXPORT ✦&nbsp;</span></div></div>
 
 <main class="wrap">
-
   <section class="input-panel" aria-label="Quiz setup">
     <span class="sec-tag">SECTION A · SETUP</span>
     <h1>Drop files or type notes.<br><span class="hl">Get a quiz.</span></h1>
     <p class="sub">Upload documents or photos (AI reads images directly), or just type your notes.</p>
-
     <div class="step">
       <div class="lab"><span>01 · Source material</span></div>
       <div class="dz" id="dz" role="button" tabindex="0" aria-label="Upload documents">
-        <span class="dz-ico">
-          <svg width="46" height="54" viewBox="0 0 46 54" fill="none" aria-hidden="true">
-            <path d="M4 3h26l12 12v36H4V3z" fill="#fbf8ee" stroke="#e9f2e9" stroke-width="2"/>
-            <path d="M30 3v12h12" fill="#ffd23f" stroke="#e9f2e9" stroke-width="2"/>
-            <text x="23" y="42" text-anchor="middle" font-family="Georgia" font-size="22" font-weight="900" fill="#20261f">?</text>
-          </svg>
-        </span>
+        <span class="dz-ico"><svg width="46" height="54" viewBox="0 0 46 54" fill="none" aria-hidden="true"><path d="M4 3h26l12 12v36H4V3z" fill="#fbf8ee" stroke="#e9f2e9" stroke-width="2"/><path d="M30 3v12h12" fill="#ffd23f" stroke="#e9f2e9" stroke-width="2"/><text x="23" y="42" text-anchor="middle" font-family="Georgia" font-size="22" font-weight="900" fill="#20261f">?</text></svg></span>
         <div class="dz-big">Upload files (optional)</div>
         <div class="dz-small">AI reads images directly · PDF/DOCX/PPTX/TXT supported</div>
         <div class="fmts"><i>PDF</i><i>DOCX</i><i>PPTX</i><i>TXT</i><i>PNG</i><i>JPG</i><i>WEBP</i></div>
       </div>
-      <input type="file" id="fileInput" multiple accept="application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.presentationml.presentation, text/plain, text/markdown, image/png, image/jpeg, image/webp, image/gif, image/bmp, .pdf, .docx, .pptx, .txt, .md, .png, .jpg, .jpeg, .webp, .gif, .bmp" hidden>
+      <input type="file" id="fileInput" multiple accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain,text/markdown,image/png,image/jpeg,image/webp,image/gif,image/bmp,.pdf,.docx,.pptx,.txt,.md,.png,.jpg,.jpeg,.webp,.gif,.bmp" hidden>
       <div id="chipContainer"></div>
-      
       <div class="divider">or type your notes</div>
-      
-      <textarea id="notesInput" class="notes-area" placeholder="Type or paste your study notes here...&#10;&#10;Example: Photosynthesis is the process by which plants convert light energy into chemical energy..."></textarea>
+      <textarea id="notesInput" class="notes-area" placeholder="Type or paste your study notes here..."></textarea>
       <div class="word-count" id="wordCount">0 words</div>
-      
       <p class="status" id="status" aria-live="polite">▸ Awaiting submission…</p>
     </div>
-
     <div class="step">
       <div class="lab"><span>02 · Quiz mix</span></div>
       <div class="lab" style="margin-top:6px"><span style="letter-spacing:.08em">Multiple choice</span><span class="val" id="mcOut">6 Qs</span></div>
-      <input type="range" id="mcRange" min="0" max="20" value="6">
+      <input type="range" id="mcRange" min="0" max="30" value="6">
       <div class="lab"><span style="letter-spacing:.08em">Short answer (1-3 words)</span><span class="val" id="shOut">3 Qs</span></div>
-      <input type="range" id="shRange" min="0" max="10" value="3">
+      <input type="range" id="shRange" min="0" max="20" value="3">
       <div class="lab"><span style="letter-spacing:.08em">Long / essay</span><span class="val" id="lgOut">1 Qs</span></div>
-      <input type="range" id="lgRange" min="0" max="5" value="1">
+      <input type="range" id="lgRange" min="0" max="10" value="1">
       <div class="lab"><span style="letter-spacing:.08em">Difficulty</span></div>
       <div class="seg" id="diffSeg" role="group" aria-label="Difficulty">
         <button type="button" data-v="easy">Easy</button>
@@ -300,7 +130,6 @@
         <button type="button" data-v="hard">Hard</button>
       </div>
     </div>
-
     <div class="step">
       <div class="lab"><span>03 · Language &amp; focus</span></div>
       <div class="grid2">
@@ -308,23 +137,18 @@
         <input class="in" id="focusIn" type="text" placeholder="Focus topic (opt.)">
       </div>
     </div>
-
     <div class="step">
       <div class="lab"><span>04 · AI engine</span></div>
-      <div class="seg" id="provSeg" role="group" aria-label="Provider">
-        <button type="button" data-v="nvidia" class="on">NVIDIA NIM</button>
-      </div>
+      <div class="seg" id="provSeg" role="group" aria-label="Provider"><button type="button" data-v="nvidia" class="on">NVIDIA NIM</button></div>
       <div class="lab"><span style="letter-spacing:.08em">Model</span></div>
       <select class="in" id="modelSel" disabled><option>nvidia/nemotron-3-nano-omni-30b-a3b-reasoning</option></select>
-      <p class="micro">Multimodal Vision model (Thinking mode disabled for speed).</p>
+      <p class="micro">Multimodal Vision · Thinking off · Batch generation enabled</p>
     </div>
-
     <button class="gen" id="genBtn" type="button"><span id="genLabel">⚡ GENERATE QUIZ</span></button>
   </section>
 
   <section class="output-panel" aria-label="Generated quiz">
     <span class="sec-tag">SECTION B · QUESTION PAPER</span>
-
     <div class="toolbar">
       <button class="tb" id="gradeBtn" disabled>✔ GRADE IT</button>
       <button class="tb" id="keyBtn" disabled>✎ ANSWER KEY</button>
@@ -332,33 +156,17 @@
       <button class="tb" id="dlBtn" disabled>↓ PDF</button>
       <button class="tb" id="printBtn" disabled>⎙ PRINT</button>
     </div>
-
     <div class="paper-empty" id="empty">
-      <div class="ghost-sheet" aria-hidden="true">
-        <div class="gs-line w85"></div><div class="gs-line w65"></div>
-        <div class="gs-opts"><i></i><i></i><i></i><i></i></div>
-        <div class="gs-line w75"></div>
-        <div class="gs-opts"><i></i><i></i><i></i><i></i></div>
-      </div>
+      <div class="ghost-sheet" aria-hidden="true"><div class="gs-line w85"></div><div class="gs-line w65"></div><div class="gs-opts"><i></i><i></i><i></i><i></i></div><div class="gs-line w75"></div><div class="gs-opts"><i></i><i></i><i></i><i></i></div></div>
       <p class="empty-title">No paper on the desk yet</p>
       <p>Upload files or type notes on the left — the quiz prints itself here.</p>
     </div>
-
     <article class="paper" id="paper" hidden>
-      <span class="hole" style="top:11%" aria-hidden="true"></span>
-      <span class="hole" style="top:50%" aria-hidden="true"></span>
-      <span class="hole" style="top:88%" aria-hidden="true"></span>
+      <span class="hole" style="top:11%" aria-hidden="true"></span><span class="hole" style="top:50%" aria-hidden="true"></span><span class="hole" style="top:88%" aria-hidden="true"></span>
       <div class="stamp" id="stamp"><b id="stampScore">0/0</b><small>PART A SCORE</small></div>
       <div class="paper-head">
-        <div>
-          <div class="paper-title">OMNIZQ<span>UIZ</span> — EXAMINATION PAPER</div>
-          <div class="paper-meta" style="text-align:left;margin-top:6px">CANDIDATE: ______________ &nbsp;·&nbsp; TIME: NO LIMIT &nbsp;·&nbsp; NOTES: CLOSED BOOK</div>
-        </div>
-        <div class="paper-meta">
-          SOURCE &nbsp;<b id="mFile">—</b><br>
-          MODEL &nbsp;&nbsp;<b id="mModel">—</b><br>
-          WRITTEN IN &nbsp;<b id="mTime">—</b> · <b id="mCount">—</b>
-        </div>
+        <div><div class="paper-title">OMNIZQ<span>UIZ</span> — EXAMINATION PAPER</div><div class="paper-meta" style="text-align:left;margin-top:6px">CANDIDATE: ______________ &nbsp;·&nbsp; TIME: NO LIMIT &nbsp;·&nbsp; NOTES: CLOSED BOOK</div></div>
+        <div class="paper-meta">SOURCE &nbsp;<b id="mFile">—</b><br>MODEL &nbsp;&nbsp;<b id="mModel">—</b><br>WRITTEN IN &nbsp;<b id="mTime">—</b> · <b id="mCount">—</b></div>
       </div>
       <div id="paperBody"></div>
       <div class="paper-end">✦ ✦ ✦ &nbsp; END OF PAPER &nbsp; ✦ ✦ ✦</div>
@@ -366,13 +174,7 @@
   </section>
 </main>
 
-<footer>
-  <div class="wrap foot">
-    <span>🔒 Files parsed in-browser. AI queried securely via hidden proxy.</span>
-    <span>OMNIZQ-AI · MULTIMODAL EDITION</span>
-  </div>
-</footer>
-
+<footer><div class="wrap foot"><span>🔒 Files parsed in-browser. AI queried securely via hidden proxy.</span><span>OMNIZQ-AI · BATCH EDITION</span></div></footer>
 <div id="toasts"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -380,512 +182,196 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-(() => {
+(()=>{
 "use strict";
-const $ = s => document.querySelector(s);
-const $$ = s => [...document.querySelectorAll(s)];
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const LETTERS = 'ABCDEF';
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LETTERS='ABCDEF';
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const state={files:[],notes:'',quiz:null,meta:null,graded:false};
+let difficulty='medium';
+const WORKER_URL="https://ehjkwqngbrf.s250038.workers.dev";
+const MODEL='nvidia/nemotron-3-nano-omni-30b-a3b-reasoning';
 
-// state.files: array of {name, kind: 'text'|'image', text?, dataUrl?, size}
-const state = { files:[], notes:'', quiz:null, meta:null, graded:false };
-let difficulty = 'medium';
+function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;$('#toasts').appendChild(t);requestAnimationFrame(()=>t.classList.add('on'));setTimeout(()=>{t.classList.remove('on');setTimeout(()=>t.remove(),350)},3800)}
+const setStatus=html=>{$('#status').innerHTML=html};
+$('#today').textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}).toUpperCase();
+$('#mcRange').addEventListener('input',e=>$('#mcOut').textContent=e.target.value+' Qs');
+$('#shRange').addEventListener('input',e=>$('#shOut').textContent=e.target.value+' Qs');
+$('#lgRange').addEventListener('input',e=>$('#lgOut').textContent=e.target.value+' Qs');
+$('#diffSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$('#diffSeg').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));difficulty=b.dataset.v});
+$('#notesInput').addEventListener('input',e=>{state.notes=e.target.value;const w=state.notes.trim().split(/\s+/).filter(Boolean).length;$('#wordCount').textContent=w+' word'+(w!==1?'s':'');updateStatus()});
 
-const WORKER_URL = "https://ehjkwqngbrf.s250038.workers.dev";
-const MODEL = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning';
+const dz=$('#dz'),fileInput=$('#fileInput');
+dz.addEventListener('click',()=>fileInput.click());
+dz.addEventListener('touchend',e=>{e.preventDefault();fileInput.click()});
+dz.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();fileInput.click()}});
+['dragover','drop'].forEach(ev=>window.addEventListener(ev,e=>e.preventDefault()));
+dz.addEventListener('dragover',()=>dz.classList.add('over'));
+dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
+dz.addEventListener('drop',e=>{dz.classList.remove('over');handleFiles(e.dataTransfer.files)});
+fileInput.addEventListener('change',e=>handleFiles(e.target.files));
 
-function toast(msg){
-  const t = document.createElement('div');
-  t.className = 'toast'; t.textContent = msg;
-  $('#toasts').appendChild(t);
-  requestAnimationFrame(() => t.classList.add('on'));
-  setTimeout(() => { t.classList.remove('on'); setTimeout(() => t.remove(), 350); }, 3800);
-}
-const setStatus = html => { $('#status').innerHTML = html; };
+const decodeXML=s=>s.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&#(\d+);/g,(m,n)=>String.fromCodePoint(+n)).replace(/&amp;/g,'&');
 
-$('#today').textContent = new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}).toUpperCase();
+async function extractPDF(file){const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;const pages=[];for(let i=1;i<=pdf.numPages;i++){const page=await pdf.getPage(i);const tc=await page.getTextContent();pages.push(tc.items.map(it=>it.str).join(' '))}return pages.join('\n\n')}
+async function extractDOCX(file){const res=await mammoth.extractRawText({arrayBuffer:await file.arrayBuffer()});return res.value||''}
+async function extractPPTX(file){const zip=await JSZip.loadAsync(await file.arrayBuffer());const slides=Object.keys(zip.files).filter(n=>/^ppt\/slides\/slide\d+\.xml$/.test(n)).sort((a,b)=>+a.match(/slide(\d+)/)[1]-+b.match(/slide(\d+)/)[1]);const out=[];for(const name of slides){const xml=await zip.files[name].async('string');const texts=[...xml.matchAll(/<a:t(?:\s[^>]*)?>([\s\S]*?)<\/a:t>/g)].map(m=>decodeXML(m[1]));if(texts.length)out.push(texts.join(' '))}return out.join('\n\n')}
 
-$('#mcRange').addEventListener('input', e => $('#mcOut').textContent = e.target.value + ' Qs');
-$('#shRange').addEventListener('input', e => $('#shOut').textContent = e.target.value + ' Qs');
-$('#lgRange').addEventListener('input', e => $('#lgOut').textContent = e.target.value + ' Qs');
-$('#diffSeg').addEventListener('click', e => {
-  const b = e.target.closest('button'); if(!b) return;
-  $('#diffSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
-  difficulty = b.dataset.v;
-});
+async function compressImage(file){return new Promise((resolve,reject)=>{const img=new Image();const url=URL.createObjectURL(file);img.onload=()=>{URL.revokeObjectURL(url);const MAX=1024;let{width,height}=img;if(width>MAX||height>MAX){if(width>height){height=Math.round(height*MAX/width);width=MAX}else{width=Math.round(width*MAX/height);height=MAX}}const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;const ctx=canvas.getContext('2d');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,width,height);ctx.drawImage(img,0,0,width,height);resolve(canvas.toDataURL('image/jpeg',0.7))};img.onerror=e=>{URL.revokeObjectURL(url);reject(e)};img.src=url})}
 
-$('#notesInput').addEventListener('input', e => {
-  state.notes = e.target.value;
-  const words = state.notes.trim().split(/\s+/).filter(Boolean).length;
-  $('#wordCount').textContent = words + ' word' + (words !== 1 ? 's' : '');
-  updateStatus();
-});
+async function handleFiles(fileList){if(!fileList||fileList.length===0)return;const files=Array.from(fileList);const placeholders=[];for(const f of files){const name=f.name.toLowerCase();const type=f.type.toLowerCase();const isImage=type.startsWith('image/')||/\.(png|jpe?g|webp|gif|bmp)$/.test(name);const okExt=/\.(pdf|docx|pptx|txt|md|png|jpe?g|webp|gif|bmp)$/.test(name);const okMime=type.startsWith('image/')||type==='application/pdf'||type.includes('wordprocessingml')||type.includes('presentationml')||type.startsWith('text/');if(!okExt&&!okMime){toast('Skipped: '+f.name);continue}placeholders.push({name:f.name,kind:isImage?'image':'text',text:'',dataUrl:'',size:f.size,processing:true,_srcFile:f})}if(placeholders.length===0)return;state.files=state.files.concat(placeholders);renderChips();updateStatus();for(let i=0;i<placeholders.length;i++){const p=placeholders[i];const realIdx=state.files.indexOf(p);try{if(p.kind==='image'){setStatus('▸ Compressing '+esc(p.name)+'…');state.files[realIdx].dataUrl=await compressImage(p._srcFile)}else{setStatus('▸ Reading '+esc(p.name)+'…');let text='';const n=p.name.toLowerCase();if(n.endsWith('.pdf'))text=await extractPDF(p._srcFile);else if(n.endsWith('.docx'))text=await extractDOCX(p._srcFile);else if(n.endsWith('.pptx'))text=await extractPPTX(p._srcFile);else text=await p._srcFile.text();state.files[realIdx].text=text}state.files[realIdx].processing=false;delete state.files[realIdx]._srcFile;renderChips();updateStatus()}catch(err){state.files[realIdx].processing=false;delete state.files[realIdx]._srcFile;toast('Failed: '+p.name);renderChips();updateStatus()}}}
 
-const dz = $('#dz'), fileInput = $('#fileInput');
-dz.addEventListener('click', () => fileInput.click());
-dz.addEventListener('touchend', (e) => { e.preventDefault(); fileInput.click(); });
-dz.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); fileInput.click(); }});
-['dragover','drop'].forEach(ev => window.addEventListener(ev, e => e.preventDefault()));
-dz.addEventListener('dragover', () => dz.classList.add('over'));
-dz.addEventListener('dragleave', () => dz.classList.remove('over'));
-dz.addEventListener('drop', e => { dz.classList.remove('over'); handleFiles(e.dataTransfer.files); });
-fileInput.addEventListener('change', e => handleFiles(e.target.files));
+function renderChips(){const container=$('#chipContainer');container.innerHTML='';state.files.forEach((f,idx)=>{const chip=document.createElement('div');chip.className='chip'+(f.processing?' processing':'');const icon=f.kind==='image'?'🖼':'¶';const words=(f.text||'').split(/\s+/).filter(Boolean).length;const info=f.processing?'Processing…':(f.kind==='image'?Math.max(1,Math.round(f.size/1024))+' KB · Image (Vision)':Math.max(1,Math.round(f.size/1024))+' KB · '+words+' words');const preview=!f.processing&&f.kind==='text'&&f.text?'<div class="cpreview">'+esc(f.text.slice(0,200))+'</div>':'';const actions=f.processing?'':'<div class="cactions"><button type="button" class="del">✕ REMOVE</button></div>';chip.innerHTML='<span class="fico" aria-hidden="true">'+icon+'</span><span class="cmeta"><span class="cname">'+esc(f.name)+'</span><br><span class="cinfo">'+info+'</span>'+preview+actions+'</span>';const delBtn=chip.querySelector('.del');if(delBtn)delBtn.addEventListener('click',()=>{state.files.splice(idx,1);renderChips();updateStatus()});container.appendChild(chip)})}
 
-const decodeXML = s => s.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&#(\d+);/g,(m,n)=>String.fromCodePoint(+n)).replace(/&amp;/g,'&');
+function updateStatus(){const anyProcessing=state.files.some(f=>f.processing);const readyFiles=state.files.filter(f=>!f.processing);const totalWords=readyFiles.filter(f=>f.kind==='text').reduce((sum,f)=>sum+(f.text||'').split(/\s+/).filter(Boolean).length,0);const notesWords=state.notes.trim().split(/\s+/).filter(Boolean).length;const combined=totalWords+notesWords;const imgCount=readyFiles.filter(f=>f.kind==='image').length;const docCount=readyFiles.filter(f=>f.kind==='text').length;if(anyProcessing){setStatus('▸ Processing files… ('+readyFiles.length+'/'+state.files.length+' done)');return}if(state.files.length===0&&notesWords===0){setStatus('▸ Awaiting submission…');return}const parts=[];if(docCount>0)parts.push(docCount+' document(s)');if(imgCount>0)parts.push(imgCount+' image(s)');if(notesWords>0)parts.push(notesWords+' typed words');setStatus('✔ '+parts.join(' + ')+' — '+combined.toLocaleString()+' total words ready.')}
 
-async function extractPDF(file){
-  const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
-  const pages = [];
-  for(let i = 1; i <= pdf.numPages; i++){
-    const page = await pdf.getPage(i);
-    const tc = await page.getTextContent();
-    pages.push(tc.items.map(it => it.str).join(' '));
-  }
-  return pages.join('\n\n');
-}
-async function extractDOCX(file){
-  const res = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
-  return res.value || '';
-}
-async function extractPPTX(file){
-  const zip = await JSZip.loadAsync(await file.arrayBuffer());
-  const slides = Object.keys(zip.files)
-    .filter(n => /^ppt\/slides\/slide\d+\.xml$/.test(n))
-    .sort((a,b) => +a.match(/slide(\d+)/)[1] - +b.match(/slide(\d+)/)[1]);
-  const out = [];
-  for(const name of slides){
-    const xml = await zip.files[name].async('string');
-    const texts = [...xml.matchAll(/<a:t(?:\s[^>]*)?>([\s\S]*?)<\/a:t>/g)].map(m => decodeXML(m[1]));
-    if(texts.length) out.push(texts.join(' '));
-  }
-  return out.join('\n\n');
-}
-
-// Compress image to prevent 524 Timeout / 413 Payload Too Large
-async function compressImage(file){
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      const MAX = 1024;
-      let { width, height } = img;
-      if(width > MAX || height > MAX){
-        if(width > height){ height = Math.round(height * MAX / width); width = MAX; }
-        else              { width  = Math.round(width  * MAX / height); height = MAX; }
-      }
-      const canvas = document.createElement('canvas');
-      canvas.width = width; canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, width, height);
-      ctx.drawImage(img, 0, 0, width, height);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-      resolve(dataUrl);
-    };
-    img.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
-    img.src = url;
-  });
-}
-
-async function handleFiles(fileList){
-  if(!fileList || fileList.length === 0) return;
-  const files = Array.from(fileList);
-  
-  const placeholders = [];
-  for(const f of files){
-    const name = f.name.toLowerCase();
-    const type = f.type.toLowerCase();
-    const isImage = type.startsWith('image/') || /\.(png|jpe?g|webp|gif|bmp)$/.test(name);
-    const okExt  = /\.(pdf|docx|pptx|txt|md|png|jpe?g|webp|gif|bmp)$/.test(name);
-    const okMime = type.startsWith('image/') ||
-                   type === 'application/pdf' ||
-                   type.includes('wordprocessingml') ||
-                   type.includes('presentationml') ||
-                   type.startsWith('text/');
-    if(!okExt && !okMime){
-      toast('Skipped: ' + f.name);
-      continue;
-    }
-    placeholders.push({
-      name: f.name,
-      kind: isImage ? 'image' : 'text',
-      text: '',
-      dataUrl: '',
-      size: f.size,
-      processing: true,
-      _srcFile: f
-    });
-  }
-  
-  if(placeholders.length === 0) return;
-  state.files = state.files.concat(placeholders);
-  renderChips();
-  updateStatus();
-  
-  for(let i = 0; i < placeholders.length; i++){
-    const p = placeholders[i];
-    const realIdx = state.files.indexOf(p);
-    try{
-      if(p.kind === 'image'){
-        setStatus('▸ Compressing ' + esc(p.name) + '…');
-        const dataUrl = await compressImage(p._srcFile);
-        state.files[realIdx].dataUrl = dataUrl;
-      }else{
-        setStatus('▸ Reading ' + esc(p.name) + '…');
-        let text = '';
-        const name = p.name.toLowerCase();
-        if(name.endsWith('.pdf'))       text = await extractPDF(p._srcFile);
-        else if(name.endsWith('.docx')) text = await extractDOCX(p._srcFile);
-        else if(name.endsWith('.pptx')) text = await extractPPTX(p._srcFile);
-        else                            text = await p._srcFile.text();
-        state.files[realIdx].text = text;
-      }
-      state.files[realIdx].processing = false;
-      delete state.files[realIdx]._srcFile;
-      renderChips();
-      updateStatus();
-    }catch(err){
-      state.files[realIdx].processing = false;
-      delete state.files[realIdx]._srcFile;
-      toast('Failed: ' + p.name);
-      renderChips();
-      updateStatus();
-    }
-  }
-}
-
-function renderChips(){
-  const container = $('#chipContainer');
-  container.innerHTML = '';
-  state.files.forEach((f, idx) => {
-    const chip = document.createElement('div');
-    chip.className = 'chip' + (f.processing ? ' processing' : '');
-    const icon = f.kind === 'image' ? '🖼' : '¶';
-    const words = (f.text || '').split(/\s+/).filter(Boolean).length;
-    const info = f.processing 
-      ? 'Processing…' 
-      : (f.kind === 'image'
-          ? Math.max(1, Math.round(f.size/1024)) + ' KB · Image (Vision)'
-          : Math.max(1, Math.round(f.size/1024)) + ' KB · ' + words + ' words');
-    const preview = !f.processing && f.kind === 'text' && f.text
-      ? `<div class="cpreview">${esc(f.text.slice(0, 200))}</div>` 
-      : '';
-    const actions = f.processing ? '' : `
-      <div class="cactions">
-        <button type="button" class="del">✕ REMOVE</button>
-      </div>`;
-    chip.innerHTML = `
-      <span class="fico" aria-hidden="true">${icon}</span>
-      <span class="cmeta">
-        <span class="cname">${esc(f.name)}</span><br>
-        <span class="cinfo">${info}</span>
-        ${preview}
-        ${actions}
-      </span>
-    `;
-    const delBtn = chip.querySelector('.del');
-    if(delBtn) delBtn.addEventListener('click', () => {
-      state.files.splice(idx, 1);
-      renderChips();
-      updateStatus();
-    });
-    container.appendChild(chip);
-  });
-}
-
-function updateStatus(){
-  const anyProcessing = state.files.some(f => f.processing);
-  const readyFiles = state.files.filter(f => !f.processing);
-  const totalWords = readyFiles.filter(f=>f.kind==='text').reduce((sum, f) => sum + (f.text || '').split(/\s+/).filter(Boolean).length, 0);
-  const notesWords = state.notes.trim().split(/\s+/).filter(Boolean).length;
-  const combined = totalWords + notesWords;
-  const imgCount = readyFiles.filter(f => f.kind === 'image').length;
-  const docCount = readyFiles.filter(f => f.kind === 'text').length;
-  
-  if(anyProcessing){
-    setStatus('▸ Processing files… (' + readyFiles.length + '/' + state.files.length + ' done)');
-    return;
-  }
-  if(state.files.length === 0 && notesWords === 0){
-    setStatus('▸ Awaiting submission…');
-    return;
-  }
-  const parts = [];
-  if(docCount > 0) parts.push(docCount + ' document(s)');
-  if(imgCount > 0) parts.push(imgCount + ' image(s)');
-  if(notesWords > 0) parts.push(notesWords + ' typed words');
-  setStatus('✔ ' + parts.join(' + ') + ' — ' + combined.toLocaleString() + ' total words ready.');
-}
-
-function buildPrompt(material, want){
-  const flavor = {
-    easy:   'foundational recall',
-    medium: 'a balanced mix of recall and application',
-    hard:   'application and analysis'
-  }[difficulty];
-  const lang = $('#langIn').value.trim(), focus = $('#focusIn').value.trim();
-  const lines = [
-    'You are an expert exam writer. Create a quiz strictly from the STUDY MATERIAL below (which may include text and images).',
-    'When images are provided, carefully read their visual content and use it to create questions.',
-    'Requirements:'
-  ];
-  if(want.short > 0) lines.push(`- Exactly ${want.short} short-answer question(s). The answer MUST be extremely brief: just 1 to 3 words (e.g., a specific name, a number, or a very short phrase). DO NOT write complete sentences for short answers. Put FIRST.`);
-  if(want.long  > 0) lines.push(`- Exactly ${want.long} long-form / essay question(s). Keep the model answer STRICTLY under 60 words (3-4 sentences max) to prevent output truncation. Put SECOND.`);
-  if(want.mc    > 0) lines.push(`- Exactly ${want.mc} multiple-choice question(s). 4 options, 1 correct. Put LAST.`);
-  lines.push(
-    `- Difficulty: ${flavor}.`,
-    lang ? `- Language: ${lang}.` : '- Language: Same as material.',
-    focus ? `- Focus: ${focus}.` : '',
-    '- Output ONLY the JSON object. No markdown fences, no commentary.',
-    '',
-    'FORMAT EXAMPLE:',
-    '{"questions":[{"type":"short","question":"Q?","answer":"1-3 words"},{"type":"long","question":"Q?","answer":"3-4 sentences max."},{"type":"mc","question":"Q?","options":["A","B","C","D"],"answerIndex":0,"explanation":"E."}]}',
-    '',
-    'STUDY MATERIAL TEXT:\n"""\n' + material + '\n"""'
-  );
+function buildPrompt(material,want){
+  const flavor={easy:'foundational recall',medium:'a balanced mix of recall and application',hard:'application and analysis'}[difficulty];
+  const lang=$('#langIn').value.trim(),focus=$('#focusIn').value.trim();
+  const lines=['You are an expert exam writer. Create a quiz strictly from the STUDY MATERIAL below (which may include text and images).','When images are provided, carefully read their visual content and use it to create questions.','Requirements:'];
+  if(want.short>0)lines.push('- Exactly '+want.short+' short-answer question(s). The answer MUST be extremely brief: just 1 to 3 words (e.g., a name, number, or short phrase). DO NOT write complete sentences.');
+  if(want.long>0)lines.push('- Exactly '+want.long+' long-form / essay question(s). Keep model answer STRICTLY under 60 words (3-4 sentences max).');
+  if(want.mc>0)lines.push('- Exactly '+want.mc+' multiple-choice question(s). 4 options, 1 correct.');
+  lines.push('- Difficulty: '+flavor+'.',lang?'- Language: '+lang+'.':'- Language: Same as material.',focus?'- Focus: '+focus+'.','','- Output ONLY the JSON object. No markdown fences, no commentary.','','FORMAT EXAMPLE:','{"questions":[{"type":"short","question":"Q?","answer":"1-3 words"},{"type":"long","question":"Q?","answer":"3-4 sentences."},{"type":"mc","question":"Q?","options":["A","B","C","D"],"answerIndex":0,"explanation":"E."}]}','','STUDY MATERIAL TEXT:\n"""\n'+material+'\n"""');
   return lines.filter(Boolean).join('\n');
 }
 
-function sampleText(text){
-  const MAX = 8000; // Leave room for images in payload
-  let t = text.replace(/\r/g,'').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();
-  if(t.length <= MAX) return t;
-  return t.slice(0, MAX) + '\n[…excerpt…]\n';
+function sampleText(text){const MAX=20000;let t=text.replace(/\r/g,'').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();if(t.length<=MAX)return t;return t.slice(0,MAX)+'\n[…excerpt…]\n'}
+
+async function callNVIDIA(textMaterial,images){
+  const userContent=[{type:'text',text:textMaterial}];
+  const MAX_IMAGES=4;const imagesToSend=images.slice(0,MAX_IMAGES);
+  for(const img of imagesToSend)userContent.push({type:'image_url',image_url:{url:img.dataUrl}});
+  const base={model:MODEL,messages:[{role:'system',content:'You are an expert exam writer. Always respond with strict JSON only.'},{role:'user',content:userContent.length===1&&userContent[0].type==='text'?textMaterial:userContent}],chat_template_kwargs:{enable_thinking:false},temperature:0.7,top_p:0.7,max_tokens:8192,stream:false};
+  const r=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(base)});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(j?.error?.message||('NVIDIA NIM error '+r.status));
+  return j?.choices?.[0]?.message?.content||'';
 }
 
-async function callNVIDIA(textMaterial, images){
-  // Build multimodal content array
-  const userContent = [{ type: 'text', text: textMaterial }];
-  
-  // Limit images to prevent 524 timeout / 413 payload too large
-  const MAX_IMAGES = 4; 
-  const imagesToSend = images.slice(0, MAX_IMAGES);
-  for(const img of imagesToSend){
-    userContent.push({ type: 'image_url', image_url: { url: img.dataUrl } });
-  }
-
-  const base = {
-    model: MODEL,
-    messages:[
-      { role:'system', content:'You are an expert exam writer. Always respond with strict JSON only.' },
-      { role:'user', content: userContent.length === 1 && userContent[0].type === 'text' ? textMaterial : userContent }
-    ],
-    chat_template_kwargs: { enable_thinking: false }, // Thinking disabled for speed
-    temperature: 0.7, top_p: 0.7, max_tokens: 8192, stream: false
-  };
-
-  const r = await fetch(WORKER_URL, {
-    method:'POST', headers:{ 'Content-Type':'application/json' },
-    body: JSON.stringify(base)
-  });
-  const j = await r.json().catch(() => ({}));
-  if(!r.ok) throw new Error(j?.error?.message || ('NVIDIA NIM error ' + r.status));
-  return j?.choices?.[0]?.message?.content || '';
-}
-
-const isPh = v => { const s = String(v ?? '').trim(); return !s || /^[\u2026.·•_\-\s]+$/.test(s); };
+const isPh=v=>{const s=String(v??'').trim();return !s||/^[\u2026.·•_\-\s]+$/.test(s)};
 
 // BULLETPROOF JSON PARSER
 function tryParse(raw){
-  if (!raw) return null;
-  let t = String(raw).trim();
-  t = t.replace(/```json\s*/gi, '').replace(/```\s*/gi, '');
-  let start = t.indexOf('{');
-  if (start === -1) return null;
-  t = t.slice(start);
-  try { return JSON.parse(t); } catch (_) {}
-  const closers = ['"}]}', '"}]}]}', '"', ']}', '}]}', '}', '"]]}', '"]}]}', '"]', '"]}]}'];
-  for (const c of closers) { try { return JSON.parse(t + c); } catch (_) {} }
-  let cut = Math.max(t.lastIndexOf('"},'), t.lastIndexOf('"}'), t.lastIndexOf('},'), t.lastIndexOf('}'));
-  if (cut > 10) {
-    let truncated = t.slice(0, cut + 1);
-    if (!truncated.endsWith('}')) truncated += '}';
-    const truncClosers = [']}', ']}', ']}]}', ''];
-    for (const c of truncClosers) { try { return JSON.parse(truncated + c); } catch (_) {} }
+  if(!raw)return null;
+  let t=String(raw).trim().replace(/```json\s*/gi,'').replace(/```\s*/gi,'');
+  let start=t.indexOf('{');
+  if(start===-1)return null;
+  t=t.slice(start);
+  try{return JSON.parse(t)}catch(_){}
+  const closers=['"}]}','"}]}]}','"',']}',']}','}','"]]}','"]}]}','"]','"]}]}'];
+  for(const c of closers){try{return JSON.parse(t+c)}catch(_){}}
+  let cut=Math.max(t.lastIndexOf('"},'),t.lastIndexOf('"}'),t.lastIndexOf('},'),t.lastIndexOf('}'));
+  if(cut>10){
+    let truncated=t.slice(0,cut+1);
+    if(!truncated.endsWith('}'))truncated+='}';
+    const truncClosers=[']}',']}',']]}]',''];
+    for(const c of truncClosers){try{return JSON.parse(truncated+c)}catch(_){}}
   }
   return null;
 }
 
 function parseQuiz(raw){
-  const j = tryParse(raw);
-  if(!j) throw new Error('Unreadable output — retrying.');
-  const list = j.questions || [];
-  const mc = [], short = [], long = [];
+  const j=tryParse(raw);
+  if(!j)throw new Error('Unreadable output — retrying.');
+  const list=j.questions||[];
+  const mc=[],short=[],long=[];
   for(const q of list){
-    if(!q || typeof q.question !== 'string' || isPh(q.question)) continue;
-    const type = String(q.type || '').toLowerCase();
-    if(type === 'mc' || Array.isArray(q.options)){
-      const opts = (q.options || []).map(o => String(o)).slice(0, 6);
-      if(opts.length < 2 || opts.some(isPh)) continue;
-      let ai = Number(q.answerIndex);
-      if(!Number.isFinite(ai) && typeof q.answer === 'string') ai = q.answer.trim().toUpperCase().charCodeAt(0) - 65;
-      if(!Number.isFinite(ai) || ai < 0 || ai >= opts.length) ai = 0;
-      mc.push({ question:q.question, options:opts, answerIndex:ai, explanation:(q.explanation && !isPh(q.explanation)) ? q.explanation : '' });
-    }else if(type === 'long'){
-      if(isPh(q.answer)) continue;
-      long.push({ question:q.question, answer:q.answer });
+    if(!q||typeof q.question!=='string'||isPh(q.question))continue;
+    const type=String(q.type||'').toLowerCase();
+    if(type==='mc'||Array.isArray(q.options)){
+      const opts=(q.options||[]).map(o=>String(o)).slice(0,6);
+      if(opts.length<2||opts.some(isPh))continue;
+      let ai=Number(q.answerIndex);
+      if(!Number.isFinite(ai)&&typeof q.answer==='string')ai=q.answer.trim().toUpperCase().charCodeAt(0)-65;
+      if(!Number.isFinite(ai)||ai<0||ai>=opts.length)ai=0;
+      mc.push({question:q.question,options:opts,answerIndex:ai,explanation:(q.explanation&&!isPh(q.explanation))?q.explanation:''});
+    }else if(type==='long'){
+      if(isPh(q.answer))continue;
+      long.push({question:q.question,answer:q.answer});
     }else{
-      if(isPh(q.answer)) continue;
-      short.push({ question:q.question, answer:q.answer });
+      if(isPh(q.answer))continue;
+      short.push({question:q.question,answer:q.answer});
     }
   }
-  if(!mc.length && !short.length && !long.length) throw new Error('No questions returned — retrying.');
-  return { mc, short, long };
+  return {mc,short,long};
 }
 
-$('#genBtn').addEventListener('click', generate);
+$('#genBtn').addEventListener('click',generate);
 async function generate(){
-  const wantMC = +$('#mcRange').value, wantSH = +$('#shRange').value, wantLG = +$('#lgRange').value;
-  if(state.files.some(f => f.processing)){ toast('Still processing files.'); return; }
-  const readyFiles = state.files.filter(f => !f.processing && ((f.text && f.text.trim().length > 0) || f.dataUrl));
-  if(readyFiles.length === 0 && state.notes.trim().length === 0){ toast('Upload a file OR type notes.'); return; }
-  if(wantMC + wantSH + wantLG === 0){ toast('Set at least one question.'); return; }
+  const wantMC=+$('#mcRange').value,wantSH=+$('#shRange').value,wantLG=+$('#lgRange').value;
+  if(state.files.some(f=>f.processing)){toast('Still processing files.');return}
+  const readyFiles=state.files.filter(f=>!f.processing&&((f.text&&f.text.trim().length>0)||f.dataUrl));
+  if(readyFiles.length===0&&state.notes.trim().length===0){toast('Upload a file OR type notes.');return}
+  if(wantMC+wantSH+wantLG===0){toast('Set at least one question.');return}
 
-  const btn = $('#genBtn'), label = $('#genLabel');
-  btn.disabled = true; label.textContent = '✍ WRITING QUESTIONS…';
-  const t0 = performance.now();
+  const btn=$('#genBtn'),label=$('#genLabel');
+  btn.disabled=true;label.textContent='✍ WRITING QUESTIONS…';
+  const t0=performance.now();
+  let allMc=[],allShort=[],allLong=[];
+
   try{
     setStatus('▸ Building the exam brief…');
-    const fileText = readyFiles.filter(f=>f.kind==='text').map(f => `[Doc: ${f.name}]\n${f.text||''}`).join('\n\n');
-    const allText = [fileText, state.notes.trim() ? '[Typed notes]\n' + state.notes.trim() : ''].filter(Boolean).join('\n\n');
-    const material = sampleText(allText);
-    const prompt = buildPrompt(material, { mc:wantMC, short:wantSH, long:wantLG });
-    const images = readyFiles.filter(f => f.kind === 'image');
+    const fileText=readyFiles.filter(f=>f.kind==='text').map(f=>'[Doc: '+f.name+']\n'+(f.text||'')).join('\n\n');
+    const allText=[fileText,state.notes.trim()?'[Typed notes]\n'+state.notes.trim():''].filter(Boolean).join('\n\n');
+    const material=sampleText(allText);
+    const images=readyFiles.filter(f=>f.kind==='image');
 
-    let quiz = { mc:[], short:[], long:[] };
-    for(let attempt = 1; attempt <= 2; attempt++){
-      setStatus('▸ Asking AI… (attempt ' + attempt + '/2)' + (images.length>0 ? ' · analyzing images' : ''));
-      const raw = await callNVIDIA(prompt, images);
-      try{ quiz = parseQuiz(raw); break; }
-      catch(err){ if(attempt === 2) throw err; setStatus('▸ Fixing cut-off text, retrying…'); }
+    // BATCH 1: MC
+    if(wantMC>0){
+      setStatus('▸ Batch 1/3: Generating Multiple Choice…');
+      const raw=await callNVIDIA(buildPrompt(material,{mc:wantMC,short:0,long:0}),images);
+      allMc=parseQuiz(raw).mc.slice(0,wantMC);
+    }
+    // BATCH 2: Short
+    if(wantSH>0){
+      setStatus('▸ Batch 2/3: Generating Short Answer…');
+      const raw=await callNVIDIA(buildPrompt(material,{mc:0,short:wantSH,long:0}),images);
+      allShort=parseQuiz(raw).short.slice(0,wantSH);
+    }
+    // BATCH 3: Long
+    if(wantLG>0){
+      setStatus('▸ Batch 3/3: Generating Long / Essay…');
+      const raw=await callNVIDIA(buildPrompt(material,{mc:0,short:0,long:wantLG}),images);
+      allLong=parseQuiz(raw).long.slice(0,wantLG);
     }
 
-    quiz.mc = quiz.mc.slice(0, wantMC); quiz.short = quiz.short.slice(0, wantSH); quiz.long = quiz.long.slice(0, wantLG);
+    if(allMc.length===0&&allShort.length===0&&allLong.length===0)throw new Error('No usable questions returned.');
 
-    const deficit = { mc: wantMC - quiz.mc.length, short: wantSH - quiz.short.length, long: wantLG - quiz.long.length };
-    if(deficit.mc > 0 || deficit.short > 0 || deficit.long > 0){
-      setStatus('▸ Topping up missing questions…');
-      try{
-        const q2 = parseQuiz(await callNVIDIA(buildPrompt(material, deficit), images));
-        quiz.mc = quiz.mc.concat(q2.mc).slice(0, wantMC);
-        quiz.short = quiz.short.concat(q2.short).slice(0, wantSH);
-        quiz.long = quiz.long.concat(q2.long).slice(0, wantLG);
-      }catch(_){}
-    }
-
-    state.quiz = quiz; state.graded = false;
-    state.meta = {
-      file: readyFiles.length > 0 ? readyFiles.map(f=>f.name).join(', ') : 'Typed notes',
-      model: MODEL, secs: ((performance.now() - t0) / 1000).toFixed(1),
-      date: new Date().toLocaleDateString(undefined,{ year:'numeric', month:'short', day:'numeric' })
-    };
+    state.quiz={mc:allMc,short:allShort,long:allLong};state.graded=false;
+    state.meta={file:readyFiles.length>0?readyFiles.map(f=>f.name).join(', '):'Typed notes',model:MODEL,secs:((performance.now()-t0)/1000).toFixed(1),date:new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})};
     renderQuiz();
-    setStatus('✔ Paper ready — ' + quiz.mc.length + ' MC · ' + quiz.short.length + ' short · ' + quiz.long.length + ' long.');
-  }catch(err){
-    setStatus('✖ ' + esc(err.message)); toast(err.message);
-  }finally{
-    btn.disabled = false; label.textContent = '⚡ GENERATE QUIZ';
-  }
+    setStatus('✔ Paper ready — '+allMc.length+' MC · '+allShort.length+' short · '+allLong.length+' long.');
+  }catch(err){setStatus('✖ '+esc(err.message));toast(err.message)}
+  finally{btn.disabled=false;label.textContent='⚡ GENERATE QUIZ'}
 }
 
 function renderQuiz(){
-  const { mc, short, long } = state.quiz, m = state.meta;
-  $('#mFile').textContent = m.file.length > 26 ? m.file.slice(0,24) + '…' : m.file;
-  $('#mModel').textContent = m.model.split('/').pop();
-  $('#mTime').textContent = m.secs + 's · ' + m.date;
-  $('#mCount').textContent = (mc.length + short.length + long.length) + ' QUESTIONS';
-
-  let html = '';
-  if(mc.length){
-    html += '<div class="part"><span class="part-tag">PART A — MULTIPLE CHOICE</span>';
-    mc.forEach((q, i) => {
-      html += `<div class="q" data-type="mc" data-qi="${i}"><div class="qhead"><span class="qnum">${String(i+1).padStart(2,'0')}</span><p class="qtext">${esc(q.question)}</p></div><div class="opts">` +
-        q.options.map((o, j) => `<button type="button" class="opt" data-i="${j}"><span class="bub"></span><span class="ltr">${LETTERS[j]}</span><span>${esc(o)}</span></button>`).join('') +
-        `</div><p class="keyhint">✔ Correct: <b>${LETTERS[q.answerIndex]}</b>${q.explanation?' — '+esc(q.explanation):''}</p></div>`;
-    }); html += '</div>';
-  }
-  if(short.length){
-    html += '<div class="part"><span class="part-tag">PART B — SHORT ANSWER (1-3 words)</span>';
-    short.forEach((q, i) => {
-      html += `<div class="q" data-type="short"><div class="qhead"><span class="qnum">${mc.length?'B'+(i+1):String(i+1).padStart(2,'0')}</span><p class="qtext">${esc(q.question)}</p></div><button type="button" class="reveal">REVEAL MODEL ANSWER</button><div class="amodel"><span class="amodel-tag">MODEL ANSWER</span><p>${esc(q.answer)}</p></div></div>`;
-    }); html += '</div>';
-  }
-  if(long.length){
-    html += '<div class="part"><span class="part-tag">PART C — LONG / ESSAY</span>';
-    long.forEach((q, i) => {
-      html += `<div class="q" data-type="long"><div class="qhead"><span class="qnum">C${i+1}</span><p class="qtext">${esc(q.question)}</p></div><button type="button" class="reveal">REVEAL MODEL ANSWER</button><div class="amodel"><span class="amodel-tag">MODEL ANSWER</span><p>${esc(q.answer)}</p></div></div>`;
-    }); html += '</div>';
-  }
-  $('#paperBody').innerHTML = html;
-  $('#empty').hidden = true;
-  const paper = $('#paper'); paper.hidden = false;
-  paper.classList.remove('show-key','graded'); $('#stamp').classList.remove('on','perfect');
-  $('#keyBtn').classList.remove('on'); $('#gradeBtn').disabled = !mc.length;
-  ['#keyBtn','#copyBtn','#dlBtn','#printBtn'].forEach(s => $(s).disabled = false);
+  const{mc,short,long}=state.quiz,m=state.meta;
+  $('#mFile').textContent=m.file.length>26?m.file.slice(0,24)+'…':m.file;
+  $('#mModel').textContent=m.model.split('/').pop();
+  $('#mTime').textContent=m.secs+'s · '+m.date;
+  $('#mCount').textContent=(mc.length+short.length+long.length)+' QUESTIONS';
+  let html='';
+  if(mc.length){html+='<div class="part"><span class="part-tag">PART A — MULTIPLE CHOICE</span>';mc.forEach((q,i)=>{html+='<div class="q" data-type="mc" data-qi="'+i+'"><div class="qhead"><span class="qnum">'+String(i+1).padStart(2,'0')+'</span><p class="qtext">'+esc(q.question)+'</p></div><div class="opts">'+q.options.map((o,j)=>'<button type="button" class="opt" data-i="'+j+'"><span class="bub"></span><span class="ltr">'+LETTERS[j]+'</span><span>'+esc(o)+'</span></button>').join('')+'</div><p class="keyhint">✔ Correct: <b>'+LETTERS[q.answerIndex]+'</b>'+(q.explanation?' — '+esc(q.explanation):'')+'</p></div>'});html+='</div>'}
+  if(short.length){html+='<div class="part"><span class="part-tag">PART B — SHORT ANSWER (1-3 words)</span>';short.forEach((q,i)=>{html+='<div class="q" data-type="short"><div class="qhead"><span class="qnum">'+(mc.length?'B'+(i+1):String(i+1).padStart(2,'0'))+'</span><p class="qtext">'+esc(q.question)+'</p></div><button type="button" class="reveal">REVEAL MODEL ANSWER</button><div class="amodel"><span class="amodel-tag">MODEL ANSWER</span><p>'+esc(q.answer)+'</p></div></div>'});html+='</div>'}
+  if(long.length){html+='<div class="part"><span class="part-tag">PART C — LONG / ESSAY</span>';long.forEach((q,i)=>{html+='<div class="q" data-type="long"><div class="qhead"><span class="qnum">C'+(i+1)+'</span><p class="qtext">'+esc(q.question)+'</p></div><button type="button" class="reveal">REVEAL MODEL ANSWER</button><div class="amodel"><span class="amodel-tag">MODEL ANSWER</span><p>'+esc(q.answer)+'</p></div></div>'});html+='</div>'}
+  $('#paperBody').innerHTML=html;$('#empty').hidden=true;const paper=$('#paper');paper.hidden=false;paper.classList.remove('show-key','graded');$('#stamp').classList.remove('on','perfect');$('#keyBtn').classList.remove('on');$('#gradeBtn').disabled=!mc.length;['#keyBtn','#copyBtn','#dlBtn','#printBtn'].forEach(s=>$(s).disabled=false);
 }
 
-$('#paperBody').addEventListener('click', e => {
-  const opt = e.target.closest('.opt');
-  if(opt && !state.graded){ const q = opt.closest('.q'); q.querySelectorAll('.opt').forEach(o => o.classList.remove('sel')); opt.classList.add('sel'); return; }
-  const rev = e.target.closest('.reveal');
-  if(rev){ const q = rev.closest('.q'); const open = q.classList.toggle('open'); rev.textContent = open ? 'HIDE MODEL ANSWER' : 'REVEAL MODEL ANSWER'; }
-});
+$('#paperBody').addEventListener('click',e=>{const opt=e.target.closest('.opt');if(opt&&!state.graded){const q=opt.closest('.q');q.querySelectorAll('.opt').forEach(o=>o.classList.remove('sel'));opt.classList.add('sel');return}const rev=e.target.closest('.reveal');if(rev){const q=rev.closest('.q');const open=q.classList.toggle('open');rev.textContent=open?'HIDE MODEL ANSWER':'REVEAL MODEL ANSWER'}});
 
-$('#gradeBtn').addEventListener('click', () => {
-  const mc = state.quiz?.mc; if(!mc || !mc.length) return;
-  const paper = $('#paper'), stamp = $('#stamp');
-  if(state.graded){ $$('#paperBody .opt').forEach(o => o.classList.remove('sel','good','bad')); paper.classList.remove('graded'); stamp.classList.remove('on','perfect'); state.graded = false; $('#gradeBtn').textContent = '✔ GRADE IT'; return; }
-  let score = 0;
-  $$('#paperBody .q[data-type="mc"]').forEach(qEl => {
-    const correct = mc[+qEl.dataset.qi].answerIndex; const sel = qEl.querySelector('.opt.sel'); const si = sel ? +sel.dataset.i : -1;
-    qEl.querySelectorAll('.opt').forEach(o => { const i = +o.dataset.i; if(i === correct) o.classList.add('good'); else if(o === sel) o.classList.add('bad'); });
-    if(si === correct) score++;
-  });
-  state.graded = true; paper.classList.add('graded');
-  $('#stampScore').textContent = score + ' / ' + mc.length; stamp.classList.add('on');
-  if(score === mc.length) stamp.classList.add('perfect'); $('#gradeBtn').textContent = '↺ RESET PICKS';
-});
+$('#gradeBtn').addEventListener('click',()=>{const mc=state.quiz?.mc;if(!mc||!mc.length)return;const paper=$('#paper'),stamp=$('#stamp');if(state.graded){$$('.opt').forEach(o=>o.classList.remove('sel','good','bad'));paper.classList.remove('graded');stamp.classList.remove('on','perfect');state.graded=false;$('#gradeBtn').textContent='✔ GRADE IT';return}let score=0;$$('.q[data-type="mc"]').forEach(qEl=>{const correct=mc[+qEl.dataset.qi].answerIndex;const sel=qEl.querySelector('.opt.sel');const si=sel?+sel.dataset.i:-1;qEl.querySelectorAll('.opt').forEach(o=>{const i=+o.dataset.i;if(i===correct)o.classList.add('good');else if(o===sel)o.classList.add('bad')});if(si===correct)score++});state.graded=true;paper.classList.add('graded');$('#stampScore').textContent=score+' / '+mc.length;stamp.classList.add('on');if(score===mc.length)stamp.classList.add('perfect');$('#gradeBtn').textContent='↺ RESET PICKS'});
 
-$('#keyBtn').addEventListener('click', () => { $('#paper').classList.toggle('show-key'); $('#keyBtn').classList.toggle('on'); });
+$('#keyBtn').addEventListener('click',()=>{$('#paper').classList.toggle('show-key');$('#keyBtn').classList.toggle('on')});
 
-$('#copyBtn').addEventListener('click', async () => {
-  const m = state.meta, q = state.quiz; let out = ['# Quiz — ' + m.file, '', `Generated by OmniQuiz-AI · ${m.date}`, ''];
-  if(q.mc.length){ out.push('## Part A — MC', ''); q.mc.forEach((x,i)=>{ out.push(`${i+1}. ${x.question}`); x.options.forEach((o,j)=>out.push(`   - ${LETTERS[j]}. ${o}`)); out.push(`   **Answer: ${LETTERS[x.answerIndex]}**`, ''); }); }
-  if(q.short.length){ out.push('## Part B — Short', ''); q.short.forEach((x,i)=>{ out.push(`${i+1}. ${x.question}`, `   _Ans: ${x.answer}_`, ''); }); }
-  if(q.long.length){ out.push('## Part C — Long', ''); q.long.forEach((x,i)=>{ out.push(`${i+1}. ${x.question}`, `   _Ans: ${x.answer}_`, ''); }); }
-  try{ await navigator.clipboard.writeText(out.join('\n')); toast('Copied ✓'); }catch(_){ toast('Copy failed'); }
-});
+$('#copyBtn').addEventListener('click',async()=>{const m=state.meta,q=state.quiz;let out=['# Quiz — '+m.file,'','Generated by OmniQuiz-AI · '+m.date,''];if(q.mc.length){out.push('## Part A — MC','');q.mc.forEach((x,i)=>{out.push((i+1)+'. '+x.question);x.options.forEach((o,j)=>out.push('   - '+LETTERS[j]+'. '+o));out.push('   **Answer: '+LETTERS[x.answerIndex]+'**','')})}if(q.short.length){out.push('## Part B — Short','');q.short.forEach((x,i)=>{out.push((i+1)+'. '+x.question,'   _Ans: '+x.answer+'_','')})}if(q.long.length){out.push('## Part C — Long','');q.long.forEach((x,i)=>{out.push((i+1)+'. '+x.question,'   _Ans: '+x.answer+'_','')})}try{await navigator.clipboard.writeText(out.join('\n'));toast('Copied ✓')}catch(_){toast('Copy failed')}});
 
-$('#dlBtn').addEventListener('click', () => {
-  if(!state.quiz) return;
-  const { jsPDF } = window.jspdf; const doc = new jsPDF({ unit:'mm', format:'a4' });
-  const W = 210, M = 18, CW = W - M*2; let y = 20;
-  const pageBreak = need => { if(y + need > 280){ doc.addPage(); y = 20; } };
-  const write = (text, size, style, gap, indent, color) => {
-    gap = gap ?? 2; indent = indent ?? 0; color = color || [32,38,31];
-    doc.setFont('helvetica', style); doc.setFontSize(size); doc.setTextColor(color[0],color[1],color[2]);
-    const lines = doc.splitTextToSize(text, CW - indent);
-    for(const ln of lines){ pageBreak(size * 0.5); doc.text(ln, M + indent, y); y += size * 0.5; } y += gap;
-  };
-  const { mc, short, long } = state.quiz, m = state.meta;
-  write('OMNQUIZ-AI — EXAMINATION PAPER', 16, 'bold', 3);
-  write('Source: ' + m.file + '   ·   ' + m.date, 9, 'normal', 4, 0, [110,115,105]);
-  doc.setDrawColor(32,38,31); doc.line(M, y, W-M, y); y += 8;
-  write('Name: ____________________________     Class: __________', 10, 'normal', 8);
-  if(mc.length){ write('PART A — MULTIPLE CHOICE', 12, 'bold', 4); mc.forEach((q,i)=>{ pageBreak(30); write((i+1)+'. '+q.question, 11, 'bold', 2.5); q.options.forEach((o,j)=>write(LETTERS[j]+'.  '+o, 10.5, 'normal', 1.5, 8)); y+=3; }); }
-  if(short.length){ write('PART B — SHORT ANSWER (1-3 words)', 12, 'bold', 4); short.forEach((q,i)=>{ pageBreak(34); write((mc.length?'B'+(i+1):(i+1))+'. '+q.question, 11, 'bold', 4); doc.setDrawColor(150,150,150); for(let k=0;k<2;k++){ pageBreak(10); doc.line(M+8,y,W-M,y); y+=9; } y+=3; }); }
-  if(long.length){ write('PART C — LONG / ESSAY', 12, 'bold', 4); long.forEach((q,i)=>{ pageBreak(46); write('C'+(i+1)+'. '+q.question, 11, 'bold', 4); doc.setDrawColor(150,150,150); for(let k=0;k<7;k++){ pageBreak(10); doc.line(M+8,y,W-M,y); y+=9; } y+=3; }); }
-  doc.addPage(); y = 20; write('ANSWER KEY', 14, 'bold', 4);
-  if(mc.length){ write('Part A', 11, 'bold', 2); mc.forEach((q,i)=>write((i+1)+'. '+LETTERS[q.answerIndex]+(q.explanation?' — '+q.explanation:''), 10, 'normal', 2)); y+=4; }
-  if(short.length){ write('Part B', 11, 'bold', 2); short.forEach((q,i)=>write((mc.length?'B'+(i+1):(i+1))+'. '+q.answer, 10, 'normal', 2)); y+=4; }
-  if(long.length){ write('Part C', 11, 'bold', 2); long.forEach((q,i)=>write('C'+(i+1)+'. '+q.answer, 10, 'normal', 3)); }
-  doc.save('quiz-' + (m.file.replace(/[^a-zA-Z0-9]/g,'_') || 'paper').slice(0,40) + '.pdf'); toast('Downloading PDF…');
-});
+$('#dlBtn').addEventListener('click',()=>{if(!state.quiz)return;const{jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});const W=210,M=18,CW=W-M*2;let y=20;const pageBreak=need=>{if(y+need>280){doc.addPage();y=20}};const write=(text,size,style,gap,indent,color)=>{gap=gap??2;indent=indent??0;color=color||[32,38,31];doc.setFont('helvetica',style);doc.setFontSize(size);doc.setTextColor(color[0],color[1],color[2]);const lines=doc.splitTextToSize(text,CW-indent);for(const ln of lines){pageBreak(size*0.5);doc.text(ln,M+indent,y);y+=size*0.5}y+=gap};const{mc,short,long}=state.quiz,m=state.meta;write('OMNQUIZ-AI — EXAMINATION PAPER',16,'bold',3);write('Source: '+m.file+'   ·   '+m.date,9,'normal',4,0,[110,115,105]);doc.setDrawColor(32,38,31);doc.line(M,y,W-M,y);y+=8;write('Name: ____________________________     Class: __________',10,'normal',8);if(mc.length){write('PART A — MULTIPLE CHOICE',12,'bold',4);mc.forEach((q,i)=>{pageBreak(30);write((i+1)+'. '+q.question,11,'bold',2.5);q.options.forEach((o,j)=>write(LETTERS[j]+'.  '+o,10.5,'normal',1.5,8));y+=3})}if(short.length){write('PART B — SHORT ANSWER (1-3 words)',12,'bold',4);short.forEach((q,i)=>{pageBreak(34);write((mc.length?'B'+(i+1):(i+1))+'. '+q.question,11,'bold',4);doc.setDrawColor(150,150,150);for(let k=0;k<2;k++){pageBreak(10);doc.line(M+8,y,W-M,y);y+=9}y+=3})}if(long.length){write('PART C — LONG / ESSAY',12,'bold',4);long.forEach((q,i)=>{pageBreak(46);write('C'+(i+1)+'. '+q.question,11,'bold',4);doc.setDrawColor(150,150,150);for(let k=0;k<7;k++){pageBreak(10);doc.line(M+8,y,W-M,y);y+=9}y+=3})}doc.addPage();y=20;write('ANSWER KEY',14,'bold',4);if(mc.length){write('Part A',11,'bold',2);mc.forEach((q,i)=>write((i+1)+'. '+LETTERS[q.answerIndex]+(q.explanation?' — '+q.explanation:''),10,'normal',2));y+=4}if(short.length){write('Part B',11,'bold',2);short.forEach((q,i)=>write((mc.length?'B'+(i+1):(i+1))+'. '+q.answer,10,'normal',2));y+=4}if(long.length){write('Part C',11,'bold',2);long.forEach((q,i)=>write('C'+(i+1)+'. '+q.answer,10,'normal',3))}doc.save('quiz-'+(m.file.replace(/[^a-zA-Z0-9]/g,'_')||'paper').slice(0,40)+'.pdf');toast('Downloading PDF…')});
 
-$('#printBtn').addEventListener('click', () => window.print());
+$('#printBtn').addEventListener('click',()=>window.print());
 })();
 </script>
 </body>
