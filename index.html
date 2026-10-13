@@ -118,6 +118,8 @@
   select.in{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23a9c6b5' stroke-width='1.6' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
   
   .micro{font-size:.72rem;color:var(--chalk2);margin-top:8px;line-height:1.5}
+  .token-info{font:400 .68rem var(--mono);color:var(--chalk2);margin-top:8px;padding:8px 10px;background:rgba(0,0,0,.2);border-radius:6px;line-height:1.5}
+  .token-info strong{color:var(--yellow)}
 
   .gen{width:100%;margin-top:24px;padding:16px;font:700 1rem var(--body);letter-spacing:.06em;background:var(--yellow);color:#14110a;border:2px solid #14110a;border-radius:12px;cursor:pointer;box-shadow:0 6px 0 #071b14,0 12px 26px rgba(0,0,0,.35);transition:.15s}
   .gen:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 0 #071b14,0 16px 30px rgba(0,0,0,.4)}
@@ -288,12 +290,17 @@
     <div class="step">
       <div class="lab"><span>02 · Quiz mix</span></div>
       <div class="lab" style="margin-top:6px"><span style="letter-spacing:.08em">Multiple choice</span><span class="val" id="mcOut">6 Qs</span></div>
-      <input type="range" id="mcRange" min="0" max="20" value="6">
+      <input type="range" id="mcRange" min="0" max="50" value="6" step="1">
       <div class="lab"><span style="letter-spacing:.08em">Short answer (1 sentence)</span><span class="val" id="shOut">3 Qs</span></div>
-      <input type="range" id="shRange" min="0" max="10" value="3">
+      <input type="range" id="shRange" min="0" max="30" value="3" step="1">
       <div class="lab"><span style="letter-spacing:.08em">Long / essay</span><span class="val" id="lgOut">1 Qs</span></div>
-      <input type="range" id="lgRange" min="0" max="5" value="1">
-      <div class="lab"><span style="letter-spacing:.08em">Difficulty</span></div>
+      <input type="range" id="lgRange" min="0" max="15" value="1" step="1">
+      
+      <div class="token-info" id="tokenInfo">
+        <strong>Token Budget:</strong> Calculating...
+      </div>
+      
+      <div class="lab" style="margin-top:14px"><span style="letter-spacing:.08em">Difficulty</span></div>
       <div class="seg" id="diffSeg" role="group" aria-label="Difficulty">
         <button type="button" data-v="easy">Easy</button>
         <button type="button" data-v="medium" class="on">Medium</button>
@@ -302,7 +309,7 @@
     </div>
 
     <div class="step">
-      <div class="lab"><span>03 · Language &amp; focus</span></div>
+      <div class="lab"><span>03 · Language & focus</span></div>
       <div class="grid2">
         <input class="in" id="langIn" type="text" placeholder="Quiz language (auto)">
         <input class="in" id="focusIn" type="text" placeholder="Focus topic (opt.)">
@@ -316,7 +323,7 @@
       </div>
       <div class="lab"><span style="letter-spacing:.08em">Model</span></div>
       <select class="in" id="modelSel" disabled><option>nvidia/nemotron-3-nano-omni-30b-a3b-reasoning</option></select>
-      <p class="micro">Multimodal Vision model (Thinking mode disabled for speed).</p>
+      <p class="micro">Multimodal Vision · 192K input · 64K output · Thinking off</p>
     </div>
 
     <button class="gen" id="genBtn" type="button"><span id="genLabel">⚡ GENERATE QUIZ</span></button>
@@ -368,8 +375,8 @@
 
 <footer>
   <div class="wrap foot">
-    <span>🔒 Files parsed in-browser. AI queried securely via hidden proxy.</span>
-    <span>OMNIZQ-AI · MULTIMODAL EDITION</span>
+    <span>🔒 Files parsed in-browser. AI queried securely via private proxy.</span>
+    <span>OMNIZQ-AI · DYNAMIC TOKEN EDITION</span>
   </div>
 </footer>
 
@@ -389,13 +396,65 @@ const LETTERS = 'ABCDEF';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-// state.files: array of {name, kind: 'text'|'image', text?, dataUrl?, size}
+// ====== CONFIGURATION ======
+// Replace with your Vercel deployment URL
+const BACKEND_URL = "https://omniquiz-backend.vercel.app/api/generate";
+const MODEL = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning';
+
+// Token limits
+const MAX_INPUT_TOKENS = 192000;
+const MAX_OUTPUT_TOKENS = 64000;
+const SYSTEM_PROMPT_TOKENS = 500;
+
+// Token estimation per question type
+const TOKENS_PER_MC = 140;      // question + 4 options + answer + explanation
+const TOKENS_PER_SHORT = 70;    // question + 1 sentence answer
+const TOKENS_PER_LONG = 200;    // question + 3-4 sentence answer
+const JSON_OVERHEAD = 400;      // JSON structure overhead
+
+// ====== STATE ======
 const state = { files:[], notes:'', quiz:null, meta:null, graded:false };
 let difficulty = 'medium';
 
-const WORKER_URL = "https://ehjkwqngbrf.s250038.workers.dev";
-const MODEL = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning';
+// ====== TOKEN CALCULATION ======
+function estimateOutputTokens(wantMC, wantSH, wantLG) {
+  const mcTokens = wantMC * TOKENS_PER_MC;
+  const shortTokens = wantSH * TOKENS_PER_SHORT;
+  const longTokens = wantLG * TOKENS_PER_LONG;
+  const total = mcTokens + shortTokens + longTokens + JSON_OVERHEAD;
+  return Math.min(total, MAX_OUTPUT_TOKENS);
+}
 
+function estimateAvailableInputTokens(outputTokens) {
+  const available = MAX_INPUT_TOKENS - outputTokens - SYSTEM_PROMPT_TOKENS;
+  return Math.max(available, 10000); // Minimum 10K tokens for input
+}
+
+function tokensToChars(tokens) {
+  // Conservative estimate: 1 token ≈ 3 characters (mix of English/Chinese)
+  return Math.floor(tokens * 3);
+}
+
+function updateTokenInfo() {
+  const wantMC = +$('#mcRange').value;
+  const wantSH = +$('#shRange').value;
+  const wantLG = +$('#lgRange').value;
+  
+  const outputTokens = estimateOutputTokens(wantMC, wantSH, wantLG);
+  const inputTokens = estimateAvailableInputTokens(outputTokens);
+  const maxChars = tokensToChars(inputTokens);
+  
+  const info = $('#tokenInfo');
+  info.innerHTML = `
+    <strong>Output:</strong> ~${outputTokens.toLocaleString()} / ${MAX_OUTPUT_TOKENS.toLocaleString()} tokens<br>
+    <strong>Input budget:</strong> ~${inputTokens.toLocaleString()} / ${MAX_INPUT_TOKENS.toLocaleString()} tokens<br>
+    <strong>Max text:</strong> ~${maxChars.toLocaleString()} characters
+  `;
+  
+  return { outputTokens, inputTokens, maxChars };
+}
+
+// ====== UTILITIES ======
 function toast(msg){
   const t = document.createElement('div');
   t.className = 'toast'; t.textContent = msg;
@@ -407,9 +466,20 @@ const setStatus = html => { $('#status').innerHTML = html; };
 
 $('#today').textContent = new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}).toUpperCase();
 
-$('#mcRange').addEventListener('input', e => $('#mcOut').textContent = e.target.value + ' Qs');
-$('#shRange').addEventListener('input', e => $('#shOut').textContent = e.target.value + ' Qs');
-$('#lgRange').addEventListener('input', e => $('#lgOut').textContent = e.target.value + ' Qs');
+// ====== EVENT LISTENERS ======
+$('#mcRange').addEventListener('input', e => {
+  $('#mcOut').textContent = e.target.value + ' Qs';
+  updateTokenInfo();
+});
+$('#shRange').addEventListener('input', e => {
+  $('#shOut').textContent = e.target.value + ' Qs';
+  updateTokenInfo();
+});
+$('#lgRange').addEventListener('input', e => {
+  $('#lgOut').textContent = e.target.value + ' Qs';
+  updateTokenInfo();
+});
+
 $('#diffSeg').addEventListener('click', e => {
   const b = e.target.closest('button'); if(!b) return;
   $('#diffSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
@@ -433,6 +503,7 @@ dz.addEventListener('dragleave', () => dz.classList.remove('over'));
 dz.addEventListener('drop', e => { dz.classList.remove('over'); handleFiles(e.dataTransfer.files); });
 fileInput.addEventListener('change', e => handleFiles(e.target.files));
 
+// ====== FILE EXTRACTION ======
 const decodeXML = s => s.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&#(\d+);/g,(m,n)=>String.fromCodePoint(+n)).replace(/&amp;/g,'&');
 
 async function extractPDF(file){
@@ -463,7 +534,6 @@ async function extractPPTX(file){
   return out.join('\n\n');
 }
 
-// Compress image to prevent 524 Timeout / 413 Payload Too Large
 async function compressImage(file){
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -620,6 +690,7 @@ function updateStatus(){
   setStatus('✔ ' + parts.join(' + ') + ' — ' + combined.toLocaleString() + ' total words ready.');
 }
 
+// ====== PROMPT BUILDING ======
 function buildPrompt(material, want){
   const flavor = {
     easy:   'foundational recall',
@@ -649,18 +720,16 @@ function buildPrompt(material, want){
   return lines.filter(Boolean).join('\n');
 }
 
-function sampleText(text){
-  const MAX = 8000; // Leave room for images in payload
+function sampleText(text, maxChars){
   let t = text.replace(/\r/g,'').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();
-  if(t.length <= MAX) return t;
-  return t.slice(0, MAX) + '\n[…excerpt…]\n';
+  if(t.length <= maxChars) return t;
+  return t.slice(0, maxChars) + '\n[…excerpt…]\n';
 }
 
-async function callNVIDIA(textMaterial, images){
-  // Build multimodal content array
+// ====== API CALL ======
+async function callBackend(textMaterial, images, maxOutputTokens){
   const userContent = [{ type: 'text', text: textMaterial }];
   
-  // Limit images to prevent 524 timeout / 413 payload too large
   const MAX_IMAGES = 4; 
   const imagesToSend = images.slice(0, MAX_IMAGES);
   for(const img of imagesToSend){
@@ -673,22 +742,34 @@ async function callNVIDIA(textMaterial, images){
       { role:'system', content:'You are an expert exam writer. Always respond with strict JSON only.' },
       { role:'user', content: userContent.length === 1 && userContent[0].type === 'text' ? textMaterial : userContent }
     ],
-    chat_template_kwargs: { enable_thinking: false }, // Thinking disabled for speed
-    temperature: 0.7, top_p: 0.7, max_tokens: 8192, stream: false
+    chat_template_kwargs: { enable_thinking: false },
+    temperature: 0.7, 
+    top_p: 0.7, 
+    max_tokens: maxOutputTokens, 
+    stream: false
   };
 
-  const r = await fetch(WORKER_URL, {
-    method:'POST', headers:{ 'Content-Type':'application/json' },
+  const r = await fetch(BACKEND_URL, {
+    method:'POST', 
+    headers:{ 'Content-Type':'application/json' },
     body: JSON.stringify(base)
   });
+  
   const j = await r.json().catch(() => ({}));
-  if(!r.ok) throw new Error(j?.error?.message || ('NVIDIA NIM error ' + r.status));
+  
+  if(!r.ok) {
+    if (r.status === 403) {
+      throw new Error('Access denied: This API is restricted to authorized domains only.');
+    }
+    throw new Error(j?.error?.message || ('Backend error ' + r.status));
+  }
+  
   return j?.choices?.[0]?.message?.content || '';
 }
 
 const isPh = v => { const s = String(v ?? '').trim(); return !s || /^[\u2026.·•_\-\s]+$/.test(s); };
 
-// BULLETPROOF JSON PARSER
+// ====== JSON PARSER ======
 function tryParse(raw){
   if (!raw) return null;
   let t = String(raw).trim();
@@ -736,6 +817,7 @@ function parseQuiz(raw){
   return { mc, short, long };
 }
 
+// ====== GENERATION ======
 $('#genBtn').addEventListener('click', generate);
 async function generate(){
   const wantMC = +$('#mcRange').value, wantSH = +$('#shRange').value, wantLG = +$('#lgRange').value;
@@ -747,18 +829,22 @@ async function generate(){
   const btn = $('#genBtn'), label = $('#genLabel');
   btn.disabled = true; label.textContent = '✍ WRITING QUESTIONS…';
   const t0 = performance.now();
+  
   try{
+    setStatus('▸ Calculating token budget…');
+    const { outputTokens, maxChars } = updateTokenInfo();
+    
     setStatus('▸ Building the exam brief…');
     const fileText = readyFiles.filter(f=>f.kind==='text').map(f => `[Doc: ${f.name}]\n${f.text||''}`).join('\n\n');
     const allText = [fileText, state.notes.trim() ? '[Typed notes]\n' + state.notes.trim() : ''].filter(Boolean).join('\n\n');
-    const material = sampleText(allText);
+    const material = sampleText(allText, maxChars);
     const prompt = buildPrompt(material, { mc:wantMC, short:wantSH, long:wantLG });
     const images = readyFiles.filter(f => f.kind === 'image');
 
     let quiz = { mc:[], short:[], long:[] };
     for(let attempt = 1; attempt <= 2; attempt++){
       setStatus('▸ Asking AI… (attempt ' + attempt + '/2)' + (images.length>0 ? ' · analyzing images' : ''));
-      const raw = await callNVIDIA(prompt, images);
+      const raw = await callBackend(prompt, images, outputTokens);
       try{ quiz = parseQuiz(raw); break; }
       catch(err){ if(attempt === 2) throw err; setStatus('▸ Fixing cut-off text, retrying…'); }
     }
@@ -769,7 +855,7 @@ async function generate(){
     if(deficit.mc > 0 || deficit.short > 0 || deficit.long > 0){
       setStatus('▸ Topping up missing questions…');
       try{
-        const q2 = parseQuiz(await callNVIDIA(buildPrompt(material, deficit), images));
+        const q2 = parseQuiz(await callBackend(buildPrompt(material, deficit), images, outputTokens));
         quiz.mc = quiz.mc.concat(q2.mc).slice(0, wantMC);
         quiz.short = quiz.short.concat(q2.short).slice(0, wantSH);
         quiz.long = quiz.long.concat(q2.long).slice(0, wantLG);
@@ -791,6 +877,7 @@ async function generate(){
   }
 }
 
+// ====== RENDERING ======
 function renderQuiz(){
   const { mc, short, long } = state.quiz, m = state.meta;
   $('#mFile').textContent = m.file.length > 26 ? m.file.slice(0,24) + '…' : m.file;
@@ -886,6 +973,9 @@ $('#dlBtn').addEventListener('click', () => {
 });
 
 $('#printBtn').addEventListener('click', () => window.print());
+
+// Initialize token info on load
+updateTokenInfo();
 })();
 </script>
 </body>
