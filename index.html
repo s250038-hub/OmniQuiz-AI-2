@@ -290,7 +290,7 @@
       <div class="lab" style="margin-top:6px"><span style="letter-spacing:.08em">Multiple choice</span><span class="val" id="mcOut">6 Qs</span></div>
       <input type="range" id="mcRange" min="0" max="20" value="6">
       <div class="lab"><span style="letter-spacing:.08em">Short answer (1-3 words)</span><span class="val" id="shOut">3 Qs</span></div>
-      <input type="range" id="shRange" min="0" max="15" value="3">
+      <input type="range" id="shRange" min="0" max="10" value="3">
       <div class="lab"><span style="letter-spacing:.08em">Long / essay</span><span class="val" id="lgOut">1 Qs</span></div>
       <input type="range" id="lgRange" min="0" max="5" value="1">
       <div class="lab"><span style="letter-spacing:.08em">Difficulty</span></div>
@@ -389,6 +389,7 @@ const LETTERS = 'ABCDEF';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
+// state.files: array of {name, kind: 'text'|'image', text?, dataUrl?, size}
 const state = { files:[], notes:'', quiz:null, meta:null, graded:false };
 let difficulty = 'medium';
 
@@ -462,6 +463,7 @@ async function extractPPTX(file){
   return out.join('\n\n');
 }
 
+// Compress image to prevent 524 Timeout / 413 Payload Too Large
 async function compressImage(file){
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -630,9 +632,9 @@ function buildPrompt(material, want){
     'When images are provided, carefully read their visual content and use it to create questions.',
     'Requirements:'
   ];
-  if(want.short > 0) lines.push(`- Exactly ${want.short} short-answer question(s). The answer MUST be extremely brief: just 1 to 3 words (e.g., a specific name, a number, or a very short phrase). DO NOT write complete sentences for short answers.`);
-  if(want.long  > 0) lines.push(`- Exactly ${want.long} long-form / essay question(s). Keep the model answer STRICTLY under 60 words (3-4 sentences max) to prevent output truncation.`);
-  if(want.mc    > 0) lines.push(`- Exactly ${want.mc} multiple-choice question(s). 4 options, 1 correct.`);
+  if(want.short > 0) lines.push(`- Exactly ${want.short} short-answer question(s). The answer MUST be extremely brief: just 1 to 3 words (e.g., a specific name, a number, or a very short phrase). DO NOT write complete sentences for short answers. Put FIRST.`);
+  if(want.long  > 0) lines.push(`- Exactly ${want.long} long-form / essay question(s). Keep the model answer STRICTLY under 60 words (3-4 sentences max) to prevent output truncation. Put SECOND.`);
+  if(want.mc    > 0) lines.push(`- Exactly ${want.mc} multiple-choice question(s). 4 options, 1 correct. Put LAST.`);
   lines.push(
     `- Difficulty: ${flavor}.`,
     lang ? `- Language: ${lang}.` : '- Language: Same as material.',
@@ -648,16 +650,17 @@ function buildPrompt(material, want){
 }
 
 function sampleText(text){
-  // INCREASED to 20000 characters to read much larger documents!
-  const MAX = 20000; 
+  const MAX = 8000; // Leave room for images in payload
   let t = text.replace(/\r/g,'').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();
   if(t.length <= MAX) return t;
   return t.slice(0, MAX) + '\n[…excerpt…]\n';
 }
 
 async function callNVIDIA(textMaterial, images){
+  // Build multimodal content array
   const userContent = [{ type: 'text', text: textMaterial }];
   
+  // Limit images to prevent 524 timeout / 413 payload too large
   const MAX_IMAGES = 4; 
   const imagesToSend = images.slice(0, MAX_IMAGES);
   for(const img of imagesToSend){
@@ -670,7 +673,7 @@ async function callNVIDIA(textMaterial, images){
       { role:'system', content:'You are an expert exam writer. Always respond with strict JSON only.' },
       { role:'user', content: userContent.length === 1 && userContent[0].type === 'text' ? textMaterial : userContent }
     ],
-    chat_template_kwargs: { enable_thinking: false }, 
+    chat_template_kwargs: { enable_thinking: false }, // Thinking disabled for speed
     temperature: 0.7, top_p: 0.7, max_tokens: 8192, stream: false
   };
 
@@ -685,6 +688,7 @@ async function callNVIDIA(textMaterial, images){
 
 const isPh = v => { const s = String(v ?? '').trim(); return !s || /^[\u2026.·•_\-\s]+$/.test(s); };
 
+// BULLETPROOF JSON PARSER
 function tryParse(raw){
   if (!raw) return null;
   let t = String(raw).trim();
@@ -728,6 +732,7 @@ function parseQuiz(raw){
       short.push({ question:q.question, answer:q.answer });
     }
   }
+  if(!mc.length && !short.length && !long.length) throw new Error('No questions returned — retrying.');
   return { mc, short, long };
 }
 
@@ -742,54 +747,43 @@ async function generate(){
   const btn = $('#genBtn'), label = $('#genLabel');
   btn.disabled = true; label.textContent = '✍ WRITING QUESTIONS…';
   const t0 = performance.now();
-  
-  let allMc = [], allShort = [], allLong = [];
-  
   try{
     setStatus('▸ Building the exam brief…');
     const fileText = readyFiles.filter(f=>f.kind==='text').map(f => `[Doc: ${f.name}]\n${f.text||''}`).join('\n\n');
     const allText = [fileText, state.notes.trim() ? '[Typed notes]\n' + state.notes.trim() : ''].filter(Boolean).join('\n\n');
     const material = sampleText(allText);
+    const prompt = buildPrompt(material, { mc:wantMC, short:wantSH, long:wantLG });
     const images = readyFiles.filter(f => f.kind === 'image');
 
-    // BATCH 1: MULTIPLE CHOICE
-    if(wantMC > 0){
-      setStatus('▸ Batch 1/3: Generating Multiple Choice...');
-      const promptMC = buildPrompt(material, { mc: wantMC, short: 0, long: 0 });
-      const rawMC = await callNVIDIA(promptMC, images);
-      const parsedMC = parseQuiz(rawMC);
-      allMc = parsedMC.mc.slice(0, wantMC);
+    let quiz = { mc:[], short:[], long:[] };
+    for(let attempt = 1; attempt <= 2; attempt++){
+      setStatus('▸ Asking AI… (attempt ' + attempt + '/2)' + (images.length>0 ? ' · analyzing images' : ''));
+      const raw = await callNVIDIA(prompt, images);
+      try{ quiz = parseQuiz(raw); break; }
+      catch(err){ if(attempt === 2) throw err; setStatus('▸ Fixing cut-off text, retrying…'); }
     }
 
-    // BATCH 2: SHORT ANSWER
-    if(wantSH > 0){
-      setStatus('▸ Batch 2/3: Generating Short Answer...');
-      const promptSH = buildPrompt(material, { mc: 0, short: wantSH, long: 0 });
-      const rawSH = await callNVIDIA(promptSH, images);
-      const parsedSH = parseQuiz(rawSH);
-      allShort = parsedSH.short.slice(0, wantSH);
+    quiz.mc = quiz.mc.slice(0, wantMC); quiz.short = quiz.short.slice(0, wantSH); quiz.long = quiz.long.slice(0, wantLG);
+
+    const deficit = { mc: wantMC - quiz.mc.length, short: wantSH - quiz.short.length, long: wantLG - quiz.long.length };
+    if(deficit.mc > 0 || deficit.short > 0 || deficit.long > 0){
+      setStatus('▸ Topping up missing questions…');
+      try{
+        const q2 = parseQuiz(await callNVIDIA(buildPrompt(material, deficit), images));
+        quiz.mc = quiz.mc.concat(q2.mc).slice(0, wantMC);
+        quiz.short = quiz.short.concat(q2.short).slice(0, wantSH);
+        quiz.long = quiz.long.concat(q2.long).slice(0, wantLG);
+      }catch(_){}
     }
 
-    // BATCH 3: LONG / ESSAY
-    if(wantLG > 0){
-      setStatus('▸ Batch 3/3: Generating Long / Essay...');
-      const promptLG = buildPrompt(material, { mc: 0, short: 0, long: wantLG });
-      const rawLG = await callNVIDIA(promptLG, images);
-      const parsedLG = parseQuiz(rawLG);
-      allLong = parsedLG.long.slice(0, wantLG);
-    }
-
-    if(allMc.length === 0 && allShort.length === 0 && allLong.length === 0) throw new Error('No usable questions returned.');
-
-    state.quiz = { mc: allMc, short: allShort, long: allLong }; 
-    state.graded = false;
+    state.quiz = quiz; state.graded = false;
     state.meta = {
       file: readyFiles.length > 0 ? readyFiles.map(f=>f.name).join(', ') : 'Typed notes',
       model: MODEL, secs: ((performance.now() - t0) / 1000).toFixed(1),
       date: new Date().toLocaleDateString(undefined,{ year:'numeric', month:'short', day:'numeric' })
     };
     renderQuiz();
-    setStatus('✔ Paper ready — ' + allMc.length + ' MC · ' + allShort.length + ' short · ' + allLong.length + ' long.');
+    setStatus('✔ Paper ready — ' + quiz.mc.length + ' MC · ' + quiz.short.length + ' short · ' + quiz.long.length + ' long.');
   }catch(err){
     setStatus('✖ ' + esc(err.message)); toast(err.message);
   }finally{
