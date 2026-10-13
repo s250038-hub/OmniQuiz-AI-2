@@ -48,7 +48,9 @@
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   select.in{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23a9c6b5' stroke-width='1.6' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
   .micro{font-size:.72rem;color:var(--chalk2);margin-top:8px;line-height:1.5}
-  .gen{width:100%;margin-top:24px;padding:16px;font:700 1rem var(--body);letter-spacing:.06em;background:var(--yellow);color:#14110a;border:2px solid #14110a;border-radius:12px;cursor:pointer;box-shadow:0 6px 0 #071b14,0 12px 26px rgba(0,0,0,.35);transition:.15s}.gen:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 0 #071b14,0 16px 30px rgba(0,0,0,.4)}.gen:active:not(:disabled){transform:translateY(3px);box-shadow:0 2px 0 #071b14}.gen:disabled{opacity:.55;cursor:wait}
+  .testbtn{width:100%;margin-top:10px;padding:10px;font:700 .74rem var(--mono);letter-spacing:.08em;background:transparent;color:var(--chalk2);border:1.5px dashed var(--line);border-radius:10px;cursor:pointer;transition:.15s}
+  .testbtn:hover{color:var(--yellow);border-color:var(--yellow)}
+  .gen{width:100%;margin-top:14px;padding:16px;font:700 1rem var(--body);letter-spacing:.06em;background:var(--yellow);color:#14110a;border:2px solid #14110a;border-radius:12px;cursor:pointer;box-shadow:0 6px 0 #071b14,0 12px 26px rgba(0,0,0,.35);transition:.15s}.gen:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 0 #071b14,0 16px 30px rgba(0,0,0,.4)}.gen:active:not(:disabled){transform:translateY(3px);box-shadow:0 2px 0 #071b14}.gen:disabled{opacity:.55;cursor:wait}
   .output-panel{animation:rise .55s .15s both;min-width:0}
   .toolbar{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px}.tb{font:700 .7rem var(--mono);letter-spacing:.1em;padding:9px 13px;border-radius:9px;border:1.5px solid var(--line);color:var(--chalk);background:rgba(255,255,255,.04);cursor:pointer;transition:.18s}.tb:hover:not(:disabled){border-color:var(--yellow);color:var(--yellow);transform:translateY(-2px)}.tb.on{background:var(--yellow);color:#14110a;border-color:#14110a}.tb:disabled{opacity:.35;cursor:not-allowed}
   .paper-empty{border:2px dashed rgba(233,242,233,.24);border-radius:18px;padding:64px 28px;text-align:center;color:var(--chalk2)}
@@ -93,7 +95,7 @@
 
 <header class="top"><div class="wrap topbar"><div class="brand"><div class="mark">?</div><div class="brand-name">OmniQuiz<em>AI</em></div></div><div class="top-meta"><span class="form-meta">FORM A · SEC. 1 · <span id="today"></span></span><a class="gh" id="ghLink" href="https://github.com/s250038-hub/OmniQuiz-AI-2" target="_blank" rel="noopener">★ Star on GitHub</a></div></div></header>
 
-<div class="ticker" aria-hidden="true"><div class="tt"><span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MULTIMODAL VISION ✦ TYPED NOTES ✦ MC ✦ SHORT ✦ LONG ✦ AUTO-GRADING ✦ PDF EXPORT ✦&nbsp;</span><span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MULTIMODAL VISION ✦ TYPED NOTES ✦ MC ✦ SHORT ✦ LONG ✦ AUTO-GRADING ✦ PDF EXPORT ✦&nbsp;</span></div></div>
+<div class="ticker" aria-hidden="true"><div class="tt"><span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MULTIMODAL VISION ✦ TYPED NOTES ✦ MC ✦ SHORT ✦ LONG ✦ AUTO-GRADING ✦ PDF EXPORT ✦&nbsp;</span><span class="tg">PDF ✦ DOCX  PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MULTIMODAL VISION ✦ TYPED NOTES ✦ MC ✦ SHORT ✦ LONG ✦ AUTO-GRADING ✦ PDF EXPORT ✦&nbsp;</span></div></div>
 
 <main class="wrap">
   <section class="input-panel" aria-label="Quiz setup">
@@ -143,6 +145,7 @@
       <div class="lab"><span style="letter-spacing:.08em">Model</span></div>
       <select class="in" id="modelSel" disabled><option>nvidia/nemotron-3-nano-omni-30b-a3b-reasoning</option></select>
       <p class="micro">Multimodal Vision · Thinking off · Batch generation enabled</p>
+      <button type="button" class="testbtn" id="testBtn">🔧 TEST API CONNECTION</button>
     </div>
     <button class="gen" id="genBtn" type="button"><span id="genLabel">⚡ GENERATE QUIZ</span></button>
   </section>
@@ -194,7 +197,9 @@ let difficulty='medium';
 const WORKER_URL="https://ehjkwqngbrf.s250038.workers.dev";
 const MODEL='nvidia/nemotron-3-nano-omni-30b-a3b-reasoning';
 
-function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;$('#toasts').appendChild(t);requestAnimationFrame(()=>t.classList.add('on'));setTimeout(()=>{t.classList.remove('on');setTimeout(()=>t.remove(),350)},3800)}
+if(location.protocol==='file:'){setTimeout(()=>toast('⚠ You opened a local file. The API only works from your GitHub Pages URL (https://s250038-hub.github.io/OmniQuiz-AI-2/).'),800)}
+
+function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;$('#toasts').appendChild(t);requestAnimationFrame(()=>t.classList.add('on'));setTimeout(()=>{t.classList.remove('on');setTimeout(()=>t.remove(),350)},5000)}
 const setStatus=html=>{$('#status').innerHTML=html};
 $('#today').textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}).toUpperCase();
 $('#mcRange').addEventListener('input',e=>$('#mcOut').textContent=e.target.value+' Qs');
@@ -221,7 +226,7 @@ async function extractPPTX(file){const zip=await JSZip.loadAsync(await file.arra
 
 async function compressImage(file){return new Promise((resolve,reject)=>{const img=new Image();const url=URL.createObjectURL(file);img.onload=()=>{URL.revokeObjectURL(url);const MAX=1024;let{width,height}=img;if(width>MAX||height>MAX){if(width>height){height=Math.round(height*MAX/width);width=MAX}else{width=Math.round(width*MAX/height);height=MAX}}const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;const ctx=canvas.getContext('2d');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,width,height);ctx.drawImage(img,0,0,width,height);resolve(canvas.toDataURL('image/jpeg',0.7))};img.onerror=e=>{URL.revokeObjectURL(url);reject(e)};img.src=url})}
 
-async function handleFiles(fileList){if(!fileList||fileList.length===0)return;const files=Array.from(fileList);const placeholders=[];for(const f of files){const name=f.name.toLowerCase();const type=f.type.toLowerCase();const isImage=type.startsWith('image/')||/\.(png|jpe?g|webp|gif|bmp)$/.test(name);const okExt=/\.(pdf|docx|pptx|txt|md|png|jpe?g|webp|gif|bmp)$/.test(name);const okMime=type.startsWith('image/')||type==='application/pdf'||type.includes('wordprocessingml')||type.includes('presentationml')||type.startsWith('text/');if(!okExt&&!okMime){toast('Skipped: '+f.name);continue}placeholders.push({name:f.name,kind:isImage?'image':'text',text:'',dataUrl:'',size:f.size,processing:true,_srcFile:f})}if(placeholders.length===0)return;state.files=state.files.concat(placeholders);renderChips();updateStatus();for(let i=0;i<placeholders.length;i++){const p=placeholders[i];const realIdx=state.files.indexOf(p);try{if(p.kind==='image'){setStatus('▸ Compressing '+esc(p.name)+'…');state.files[realIdx].dataUrl=await compressImage(p._srcFile)}else{setStatus('▸ Reading '+esc(p.name)+'…');let text='';const n=p.name.toLowerCase();if(n.endsWith('.pdf'))text=await extractPDF(p._srcFile);else if(n.endsWith('.docx'))text=await extractDOCX(p._srcFile);else if(n.endsWith('.pptx'))text=await extractPPTX(p._srcFile);else text=await p._srcFile.text();state.files[realIdx].text=text}state.files[realIdx].processing=false;delete state.files[realIdx]._srcFile;renderChips();updateStatus()}catch(err){state.files[realIdx].processing=false;delete state.files[realIdx]._srcFile;toast('Failed: '+p.name);renderChips();updateStatus()}}}
+async function handleFiles(fileList){if(!fileList||fileList.length===0)return;const files=Array.from(fileList);const placeholders=[];for(const f of files){const name=f.name.toLowerCase();const type=f.type.toLowerCase();const isImage=type.startsWith('image/')||/\.(png|jpe?g|webp|gif|bmp)$/.test(name);const okExt=/\.(pdf|docx|pptx|txt|md|png|jpe?g|webp|gif|bmp)$/.test(name);const okMime=type.startsWith('image/')||type==='application/pdf'||type.includes('wordprocessingml')||type.includes('presentationml')||type.startsWith('text/');if(!okExt&&!okMime){toast('Skipped: '+f.name);continue}placeholders.push({name:f.name,kind:isImage?'image':'text',text:'',dataUrl:'',size:f.size,processing:true,_srcFile:f})}if(placeholders.length===0)return;state.files=state.files.concat(placeholders);renderChips();updateStatus();for(let i=0;i<placeholders.length;i++){const p=placeholders[i];const realIdx=state.files.indexOf(p);try{if(p.kind==='image'){setStatus('▸ Compressing '+esc(p.name)+'…');state.files[realIdx].dataUrl=await compressImage(p._srcFile)}else{setStatus('▸ Reading '+esc(p.name)+'…');let text='';const n=p.name.toLowerCase();if(n.endsWith('.pdf'))text=await extractPDF(p._srcFile);else if(n.endsWith('.docx'))text=await extractDOCX(p._srcFile);else if(n.endsWith('.pptx'))text=await extractPPTX(p._srcFile);else text=await p._srcFile.text();state.files[realIdx].text=text}state.files[realIdx].processing=false;delete state.files[realIdx]._srcFile;renderChips();updateStatus()}catch(err){console.error(err);state.files[realIdx].processing=false;delete state.files[realIdx]._srcFile;toast('Failed: '+p.name+' — '+err.message);renderChips();updateStatus()}}}
 
 function renderChips(){const container=$('#chipContainer');container.innerHTML='';state.files.forEach((f,idx)=>{const chip=document.createElement('div');chip.className='chip'+(f.processing?' processing':'');const icon=f.kind==='image'?'🖼':'¶';const words=(f.text||'').split(/\s+/).filter(Boolean).length;const info=f.processing?'Processing…':(f.kind==='image'?Math.max(1,Math.round(f.size/1024))+' KB · Image (Vision)':Math.max(1,Math.round(f.size/1024))+' KB · '+words+' words');const preview=!f.processing&&f.kind==='text'&&f.text?'<div class="cpreview">'+esc(f.text.slice(0,200))+'</div>':'';const actions=f.processing?'':'<div class="cactions"><button type="button" class="del">✕ REMOVE</button></div>';chip.innerHTML='<span class="fico" aria-hidden="true">'+icon+'</span><span class="cmeta"><span class="cname">'+esc(f.name)+'</span><br><span class="cinfo">'+info+'</span>'+preview+actions+'</span>';const delBtn=chip.querySelector('.del');if(delBtn)delBtn.addEventListener('click',()=>{state.files.splice(idx,1);renderChips();updateStatus()});container.appendChild(chip)})}
 
@@ -240,16 +245,48 @@ function buildPrompt(material,want){
 
 function sampleText(text){const MAX=20000;let t=text.replace(/\r/g,'').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();if(t.length<=MAX)return t;return t.slice(0,MAX)+'\n[…excerpt…]\n'}
 
+/* API call with automatic fallbacks: kwargs on/off, images on/off */
 async function callNVIDIA(textMaterial,images){
   const userContent=[{type:'text',text:textMaterial}];
-  const MAX_IMAGES=4;const imagesToSend=images.slice(0,MAX_IMAGES);
+  const imagesToSend=images.slice(0,4);
   for(const img of imagesToSend)userContent.push({type:'image_url',image_url:{url:img.dataUrl}});
-  const base={model:MODEL,messages:[{role:'system',content:'You are an expert exam writer. Always respond with strict JSON only.'},{role:'user',content:userContent.length===1&&userContent[0].type==='text'?textMaterial:userContent}],chat_template_kwargs:{enable_thinking:false},temperature:0.7,top_p:0.7,max_tokens:8192,stream:false};
-  const r=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(base)});
-  const j=await r.json().catch(()=>({}));
-  if(!r.ok)throw new Error(j?.error?.message||('NVIDIA NIM error '+r.status));
-  return j?.choices?.[0]?.message?.content||'';
+  const hasImages=imagesToSend.length>0;
+  const mk=(useKwargs,useImages)=>{
+    const body={model:MODEL,messages:[{role:'system',content:'You are an expert exam writer. Always respond with strict JSON only.'},{role:'user',content:(useImages&&hasImages)?userContent:textMaterial}],temperature:0.7,top_p:0.7,max_tokens:8192,stream:false};
+    if(useKwargs)body.chat_template_kwargs={enable_thinking:false};
+    return body;
+  };
+  const attempts=[];
+  for(const uk of [true,false])for(const ui of (hasImages?[true,false]:[false]))attempts.push(mk(uk,ui));
+  let lastErr=null;
+  for(const body of attempts){
+    try{
+      const r=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      const j=await r.json().catch(()=>({}));
+      if(!r.ok){lastErr=new Error('HTTP '+r.status+': '+(j?.error?.message||JSON.stringify(j).slice(0,200)||'no body'));console.warn('[OmniQuiz] attempt failed:',lastErr.message);continue}
+      const content=j?.choices?.[0]?.message?.content||'';
+      if(!content){lastErr=new Error('Empty model response');continue}
+      console.log('[OmniQuiz] raw model response:',content);
+      return content;
+    }catch(err){lastErr=err;console.warn('[OmniQuiz] network error:',err.message)}
+  }
+  throw lastErr||new Error('All API attempts failed');
 }
+
+/* 🔧 Diagnostic test button */
+$('#testBtn').addEventListener('click',async()=>{
+  const btn=$('#testBtn');btn.disabled=true;btn.textContent='⏳ TESTING…';
+  setStatus('▸ Testing worker + NVIDIA key + model…');
+  try{
+    const r=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:MODEL,messages:[{role:'user',content:'Reply with the single word: OK'}],max_tokens:16,stream:false})});
+    const j=await r.json().catch(()=>null);
+    if(!r.ok){setStatus('✖ Worker reached but NVIDIA refused: HTTP '+r.status+' — '+esc(j?.error?.message||JSON.stringify(j)||'no body'));toast('API test failed: HTTP '+r.status)}
+    else{const c=j?.choices?.[0]?.message?.content||'(empty)';setStatus('✔ Connection OK — model replied: '+esc(String(c).slice(0,80)));toast('API connection OK ✓')}
+  }catch(err){
+    setStatus('✖ Cannot reach worker at all: '+esc(err.message)+' — check CORS origin / worker deployment / internet.');
+    toast('Cannot reach worker: '+err.message);
+  }finally{btn.disabled=false;btn.textContent='🔧 TEST API CONNECTION'}
+});
 
 const isPh=v=>{const s=String(v??'').trim();return !s||/^[\u2026.·•_\-\s]+$/.test(s)};
 
@@ -266,7 +303,7 @@ function tryParse(raw){
   if(cut>10){
     let truncated=t.slice(0,cut+1);
     if(!truncated.endsWith('}'))truncated+='}';
-    const truncClosers=[']}',']}',']]}]',''];
+    const truncClosers=[']}',']}','']  ;
     for(const c of truncClosers){try{return JSON.parse(truncated+c)}catch(_){}}
   }
   return null;
@@ -340,8 +377,10 @@ async function generate(){
     state.meta={file:readyFiles.length>0?readyFiles.map(f=>f.name).join(', '):'Typed notes',model:MODEL,secs:((performance.now()-t0)/1000).toFixed(1),date:new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})};
     renderQuiz();
     setStatus('✔ Paper ready — '+allMc.length+' MC · '+allShort.length+' short · '+allLong.length+' long.');
-  }catch(err){setStatus('✖ '+esc(err.message));toast(err.message)}
-  finally{btn.disabled=false;label.textContent='⚡ GENERATE QUIZ'}
+  }catch(err){
+    console.error('[OmniQuiz] generate error:',err);
+    setStatus('✖ '+esc(err.message));toast(err.message);
+  }finally{btn.disabled=false;label.textContent='⚡ GENERATE QUIZ'}
 }
 
 function renderQuiz(){
