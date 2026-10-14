@@ -330,7 +330,7 @@
       </div>
       <div class="lab"><span style="letter-spacing:.08em">Model</span></div>
       <select class="in" id="modelSel" disabled><option>nvidia/nemotron-3-nano-omni-30b-a3b-reasoning</option></select>
-      <p class="micro">Multimodal Vision model · 235K context · 16500 output tokens · No image limit.</p>
+      <p class="micro">Multimodal Vision model (Thinking mode disabled for speed).</p>
     </div>
 
     <button class="gen" id="genBtn" type="button"><span id="genLabel">⚡ GENERATE QUIZ</span></button>
@@ -520,7 +520,7 @@ async function extractPPTX(file){
   return out.join('\n\n');
 }
 
-// Compress image to reduce payload size
+// Compress image to prevent 524 Timeout / 413 Payload Too Large
 async function compressImage(file){
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -659,7 +659,7 @@ function buildPrompt(material, want){
 }
 
 function sampleText(text){
-  const MAX = 235000; // CHANGED: was 8000, now 235000
+  const MAX = 8000; // Leave room for images in payload
   let t = text.replace(/\r/g,'').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();
   if(t.length <= MAX) return t;
   return t.slice(0, MAX) + '\n[…excerpt…]\n';
@@ -669,8 +669,10 @@ async function callNVIDIA(textMaterial, images){
   // Build multimodal content array
   const userContent = [{ type: 'text', text: textMaterial }];
   
-  // NO IMAGE LIMIT — send all images
-  for(const img of images){
+  // Limit images to prevent 524 timeout / 413 payload too large
+  const MAX_IMAGES = 4; 
+  const imagesToSend = images.slice(0, MAX_IMAGES);
+  for(const img of imagesToSend){
     userContent.push({ type: 'image_url', image_url: { url: img.dataUrl } });
   }
 
@@ -680,10 +682,8 @@ async function callNVIDIA(textMaterial, images){
       { role:'system', content:'You are an expert exam writer. Always respond with strict JSON only.' },
       { role:'user', content: userContent.length === 1 ? textMaterial : userContent }
     ],
-    chat_template_kwargs: { enable_thinking: false },
-    temperature: 0.7, top_p: 0.7, 
-    max_tokens: 16500, // CHANGED: was 8192, now 16500
-    stream: false
+    chat_template_kwargs: { enable_thinking: false }, // Thinking disabled for speed
+    temperature: 0.7, top_p: 0.7, max_tokens: 8192, stream: false
   };
 
   const r = await fetch(WORKER_URL, {
@@ -778,7 +778,7 @@ async function generate(){
 
     let quiz = { mc:[], short:[], long:[] };
     for(let attempt = 1; attempt <= 2; attempt++){
-      setStatus('▸ Asking AI… (attempt ' + attempt + '/2)' + (images.length>0 ? ' · analyzing ' + images.length + ' image(s)' : ''));
+      setStatus('▸ Asking AI… (attempt ' + attempt + '/2)' + (images.length>0 ? ' · analyzing images' : ''));
       const raw = await callNVIDIA(prompt, images);
       try{ quiz = parseQuiz(raw); break; }
       catch(err){ if(attempt === 2) throw err; setStatus('▸ Fixing cut-off text, retrying…'); }
