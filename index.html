@@ -414,9 +414,9 @@ const MODEL = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning';
 const MAX_TOKENS = 65536;      // max_tokens per call
 const BASE_RESERVE = 1024;     // base overhead per call
 const EXTRA_PER_Q = 64;        // safety headroom per question
-const COST  = { mc:128, short:256, long:512 };
-const MAXQ  = { mc:504, short:252, long:126 };   // floor((65536-1024)/cost)
-const LABEL = { mc:'MC', short:'short', long:'long' };
+const COST  = { mc:128, sh:256, lg:512 };
+const MAXQ  = { mc:504, sh:252, lg:126 };   // floor((65536-1024)/cost)
+const LABEL = { mc:'MC', sh:'short', lg:'long' };
 
 function toast(msg){
   const t = document.createElement('div');
