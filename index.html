@@ -72,11 +72,10 @@
 
   .num{width:5.4em;background:#0c251d;border:1.5px solid var(--line);color:var(--yellow);border-radius:6px;padding:3px 6px;font:700 .74rem var(--mono);text-align:right}
   .num:focus{outline:none;border-color:var(--yellow);box-shadow:0 0 0 3px rgba(255,210,63,.16)}
-  
-  /* Simple status line for budget */
-  .budget{font:400 .66rem var(--mono);margin:2px 0 8px;line-height:1.45}
+  .budget{font:400 .66rem var(--mono);color:var(--chalk2);margin:2px 0 8px;line-height:1.45}
   .budget.ok{color:var(--mint)}
   .budget.warn{color:var(--yellow)}
+  .budget.over{color:var(--red)}
 
   .dz{border:2px dashed #3e7a62;border-radius:14px;padding:26px 16px 20px;text-align:center;cursor:pointer;background:rgba(255,255,255,.02);transition:.2s}
   .dz:hover,.dz.over{border-color:var(--yellow);background:rgba(255,210,63,.07)}
@@ -256,8 +255,8 @@
 
 <div class="ticker" aria-hidden="true">
   <div class="tt">
-    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MULTIMODAL VISION ✦ TYPED NOTES ✦ MC ✦ SHORT ✦ LONG ✦ 3-BATCH ENGINE ✦ PDF EXPORT ✦&nbsp;</span>
-    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MULTIMODAL VISION ✦ TYPED NOTES ✦ MC ✦ SHORT ✦ LONG ✦ 3-BATCH ENGINE ✦ PDF EXPORT ✦&nbsp;</span>
+    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MULTIMODAL VISION ✦ TYPED NOTES ✦ MC ✦ SHORT ✦ LONG ✦ 3-BATCH ENGINE ✦ TOKEN BUDGET ✦ PDF EXPORT ✦&nbsp;</span>
+    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MULTIMODAL VISION ✦ TYPED NOTES ✦ MC ✦ SHORT ✦ LONG ✦ 3-BATCH ENGINE ✦ TOKEN BUDGET ✦ PDF EXPORT ✦&nbsp;</span>
   </div>
 </div>
 
@@ -294,19 +293,19 @@
     </div>
 
     <div class="step">
-      <div class="lab"><span>02 · Quiz mix</span></div>
+      <div class="lab"><span>02 · Quiz mix &amp; token budget</span></div>
 
-      <div class="lab" style="margin-top:6px"><span style="letter-spacing:.08em">Multiple choice</span><span class="val"><input class="num" id="mcNum" type="number" min="0" max="9116" value="6"> Qs</span></div>
-      <input type="range" id="mcRange" min="0" max="9116" value="6">
-      <div class="budget ok" id="mcBudget">✔ OK</div>
+      <div class="lab" style="margin-top:6px"><span style="letter-spacing:.08em">Multiple choice · 128 tok/q · max 63</span><span class="val"><input class="num" id="mcNum" type="number" min="0" max="63" value="6"> Qs</span></div>
+      <input type="range" id="mcRange" min="0" max="63" value="6">
+      <div class="budget ok" id="mcBudget"></div>
 
-      <div class="lab"><span style="letter-spacing:.08em">Short answer (1 sentence)</span><span class="val"><input class="num" id="shNum" type="number" min="0" max="9116" value="3"> Qs</span></div>
-      <input type="range" id="shRange" min="0" max="9116" value="3">
-      <div class="budget ok" id="shBudget">✔ OK</div>
+      <div class="lab"><span style="letter-spacing:.08em">Short answer (1 sentence) · 256 tok/q · max 31</span><span class="val"><input class="num" id="shNum" type="number" min="0" max="31" value="3"> Qs</span></div>
+      <input type="range" id="shRange" min="0" max="31" value="3">
+      <div class="budget ok" id="shBudget"></div>
 
-      <div class="lab"><span style="letter-spacing:.08em">Long / essay</span><span class="val"><input class="num" id="lgNum" type="number" min="0" max="9116" value="1"> Qs</span></div>
-      <input type="range" id="lgRange" min="0" max="9116" value="1">
-      <div class="budget ok" id="lgBudget">✔ OK</div>
+      <div class="lab"><span style="letter-spacing:.08em">Long / essay · 512 tok/q · max 15</span><span class="val"><input class="num" id="lgNum" type="number" min="0" max="15" value="1"> Qs</span></div>
+      <input type="range" id="lgRange" min="0" max="15" value="1">
+      <div class="budget ok" id="lgBudget"></div>
 
       <div class="lab"><span style="letter-spacing:.08em">Difficulty</span></div>
       <div class="seg" id="diffSeg" role="group" aria-label="Difficulty">
@@ -331,7 +330,7 @@
       </div>
       <div class="lab"><span style="letter-spacing:.08em">Model</span></div>
       <select class="in" id="modelSel" disabled><option>nvidia/nemotron-3-nano-omni-30b-a3b-reasoning</option></select>
-      <p class="micro">3 calls per quiz (MC / Short / Long) · 65,536 tokens/call · Max 9116 questions.</p>
+      <p class="micro">3 calls per quiz (MC / Short / Long) · 9,116 output tokens per call · 190,464 char input · no image limit.</p>
     </div>
 
     <button class="gen" id="genBtn" type="button"><span id="genLabel">⚡ GENERATE QUIZ</span></button>
@@ -384,7 +383,7 @@
 <footer>
   <div class="wrap foot">
     <span>🔒 Files parsed in-browser. AI queried securely via hidden proxy.</span>
-    <span>OMNIZQ-AI · BATCH EDITION</span>
+    <span>OMNIZQ-AI · BATCH + BUDGET EDITION</span>
   </div>
 </footer>
 
@@ -401,6 +400,7 @@ const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const LETTERS = 'ABCDEF';
+const fmt = n => n.toLocaleString();
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
@@ -410,8 +410,13 @@ let difficulty = 'medium';
 const WORKER_URL = "https://ehjkwqngbrf.s250038.workers.dev";
 const MODEL = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning';
 
-/* ---- CONSTANTS ---- */
-const MAX_LIMIT = 9116; // The hard limit per question type
+/* ---- TOKEN BUDGET CONSTANTS (9116 tokens per call) ---- */
+const MAX_TOKENS = 9116;       // max_tokens per call
+const BASE_RESERVE = 1024;     // base overhead per call
+const EXTRA_PER_Q = 64;        // safety headroom per question
+const COST  = { mc:128, sh:256, lg:512 };
+const MAXQ  = { mc:63, sh:31, lg:15 };           // floor((9116-1024)/cost)
+const LABEL = { mc:'MC', sh:'short', lg:'long' };
 
 function toast(msg){
   const t = document.createElement('div');
@@ -424,45 +429,42 @@ const setStatus = html => { $('#status').innerHTML = html; };
 
 $('#today').textContent = new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}).toUpperCase();
 
-/* ---- SIMPLE BUDGET CHECK (NO MATH SHOWN) ---- */
-function checkBudget(type, n){
+/* ---- Budget readout + synced number/slider controls ---- */
+function budgetLine(type, n){
   const el = $('#'+type+'Budget');
-  if(n > MAX_LIMIT){
-    el.className = 'budget warn';
-    el.textContent = '⚠ Not recommended over ' + MAX_LIMIT + ' questions';
-  } else {
-    el.className = 'budget ok';
-    el.textContent = '✔ OK';
+  const cost = COST[type];
+  const used = BASE_RESERVE + n*cost;
+  const withExtra = used + n*EXTRA_PER_Q;
+  if(n > MAXQ[type]){
+    el.className = 'budget over';
+    el.textContent = '✖ Over per-call limit — max ' + MAXQ[type] + ' ' + LABEL[type] + ' questions per call.';
+    return;
   }
+  if(withExtra > MAX_TOKENS){
+    el.className = 'budget warn';
+    el.textContent = '⚠ ' + n + ' × ' + cost + ' = ' + fmt(n*cost) + ' tok + ' + fmt(BASE_RESERVE) + ' base = ' + fmt(used) + ' / ' + fmt(MAX_TOKENS) + ' · no +64 tok/question headroom left — not suggested to use max tokens';
+    return;
+  }
+  el.className = 'budget ok';
+  el.textContent = '✔ ' + n + ' × ' + cost + ' = ' + fmt(n*cost) + ' tok + ' + fmt(BASE_RESERVE) + ' base = ' + fmt(used) + ' / ' + fmt(MAX_TOKENS) + ' · +64 tok headroom per question OK';
 }
 
 function bindCount(type){
   const num = $('#'+type+'Num'), range = $('#'+type+'Range');
   const set = v => {
-    let val = Math.floor(+v || 0);
-    if(val < 0) val = 0;
-    
-    // Hard clamp to prevent breaking things, but show warning first
-    if(val > MAX_LIMIT) {
-       val = MAX_LIMIT; 
-       // We clamp silently here to keep UI clean, the warning showed in checkBudget
-    }
-
-    if(+num.value !== val) num.value = val;
-    if(+range.value !== val) range.value = val;
-    
-    // Check original input for warning logic
-    checkBudget(type, Math.floor(+v || 0));
+    v = Math.max(0, Math.min(MAXQ[type], Math.floor(+v || 0)));
+    if(+num.value !== v) num.value = v;
+    if(+range.value !== v) range.value = v;
+    budgetLine(type, v);
   };
-  
-  num.addEventListener('input', () => set(num.value));
+  num.addEventListener('input', () => {
+    if(+num.value > MAXQ[type]) toast('Limit: max ' + MAXQ[type] + ' ' + LABEL[type] + ' questions per call.');
+    set(num.value);
+  });
   num.addEventListener('change', () => set(num.value));
   range.addEventListener('input', () => set(range.value));
-  
-  // Init
   set(num.value);
 }
-
 bindCount('mc'); bindCount('sh'); bindCount('lg');
 
 $('#diffSeg').addEventListener('click', e => {
@@ -622,7 +624,7 @@ function updateStatus(){
   if(docCount > 0) parts.push(docCount + ' document(s)');
   if(imgCount > 0) parts.push(imgCount + ' image(s)');
   if(notesWords > 0) parts.push(notesWords + ' typed words');
-  setStatus('✔ ' + parts.join(' + ') + ' — ' + combined.toLocaleString() + ' total words ready.');
+  setStatus('✔ ' + parts.join(' + ') + ' — ' + fmt(combined) + ' total words ready.');
 }
 
 function buildPrompt(material, want){
@@ -633,24 +635,30 @@ function buildPrompt(material, want){
     'When images are provided, carefully read their visual content and use it to create questions.',
     'Requirements:'
   ];
-  if(want.short > 0) lines.push('- Exactly ' + want.short + ' short-answer question(s). Each answer MUST be exactly ONE complete sentence.');
+  if(want.short > 0) lines.push('- Exactly ' + want.short + ' short-answer question(s). Each answer MUST be exactly ONE complete sentence (not a few words, not multiple sentences).');
   if(want.long  > 0) lines.push('- Exactly ' + want.long + ' long-form / essay question(s). Each model answer MUST be 3-4 sentences (under 60 words).');
-  if(want.mc    > 0) lines.push('- Exactly ' + want.mc + ' multiple-choice question(s). Each has exactly 4 options and exactly 1 correct answer.');
+  if(want.mc    > 0) lines.push('- Exactly ' + want.mc + ' multiple-choice question(s). Each has exactly 4 options and exactly 1 correct answer. Vary the correct option position.');
   lines.push(
     '- Difficulty: ' + flavor + '.',
     lang ? '- Language: ' + lang + '.' : '- Language: Same as material.',
     focus ? '- Focus: ' + focus + '.' : '',
+    '- Use ONLY facts present in the material. Never invent facts.',
     '- Output ONLY the JSON object. No markdown fences, no commentary.',
     '',
-    'FORMAT EXAMPLE:',
-    '{"questions":[{"type":"short","question":"Q?","answer":"One sentence."},{"type":"long","question":"Q?","answer":"3-4 sentences."},{"type":"mc","question":"Q?","options":["A","B","C","D"],"answerIndex":0,"explanation":"E."}]}'
+    'FORMAT EXAMPLE (format only — content is fake, do NOT reuse):'
   );
-  lines.push('', 'STUDY MATERIAL TEXT:\n"""\n' + material + '\n"""');
+  const ex = [];
+  if(want.short > 0) ex.push('{"type":"short","question":"Name the pigment that captures light energy in plants.","answer":"Chlorophyll is the pigment that captures light energy."}');
+  if(want.long  > 0) ex.push('{"type":"long","question":"Explain where photosynthesis takes place and its two main stages.","answer":"Photosynthesis takes place in the chloroplasts of plant cells. In the light-dependent reactions, light energy splits water and produces ATP and NADPH. In the Calvin cycle, carbon dioxide is fixed into glucose using those products."}');
+  if(want.mc    > 0) ex.push('{"type":"mc","question":"What gas do plants absorb during photosynthesis?","options":["Oxygen","Carbon dioxide","Nitrogen","Hydrogen"],"answerIndex":1,"explanation":"Plants absorb carbon dioxide from the air."}');
+  lines.push('{"questions":[' + ex.join(',') + ']}');
+  lines.push('', 'CRITICAL: every string must contain REAL content from the material. NEVER output placeholder dots ("..."). The "questions" array must contain the exact requested counts.',
+    '', 'STUDY MATERIAL TEXT:\n"""\n' + material + '\n"""');
   return lines.filter(Boolean).join('\n');
 }
 
 function sampleText(text){
-  const MAX = 190464; 
+  const MAX = 190464; // max input chars
   let t = text.replace(/\r/g,'').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();
   if(t.length <= MAX) return t;
   return t.slice(0, MAX) + '\n[…excerpt…]\n';
@@ -659,8 +667,6 @@ function sampleText(text){
 async function callNVIDIA(textMaterial, images){
   const userContent = [{ type:'text', text:textMaterial }];
   for(const img of images) userContent.push({ type:'image_url', image_url:{ url: img.dataUrl } });
-  
-  // Try 65536 first, fallback to 16500 if error (to avoid 524/400)
   const mk = mt => ({
     model: MODEL,
     messages:[
@@ -669,19 +675,15 @@ async function callNVIDIA(textMaterial, images){
     ],
     chat_template_kwargs:{ enable_thinking:false },
     temperature:0.7, top_p:0.7,
-    max_tokens: mt, 
+    max_tokens: mt,   // 9116 per call; fallback 4096 if the endpoint rejects it
     stream:false
   });
-
-  let r = await fetch(WORKER_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(mk(65536)) });
+  let r = await fetch(WORKER_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(mk(MAX_TOKENS)) });
   let j = await r.json().catch(() => ({}));
-  
   if(!r.ok && (r.status === 400 || r.status === 422)){
-    // Fallback for safety
-    r = await fetch(WORKER_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(mk(16500)) });
+    r = await fetch(WORKER_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(mk(4096)) });
     j = await r.json().catch(() => ({}));
   }
-  
   if(!r.ok) throw new Error(j?.error?.message || ('NVIDIA NIM error ' + r.status));
   return j?.choices?.[0]?.message?.content || '';
 }
@@ -733,34 +735,18 @@ function parseQuiz(raw){
   return { mc, short, long };
 }
 
+/* ---- ONE BATCH = ONE API CALL (retry + top-up inside) ---- */
 async function genBatch(type, count, material, images){
   let got = [];
-  // Limit loop to prevent infinite hangs, but allow large counts
-  // We chunk requests if count is huge to avoid single-packet timeout? 
-  // User asked for 9116 max. A single request for 9116 questions will definitely timeout.
-  // We must chunk internally if count > 50 (safe batch size).
-  
-  const CHUNK_SIZE = 20; // Safe amount per API call to avoid 524 timeout
-  let remaining = count;
-  
-  while(remaining > 0 && got.length < count){
-    const batchSize = Math.min(remaining, CHUNK_SIZE);
+  for(let attempt = 1; attempt <= 2 && got.length < count; attempt++){
     const want = { mc:0, short:0, long:0 };
-    want[type] = batchSize;
-    
-    // Update status with progress
-    const typeName = type === 'mc' ? 'MC' : (type === 'short' ? 'Short' : 'Long');
-    setStatus(`▸ Generating ${typeName}... (${got.length}/${count})`);
-
+    want[type] = count - got.length;
     try{
       const q = parseQuiz(await callNVIDIA(buildPrompt(material, want), images));
       got = got.concat(q[type]);
     }catch(err){
-      console.error("Batch failed, retrying smaller...", err);
-      // If a batch fails, we might be stuck. Break to return what we have.
-      break; 
+      if(attempt === 2 && got.length === 0) throw err;
     }
-    remaining -= batchSize;
   }
   return got.slice(0, count);
 }
@@ -786,14 +772,17 @@ async function generate(){
     let mc = [], sh = [], lg = [], partial = false;
 
     if(wantMC){
+      setStatus('▸ Batch 1/3: Multiple choice (' + wantMC + ' × 128 tok)…');
       mc = await genBatch('mc', wantMC, material, images);
       if(mc.length < wantMC) partial = true;
     }
     if(wantSH){
+      setStatus('▸ Batch 2/3: Short answer (' + wantSH + ' × 256 tok)…');
       sh = await genBatch('short', wantSH, material, images);
       if(sh.length < wantSH) partial = true;
     }
     if(wantLG){
+      setStatus('▸ Batch 3/3: Long / essay (' + wantLG + ' × 512 tok)…');
       lg = await genBatch('long', wantLG, material, images);
       if(lg.length < wantLG) partial = true;
     }
@@ -807,7 +796,7 @@ async function generate(){
       date: new Date().toLocaleDateString(undefined,{ year:'numeric', month:'short', day:'numeric' })
     };
     renderQuiz();
-    setStatus('✔ Paper ready — ' + mc.length + ' MC · ' + sh.length + ' short · ' + lg.length + ' long.' + (partial ? '  partial' : ''));
+    setStatus('✔ Paper ready — ' + mc.length + ' MC · ' + sh.length + ' short · ' + lg.length + ' long.' + (partial ? ' ⚠ partial (some batches returned fewer)' : ''));
   }catch(err){
     setStatus('✖ ' + esc(err.message)); toast(err.message);
   }finally{
