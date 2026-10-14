@@ -8,7 +8,6 @@
 ![GitHub Pages](https://img.shields.io/badge/Hosted%20on-GitHub%20Pages-blue)
 ![AI Engine](https://img.shields.io/badge/AI-NVIDIA%20NIM-76b900)
 ![Security](https://img.shields.io/badge/Proxy-Cloudflare%20Workers-orange)
-![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
@@ -57,5 +56,5 @@ Here's what the AI generates from a single PDF upload:
 | API Proxy | Cloudflare Workers (free tier) |
 | AI Engine | NVIDIA NIM — `nvidia/nemotron-3.5-lightning-30b-a3b` |
 | Mobile Wrapper | [Capacitor](https://capacitorjs.com/) |
-| CI/CD | GitHub Actions (auto-builds APK + iOS on push) |
 | Hosting | GitHub Pages (free) |
+## hahaha
