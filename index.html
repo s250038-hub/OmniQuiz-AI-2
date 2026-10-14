@@ -66,9 +66,16 @@
   h1 .hl{background:linear-gradient(transparent 58%, rgba(255,210,63,.9) 58%);padding:0 3px}
   .sub{color:var(--chalk2);font-size:.94rem;line-height:1.5;margin-bottom:24px}
   .lab{display:flex;justify-content:space-between;align-items:baseline;font:700 .64rem var(--mono);letter-spacing:.18em;color:var(--chalk2);text-transform:uppercase;margin:20px 0 8px}
-  .lab .val{color:var(--yellow);font-size:.72rem}
+  .lab .val{color:var(--yellow);font-size:.72rem;display:flex;align-items:center;gap:4px}
   .step{border-top:1px dashed rgba(233,242,233,.14);padding-top:16px;margin-top:18px}
   .step:first-of-type{border-top:0;margin-top:0;padding-top:0}
+
+  .num{width:5.4em;background:#0c251d;border:1.5px solid var(--line);color:var(--yellow);border-radius:6px;padding:3px 6px;font:700 .74rem var(--mono);text-align:right}
+  .num:focus{outline:none;border-color:var(--yellow);box-shadow:0 0 0 3px rgba(255,210,63,.16)}
+  .budget{font:400 .66rem var(--mono);color:var(--chalk2);margin:2px 0 8px;line-height:1.45}
+  .budget.ok{color:var(--mint)}
+  .budget.warn{color:var(--yellow)}
+  .budget.over{color:var(--red)}
 
   .dz{border:2px dashed #3e7a62;border-radius:14px;padding:26px 16px 20px;text-align:center;cursor:pointer;background:rgba(255,255,255,.02);transition:.2s}
   .dz:hover,.dz.over{border-color:var(--yellow);background:rgba(255,210,63,.07)}
@@ -248,8 +255,8 @@
 
 <div class="ticker" aria-hidden="true">
   <div class="tt">
-    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MULTIMODAL VISION ✦ TYPED NOTES ✦ MC ✦ SHORT ✦ LONG ✦ AUTO-GRADING ✦ PDF EXPORT ✦&nbsp;</span>
-    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MULTIMODAL VISION ✦ TYPED NOTES ✦ MC ✦ SHORT ✦ LONG ✦ AUTO-GRADING ✦ PDF EXPORT ✦&nbsp;</span>
+    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MULTIMODAL VISION ✦ TYPED NOTES ✦ MC ✦ SHORT ✦ LONG ✦ 3-BATCH ENGINE ✦ TOKEN BUDGET ✦ PDF EXPORT ✦&nbsp;</span>
+    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MULTIMODAL VISION ✦ TYPED NOTES ✦ MC ✦ SHORT ✦ LONG ✦ 3-BATCH ENGINE ✦ TOKEN BUDGET ✦ PDF EXPORT ✦&nbsp;</span>
   </div>
 </div>
 
@@ -286,13 +293,20 @@
     </div>
 
     <div class="step">
-      <div class="lab"><span>02 · Quiz mix</span></div>
-      <div class="lab" style="margin-top:6px"><span style="letter-spacing:.08em">Multiple choice</span><span class="val" id="mcOut">6 Qs</span></div>
-      <input type="range" id="mcRange" min="0" max="20" value="6">
-      <div class="lab"><span style="letter-spacing:.08em">Short answer (1 sentence)</span><span class="val" id="shOut">3 Qs</span></div>
-      <input type="range" id="shRange" min="0" max="10" value="3">
-      <div class="lab"><span style="letter-spacing:.08em">Long / essay</span><span class="val" id="lgOut">1 Qs</span></div>
-      <input type="range" id="lgRange" min="0" max="5" value="1">
+      <div class="lab"><span>02 · Quiz mix &amp; token budget</span></div>
+
+      <div class="lab" style="margin-top:6px"><span style="letter-spacing:.08em">Multiple choice · 128 tok/q · max 63</span><span class="val"><input class="num" id="mcNum" type="number" min="0" max="63" value="6"> Qs</span></div>
+      <input type="range" id="mcRange" min="0" max="63" value="6">
+      <div class="budget ok" id="mcBudget"></div>
+
+      <div class="lab"><span style="letter-spacing:.08em">Short answer (1 sentence) · 256 tok/q · max 31</span><span class="val"><input class="num" id="shNum" type="number" min="0" max="31" value="3"> Qs</span></div>
+      <input type="range" id="shRange" min="0" max="31" value="3">
+      <div class="budget ok" id="shBudget"></div>
+
+      <div class="lab"><span style="letter-spacing:.08em">Long / essay · 512 tok/q · max 15</span><span class="val"><input class="num" id="lgNum" type="number" min="0" max="15" value="1"> Qs</span></div>
+      <input type="range" id="lgRange" min="0" max="15" value="1">
+      <div class="budget ok" id="lgBudget"></div>
+
       <div class="lab"><span style="letter-spacing:.08em">Difficulty</span></div>
       <div class="seg" id="diffSeg" role="group" aria-label="Difficulty">
         <button type="button" data-v="easy">Easy</button>
@@ -316,7 +330,7 @@
       </div>
       <div class="lab"><span style="letter-spacing:.08em">Model</span></div>
       <select class="in" id="modelSel" disabled><option>nvidia/nemotron-3-nano-omni-30b-a3b-reasoning</option></select>
-      <p class="micro">Multimodal Vision model (Thinking mode disabled for speed).</p>
+      <p class="micro">3 calls per quiz (MC / Short / Long) · 9,116 output tokens per call · 190,464 char input · no image limit.</p>
     </div>
 
     <button class="gen" id="genBtn" type="button"><span id="genLabel">⚡ GENERATE QUIZ</span></button>
@@ -369,7 +383,7 @@
 <footer>
   <div class="wrap foot">
     <span>🔒 Files parsed in-browser. AI queried securely via hidden proxy.</span>
-    <span>OMNIZQ-AI · MULTIMODAL EDITION</span>
+    <span>OMNIZQ-AI · BATCH + BUDGET EDITION</span>
   </div>
 </footer>
 
@@ -386,15 +400,23 @@ const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const LETTERS = 'ABCDEF';
+const fmt = n => n.toLocaleString();
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-// state.files: array of {name, kind: 'text'|'image', text?, dataUrl?, size}
 const state = { files:[], notes:'', quiz:null, meta:null, graded:false };
 let difficulty = 'medium';
 
 const WORKER_URL = "https://ehjkwqngbrf.s250038.workers.dev";
 const MODEL = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning';
+
+/* ---- TOKEN BUDGET CONSTANTS (9116 tokens per call) ---- */
+const MAX_TOKENS = 9116;       // max_tokens per call
+const BASE_RESERVE = 1024;     // base overhead per call
+const EXTRA_PER_Q = 64;        // safety headroom per question
+const COST  = { mc:128, sh:256, lg:512 };
+const MAXQ  = { mc:63, sh:31, lg:15 };           // floor((9116-1024)/cost)
+const LABEL = { mc:'MC', sh:'short', lg:'long' };
 
 function toast(msg){
   const t = document.createElement('div');
@@ -407,9 +429,44 @@ const setStatus = html => { $('#status').innerHTML = html; };
 
 $('#today').textContent = new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}).toUpperCase();
 
-$('#mcRange').addEventListener('input', e => $('#mcOut').textContent = e.target.value + ' Qs');
-$('#shRange').addEventListener('input', e => $('#shOut').textContent = e.target.value + ' Qs');
-$('#lgRange').addEventListener('input', e => $('#lgOut').textContent = e.target.value + ' Qs');
+/* ---- Budget readout + synced number/slider controls ---- */
+function budgetLine(type, n){
+  const el = $('#'+type+'Budget');
+  const cost = COST[type];
+  const used = BASE_RESERVE + n*cost;
+  const withExtra = used + n*EXTRA_PER_Q;
+  if(n > MAXQ[type]){
+    el.className = 'budget over';
+    el.textContent = '✖ Over per-call limit — max ' + MAXQ[type] + ' ' + LABEL[type] + ' questions per call.';
+    return;
+  }
+  if(withExtra > MAX_TOKENS){
+    el.className = 'budget warn';
+    el.textContent = '⚠ ' + n + ' × ' + cost + ' = ' + fmt(n*cost) + ' tok + ' + fmt(BASE_RESERVE) + ' base = ' + fmt(used) + ' / ' + fmt(MAX_TOKENS) + ' · no +64 tok/question headroom left — not suggested to use max tokens';
+    return;
+  }
+  el.className = 'budget ok';
+  el.textContent = '✔ ' + n + ' × ' + cost + ' = ' + fmt(n*cost) + ' tok + ' + fmt(BASE_RESERVE) + ' base = ' + fmt(used) + ' / ' + fmt(MAX_TOKENS) + ' · +64 tok headroom per question OK';
+}
+
+function bindCount(type){
+  const num = $('#'+type+'Num'), range = $('#'+type+'Range');
+  const set = v => {
+    v = Math.max(0, Math.min(MAXQ[type], Math.floor(+v || 0)));
+    if(+num.value !== v) num.value = v;
+    if(+range.value !== v) range.value = v;
+    budgetLine(type, v);
+  };
+  num.addEventListener('input', () => {
+    if(+num.value > MAXQ[type]) toast('Limit: max ' + MAXQ[type] + ' ' + LABEL[type] + ' questions per call.');
+    set(num.value);
+  });
+  num.addEventListener('change', () => set(num.value));
+  range.addEventListener('input', () => set(range.value));
+  set(num.value);
+}
+bindCount('mc'); bindCount('sh'); bindCount('lg');
+
 $('#diffSeg').addEventListener('click', e => {
   const b = e.target.closest('button'); if(!b) return;
   $('#diffSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
@@ -463,7 +520,6 @@ async function extractPPTX(file){
   return out.join('\n\n');
 }
 
-// Compress image to prevent 524 Timeout / 413 Payload Too Large
 async function compressImage(file){
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -482,8 +538,7 @@ async function compressImage(file){
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, width, height);
       ctx.drawImage(img, 0, 0, width, height);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-      resolve(dataUrl);
+      resolve(canvas.toDataURL('image/jpeg', 0.7));
     };
     img.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
     img.src = url;
@@ -493,66 +548,44 @@ async function compressImage(file){
 async function handleFiles(fileList){
   if(!fileList || fileList.length === 0) return;
   const files = Array.from(fileList);
-  
   const placeholders = [];
   for(const f of files){
     const name = f.name.toLowerCase();
     const type = f.type.toLowerCase();
     const isImage = type.startsWith('image/') || /\.(png|jpe?g|webp|gif|bmp)$/.test(name);
     const okExt  = /\.(pdf|docx|pptx|txt|md|png|jpe?g|webp|gif|bmp)$/.test(name);
-    const okMime = type.startsWith('image/') ||
-                   type === 'application/pdf' ||
-                   type.includes('wordprocessingml') ||
-                   type.includes('presentationml') ||
-                   type.startsWith('text/');
-    if(!okExt && !okMime){
-      toast('Skipped: ' + f.name);
-      continue;
-    }
-    placeholders.push({
-      name: f.name,
-      kind: isImage ? 'image' : 'text',
-      text: '',
-      dataUrl: '',
-      size: f.size,
-      processing: true,
-      _srcFile: f
-    });
+    const okMime = type.startsWith('image/') || type === 'application/pdf' || type.includes('wordprocessingml') || type.includes('presentationml') || type.startsWith('text/');
+    if(!okExt && !okMime){ toast('Skipped: ' + f.name); continue; }
+    placeholders.push({ name:f.name, kind:isImage?'image':'text', text:'', dataUrl:'', size:f.size, processing:true, _srcFile:f });
   }
-  
   if(placeholders.length === 0) return;
   state.files = state.files.concat(placeholders);
-  renderChips();
-  updateStatus();
-  
+  renderChips(); updateStatus();
   for(let i = 0; i < placeholders.length; i++){
     const p = placeholders[i];
     const realIdx = state.files.indexOf(p);
     try{
       if(p.kind === 'image'){
         setStatus('▸ Compressing ' + esc(p.name) + '…');
-        const dataUrl = await compressImage(p._srcFile);
-        state.files[realIdx].dataUrl = dataUrl;
+        state.files[realIdx].dataUrl = await compressImage(p._srcFile);
       }else{
         setStatus('▸ Reading ' + esc(p.name) + '…');
         let text = '';
-        const name = p.name.toLowerCase();
-        if(name.endsWith('.pdf'))       text = await extractPDF(p._srcFile);
-        else if(name.endsWith('.docx')) text = await extractDOCX(p._srcFile);
-        else if(name.endsWith('.pptx')) text = await extractPPTX(p._srcFile);
-        else                            text = await p._srcFile.text();
+        const n = p.name.toLowerCase();
+        if(n.endsWith('.pdf'))       text = await extractPDF(p._srcFile);
+        else if(n.endsWith('.docx')) text = await extractDOCX(p._srcFile);
+        else if(n.endsWith('.pptx')) text = await extractPPTX(p._srcFile);
+        else                         text = await p._srcFile.text();
         state.files[realIdx].text = text;
       }
       state.files[realIdx].processing = false;
       delete state.files[realIdx]._srcFile;
-      renderChips();
-      updateStatus();
+      renderChips(); updateStatus();
     }catch(err){
       state.files[realIdx].processing = false;
       delete state.files[realIdx]._srcFile;
       toast('Failed: ' + p.name);
-      renderChips();
-      updateStatus();
+      renderChips(); updateStatus();
     }
   }
 }
@@ -565,33 +598,14 @@ function renderChips(){
     chip.className = 'chip' + (f.processing ? ' processing' : '');
     const icon = f.kind === 'image' ? '🖼' : '¶';
     const words = (f.text || '').split(/\s+/).filter(Boolean).length;
-    const info = f.processing 
-      ? 'Processing…' 
-      : (f.kind === 'image'
-          ? Math.max(1, Math.round(f.size/1024)) + ' KB · Image (Vision)'
-          : Math.max(1, Math.round(f.size/1024)) + ' KB · ' + words + ' words');
-    const preview = !f.processing && f.kind === 'text' && f.text
-      ? `<div class="cpreview">${esc(f.text.slice(0, 200))}</div>` 
-      : '';
-    const actions = f.processing ? '' : `
-      <div class="cactions">
-        <button type="button" class="del">✕ REMOVE</button>
-      </div>`;
-    chip.innerHTML = `
-      <span class="fico" aria-hidden="true">${icon}</span>
-      <span class="cmeta">
-        <span class="cname">${esc(f.name)}</span><br>
-        <span class="cinfo">${info}</span>
-        ${preview}
-        ${actions}
-      </span>
-    `;
+    const info = f.processing ? 'Processing…' : (f.kind === 'image'
+      ? Math.max(1, Math.round(f.size/1024)) + ' KB · Image (Vision)'
+      : Math.max(1, Math.round(f.size/1024)) + ' KB · ' + words + ' words');
+    const preview = !f.processing && f.kind === 'text' && f.text ? `<div class="cpreview">${esc(f.text.slice(0, 200))}</div>` : '';
+    const actions = f.processing ? '' : '<div class="cactions"><button type="button" class="del">✕ REMOVE</button></div>';
+    chip.innerHTML = '<span class="fico" aria-hidden="true">'+icon+'</span><span class="cmeta"><span class="cname">'+esc(f.name)+'</span><br><span class="cinfo">'+info+'</span>'+preview+actions+'</span>';
     const delBtn = chip.querySelector('.del');
-    if(delBtn) delBtn.addEventListener('click', () => {
-      state.files.splice(idx, 1);
-      renderChips();
-      updateStatus();
-    });
+    if(delBtn) delBtn.addEventListener('click', () => { state.files.splice(idx, 1); renderChips(); updateStatus(); });
     container.appendChild(chip);
   });
 }
@@ -599,112 +613,97 @@ function renderChips(){
 function updateStatus(){
   const anyProcessing = state.files.some(f => f.processing);
   const readyFiles = state.files.filter(f => !f.processing);
-  const totalWords = readyFiles.filter(f=>f.kind==='text').reduce((sum, f) => sum + (f.text || '').split(/\s+/).filter(Boolean).length, 0);
+  const totalWords = readyFiles.filter(f=>f.kind==='text').reduce((sum,f)=>sum+(f.text||'').split(/\s+/).filter(Boolean).length,0);
   const notesWords = state.notes.trim().split(/\s+/).filter(Boolean).length;
   const combined = totalWords + notesWords;
   const imgCount = readyFiles.filter(f => f.kind === 'image').length;
   const docCount = readyFiles.filter(f => f.kind === 'text').length;
-  
-  if(anyProcessing){
-    setStatus('▸ Processing files… (' + readyFiles.length + '/' + state.files.length + ' done)');
-    return;
-  }
-  if(state.files.length === 0 && notesWords === 0){
-    setStatus('▸ Awaiting submission…');
-    return;
-  }
+  if(anyProcessing){ setStatus('▸ Processing files… (' + readyFiles.length + '/' + state.files.length + ' done)'); return; }
+  if(state.files.length === 0 && notesWords === 0){ setStatus('▸ Awaiting submission…'); return; }
   const parts = [];
   if(docCount > 0) parts.push(docCount + ' document(s)');
   if(imgCount > 0) parts.push(imgCount + ' image(s)');
   if(notesWords > 0) parts.push(notesWords + ' typed words');
-  setStatus('✔ ' + parts.join(' + ') + ' — ' + combined.toLocaleString() + ' total words ready.');
+  setStatus('✔ ' + parts.join(' + ') + ' — ' + fmt(combined) + ' total words ready.');
 }
 
 function buildPrompt(material, want){
-  const flavor = {
-    easy:   'foundational recall',
-    medium: 'a balanced mix of recall and application',
-    hard:   'application and analysis'
-  }[difficulty];
+  const flavor = { easy:'foundational recall', medium:'a balanced mix of recall and application', hard:'application and analysis' }[difficulty];
   const lang = $('#langIn').value.trim(), focus = $('#focusIn').value.trim();
   const lines = [
     'You are an expert exam writer. Create a quiz strictly from the STUDY MATERIAL below (which may include text and images).',
     'When images are provided, carefully read their visual content and use it to create questions.',
     'Requirements:'
   ];
-  if(want.short > 0) lines.push(`- Exactly ${want.short} short-answer question(s). The answer MUST be exactly ONE complete sentence. DO NOT write multiple sentences or just a few words. Put FIRST.`);
-  if(want.long  > 0) lines.push(`- Exactly ${want.long} long-form / essay question(s). Keep the model answer STRICTLY under 60 words (3-4 sentences max) to prevent output truncation. Put SECOND.`);
-  if(want.mc    > 0) lines.push(`- Exactly ${want.mc} multiple-choice question(s). 4 options, 1 correct. Put LAST.`);
+  if(want.short > 0) lines.push('- Exactly ' + want.short + ' short-answer question(s). Each answer MUST be exactly ONE complete sentence (not a few words, not multiple sentences).');
+  if(want.long  > 0) lines.push('- Exactly ' + want.long + ' long-form / essay question(s). Each model answer MUST be 3-4 sentences (under 60 words).');
+  if(want.mc    > 0) lines.push('- Exactly ' + want.mc + ' multiple-choice question(s). Each has exactly 4 options and exactly 1 correct answer. Vary the correct option position.');
   lines.push(
-    `- Difficulty: ${flavor}.`,
-    lang ? `- Language: ${lang}.` : '- Language: Same as material.',
-    focus ? `- Focus: ${focus}.` : '',
+    '- Difficulty: ' + flavor + '.',
+    lang ? '- Language: ' + lang + '.' : '- Language: Same as material.',
+    focus ? '- Focus: ' + focus + '.' : '',
+    '- Use ONLY facts present in the material. Never invent facts.',
     '- Output ONLY the JSON object. No markdown fences, no commentary.',
     '',
-    'FORMAT EXAMPLE:',
-    '{"questions":[{"type":"short","question":"Q?","answer":"One complete sentence here."},{"type":"long","question":"Q?","answer":"3-4 sentences max."},{"type":"mc","question":"Q?","options":["A","B","C","D"],"answerIndex":0,"explanation":"E."}]}',
-    '',
-    'STUDY MATERIAL TEXT:\n"""\n' + material + '\n"""'
+    'FORMAT EXAMPLE (format only — content is fake, do NOT reuse):'
   );
+  const ex = [];
+  if(want.short > 0) ex.push('{"type":"short","question":"Name the pigment that captures light energy in plants.","answer":"Chlorophyll is the pigment that captures light energy."}');
+  if(want.long  > 0) ex.push('{"type":"long","question":"Explain where photosynthesis takes place and its two main stages.","answer":"Photosynthesis takes place in the chloroplasts of plant cells. In the light-dependent reactions, light energy splits water and produces ATP and NADPH. In the Calvin cycle, carbon dioxide is fixed into glucose using those products."}');
+  if(want.mc    > 0) ex.push('{"type":"mc","question":"What gas do plants absorb during photosynthesis?","options":["Oxygen","Carbon dioxide","Nitrogen","Hydrogen"],"answerIndex":1,"explanation":"Plants absorb carbon dioxide from the air."}');
+  lines.push('{"questions":[' + ex.join(',') + ']}');
+  lines.push('', 'CRITICAL: every string must contain REAL content from the material. NEVER output placeholder dots ("..."). The "questions" array must contain the exact requested counts.',
+    '', 'STUDY MATERIAL TEXT:\n"""\n' + material + '\n"""');
   return lines.filter(Boolean).join('\n');
 }
 
 function sampleText(text){
-  const MAX = 8000; // Leave room for images in payload
+  const MAX = 190464; // max input chars
   let t = text.replace(/\r/g,'').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();
   if(t.length <= MAX) return t;
   return t.slice(0, MAX) + '\n[…excerpt…]\n';
 }
 
 async function callNVIDIA(textMaterial, images){
-  // Build multimodal content array
-  const userContent = [{ type: 'text', text: textMaterial }];
-  
-  // Limit images to prevent 524 timeout / 413 payload too large
-  const MAX_IMAGES = 4; 
-  const imagesToSend = images.slice(0, MAX_IMAGES);
-  for(const img of imagesToSend){
-    userContent.push({ type: 'image_url', image_url: { url: img.dataUrl } });
-  }
-
-  const base = {
+  const userContent = [{ type:'text', text:textMaterial }];
+  for(const img of images) userContent.push({ type:'image_url', image_url:{ url: img.dataUrl } });
+  const mk = mt => ({
     model: MODEL,
     messages:[
       { role:'system', content:'You are an expert exam writer. Always respond with strict JSON only.' },
-      { role:'user', content: userContent.length === 1 && userContent[0].type === 'text' ? textMaterial : userContent }
+      { role:'user', content: userContent.length === 1 ? textMaterial : userContent }
     ],
-    chat_template_kwargs: { enable_thinking: false }, // Thinking disabled for speed
-    temperature: 0.7, top_p: 0.7, max_tokens: 8192, stream: false
-  };
-
-  const r = await fetch(WORKER_URL, {
-    method:'POST', headers:{ 'Content-Type':'application/json' },
-    body: JSON.stringify(base)
+    chat_template_kwargs:{ enable_thinking:false },
+    temperature:0.7, top_p:0.7,
+    max_tokens: mt,   // 9116 per call; fallback 4096 if the endpoint rejects it
+    stream:false
   });
-  const j = await r.json().catch(() => ({}));
+  let r = await fetch(WORKER_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(mk(MAX_TOKENS)) });
+  let j = await r.json().catch(() => ({}));
+  if(!r.ok && (r.status === 400 || r.status === 422)){
+    r = await fetch(WORKER_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(mk(4096)) });
+    j = await r.json().catch(() => ({}));
+  }
   if(!r.ok) throw new Error(j?.error?.message || ('NVIDIA NIM error ' + r.status));
   return j?.choices?.[0]?.message?.content || '';
 }
 
 const isPh = v => { const s = String(v ?? '').trim(); return !s || /^[\u2026.·•_\-\s]+$/.test(s); };
 
-// BULLETPROOF JSON PARSER
 function tryParse(raw){
-  if (!raw) return null;
-  let t = String(raw).trim();
-  t = t.replace(/```json\s*/gi, '').replace(/```\s*/gi, '');
-  let start = t.indexOf('{');
-  if (start === -1) return null;
+  if(!raw) return null;
+  let t = String(raw).trim().replace(/```json\s*/gi,'').replace(/```\s*/gi,'');
+  const start = t.indexOf('{');
+  if(start === -1) return null;
   t = t.slice(start);
-  try { return JSON.parse(t); } catch (_) {}
-  const closers = ['"}]}', '"}]}]}', '"', ']}', '}]}', '}', '"]]}', '"]}]}', '"]', '"]}]}'];
-  for (const c of closers) { try { return JSON.parse(t + c); } catch (_) {} }
-  let cut = Math.max(t.lastIndexOf('"},'), t.lastIndexOf('"}'), t.lastIndexOf('},'), t.lastIndexOf('}'));
-  if (cut > 10) {
+  try{ return JSON.parse(t); }catch(_){}
+  const closers = ['"}]}','"}]}]}','"',']}',']}','}','"]]}','"]}]}','"]','"]}]}'];
+  for(const c of closers){ try{ return JSON.parse(t + c); }catch(_){} }
+  const cut = Math.max(t.lastIndexOf('"},'), t.lastIndexOf('"}'), t.lastIndexOf('},'), t.lastIndexOf('}'));
+  if(cut > 10){
     let truncated = t.slice(0, cut + 1);
-    if (!truncated.endsWith('}')) truncated += '}';
-    const truncClosers = [']}', ']}', ']}]}', ''];
-    for (const c of truncClosers) { try { return JSON.parse(truncated + c); } catch (_) {} }
+    if(!truncated.endsWith('}')) truncated += '}';
+    for(const c of [']}',']]}','']){ try{ return JSON.parse(truncated + c); }catch(_){} }
   }
   return null;
 }
@@ -736,9 +735,25 @@ function parseQuiz(raw){
   return { mc, short, long };
 }
 
+/* ---- ONE BATCH = ONE API CALL (retry + top-up inside) ---- */
+async function genBatch(type, count, material, images){
+  let got = [];
+  for(let attempt = 1; attempt <= 2 && got.length < count; attempt++){
+    const want = { mc:0, short:0, long:0 };
+    want[type] = count - got.length;
+    try{
+      const q = parseQuiz(await callNVIDIA(buildPrompt(material, want), images));
+      got = got.concat(q[type]);
+    }catch(err){
+      if(attempt === 2 && got.length === 0) throw err;
+    }
+  }
+  return got.slice(0, count);
+}
+
 $('#genBtn').addEventListener('click', generate);
 async function generate(){
-  const wantMC = +$('#mcRange').value, wantSH = +$('#shRange').value, wantLG = +$('#lgRange').value;
+  const wantMC = +$('#mcNum').value, wantSH = +$('#shNum').value, wantLG = +$('#lgNum').value;
   if(state.files.some(f => f.processing)){ toast('Still processing files.'); return; }
   const readyFiles = state.files.filter(f => !f.processing && ((f.text && f.text.trim().length > 0) || f.dataUrl));
   if(readyFiles.length === 0 && state.notes.trim().length === 0){ toast('Upload a file OR type notes.'); return; }
@@ -749,41 +764,39 @@ async function generate(){
   const t0 = performance.now();
   try{
     setStatus('▸ Building the exam brief…');
-    const fileText = readyFiles.filter(f=>f.kind==='text').map(f => `[Doc: ${f.name}]\n${f.text||''}`).join('\n\n');
+    const fileText = readyFiles.filter(f=>f.kind==='text').map(f => '[Doc: ' + f.name + ']\n' + (f.text||'')).join('\n\n');
     const allText = [fileText, state.notes.trim() ? '[Typed notes]\n' + state.notes.trim() : ''].filter(Boolean).join('\n\n');
     const material = sampleText(allText);
-    const prompt = buildPrompt(material, { mc:wantMC, short:wantSH, long:wantLG });
     const images = readyFiles.filter(f => f.kind === 'image');
 
-    let quiz = { mc:[], short:[], long:[] };
-    for(let attempt = 1; attempt <= 2; attempt++){
-      setStatus('▸ Asking AI… (attempt ' + attempt + '/2)' + (images.length>0 ? ' · analyzing images' : ''));
-      const raw = await callNVIDIA(prompt, images);
-      try{ quiz = parseQuiz(raw); break; }
-      catch(err){ if(attempt === 2) throw err; setStatus('▸ Fixing cut-off text, retrying…'); }
+    let mc = [], sh = [], lg = [], partial = false;
+
+    if(wantMC){
+      setStatus('▸ Batch 1/3: Multiple choice (' + wantMC + ' × 128 tok)…');
+      mc = await genBatch('mc', wantMC, material, images);
+      if(mc.length < wantMC) partial = true;
+    }
+    if(wantSH){
+      setStatus('▸ Batch 2/3: Short answer (' + wantSH + ' × 256 tok)…');
+      sh = await genBatch('short', wantSH, material, images);
+      if(sh.length < wantSH) partial = true;
+    }
+    if(wantLG){
+      setStatus('▸ Batch 3/3: Long / essay (' + wantLG + ' × 512 tok)…');
+      lg = await genBatch('long', wantLG, material, images);
+      if(lg.length < wantLG) partial = true;
     }
 
-    quiz.mc = quiz.mc.slice(0, wantMC); quiz.short = quiz.short.slice(0, wantSH); quiz.long = quiz.long.slice(0, wantLG);
+    if(!mc.length && !sh.length && !lg.length) throw new Error('No usable questions returned.');
 
-    const deficit = { mc: wantMC - quiz.mc.length, short: wantSH - quiz.short.length, long: wantLG - quiz.long.length };
-    if(deficit.mc > 0 || deficit.short > 0 || deficit.long > 0){
-      setStatus('▸ Topping up missing questions…');
-      try{
-        const q2 = parseQuiz(await callNVIDIA(buildPrompt(material, deficit), images));
-        quiz.mc = quiz.mc.concat(q2.mc).slice(0, wantMC);
-        quiz.short = quiz.short.concat(q2.short).slice(0, wantSH);
-        quiz.long = quiz.long.concat(q2.long).slice(0, wantLG);
-      }catch(_){}
-    }
-
-    state.quiz = quiz; state.graded = false;
+    state.quiz = { mc, short:sh, long:lg }; state.graded = false;
     state.meta = {
       file: readyFiles.length > 0 ? readyFiles.map(f=>f.name).join(', ') : 'Typed notes',
       model: MODEL, secs: ((performance.now() - t0) / 1000).toFixed(1),
       date: new Date().toLocaleDateString(undefined,{ year:'numeric', month:'short', day:'numeric' })
     };
     renderQuiz();
-    setStatus('✔ Paper ready — ' + quiz.mc.length + ' MC · ' + quiz.short.length + ' short · ' + quiz.long.length + ' long.');
+    setStatus('✔ Paper ready — ' + mc.length + ' MC · ' + sh.length + ' short · ' + lg.length + ' long.' + (partial ? ' ⚠ partial (some batches returned fewer)' : ''));
   }catch(err){
     setStatus('✖ ' + esc(err.message)); toast(err.message);
   }finally{
@@ -846,16 +859,17 @@ $('#gradeBtn').addEventListener('click', () => {
   });
   state.graded = true; paper.classList.add('graded');
   $('#stampScore').textContent = score + ' / ' + mc.length; stamp.classList.add('on');
-  if(score === mc.length) stamp.classList.add('perfect'); $('#gradeBtn').textContent = '↺ RESET PICKS';
+  if(score === mc.length) stamp.classList.add('perfect');
+  $('#gradeBtn').textContent = '↺ RESET PICKS';
 });
 
 $('#keyBtn').addEventListener('click', () => { $('#paper').classList.toggle('show-key'); $('#keyBtn').classList.toggle('on'); });
 
 $('#copyBtn').addEventListener('click', async () => {
-  const m = state.meta, q = state.quiz; let out = ['# Quiz — ' + m.file, '', `Generated by OmniQuiz-AI · ${m.date}`, ''];
-  if(q.mc.length){ out.push('## Part A — MC', ''); q.mc.forEach((x,i)=>{ out.push(`${i+1}. ${x.question}`); x.options.forEach((o,j)=>out.push(`   - ${LETTERS[j]}. ${o}`)); out.push(`   **Answer: ${LETTERS[x.answerIndex]}**`, ''); }); }
-  if(q.short.length){ out.push('## Part B — Short', ''); q.short.forEach((x,i)=>{ out.push(`${i+1}. ${x.question}`, `   _Ans: ${x.answer}_`, ''); }); }
-  if(q.long.length){ out.push('## Part C — Long', ''); q.long.forEach((x,i)=>{ out.push(`${i+1}. ${x.question}`, `   _Ans: ${x.answer}_`, ''); }); }
+  const m = state.meta, q = state.quiz; let out = ['# Quiz — ' + m.file, '', 'Generated by OmniQuiz-AI · ' + m.date, ''];
+  if(q.mc.length){ out.push('## Part A — MC', ''); q.mc.forEach((x,i)=>{ out.push((i+1)+'. '+x.question); x.options.forEach((o,j)=>out.push('   - '+LETTERS[j]+'. '+o)); out.push('   **Answer: '+LETTERS[x.answerIndex]+'**', ''); }); }
+  if(q.short.length){ out.push('## Part B — Short', ''); q.short.forEach((x,i)=>{ out.push((i+1)+'. '+x.question, '   _Ans: '+x.answer+'_', ''); }); }
+  if(q.long.length){ out.push('## Part C — Long', ''); q.long.forEach((x,i)=>{ out.push((i+1)+'. '+x.question, '   _Ans: '+x.answer+'_', ''); }); }
   try{ await navigator.clipboard.writeText(out.join('\n')); toast('Copied ✓'); }catch(_){ toast('Copy failed'); }
 });
 
