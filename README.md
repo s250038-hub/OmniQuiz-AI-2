@@ -5,8 +5,6 @@
 > Upload any study document and let AI generate a complete exam paper — multiple choice, short answer, and long essay questions — instantly in your browser.
 
 [![Live Demo](https://img.shields.io/badge/demo-online-brightgreen.svg)](https://s250038-hub.github.io/OmniQuiz-AI-2/)
-[![Android APK](https://img.shields.io/badge/Android-APK%20Download-3DDC84?logo=android)](https://github.com/s250038-hub/OmniQuiz-AI-2/raw/main/download/android/app.apk)
-[![iOS App](https://img.shields.io/badge/iOS-Simulator%20Build-000000?logo=apple)](https://github.com/s250038-hub/OmniQuiz-AI-2/raw/main/download/ios/app.app.zip)
 ![GitHub Pages](https://img.shields.io/badge/Hosted%20on-GitHub%20Pages-blue)
 ![AI Engine](https://img.shields.io/badge/AI-NVIDIA%20NIM-76b900)
 ![Security](https://img.shields.io/badge/Proxy-Cloudflare%20Workers-orange)
@@ -29,7 +27,6 @@
 | 📋 **PDF export** | Download printable PDF with question paper + answer key |
 | ⧉ **Markdown export** | Copy or download as `.md` |
 | 🔄 **Smart top-up** | Auto-retries and fills in any missing questions |
-| 📱 **Mobile apps** | Auto-built Android APK + iOS app on every push |
 | 🔒 **100% private** | Files parsed in-browser. API key hidden via proxy |
 
 ### 🎓 Sample Output
@@ -46,19 +43,6 @@ Here's what the AI generates from a single PDF upload:
 ## 🚀 Live Demo
 
 👉 **[https://s250038-hub.github.io/OmniQuiz-AI-2/](https://s250038-hub.github.io/OmniQuiz-AI-2/)**
-
-## 📱 Mobile Apps
-
-Every push to `main` automatically rebuilds both mobile apps via GitHub Actions:
-
-| Platform | Download Link | Notes |
-|---|---|---|
-| 🤖 **Android** | [`download/android/app.apk`](https://github.com/s250038-hub/OmniQuiz-AI-2/raw/main/download/android/app.apk) | Installable on any Android device |
-| 🍎 **iOS** | [`download/ios/app.app.zip`](https://github.com/s250038-hub/OmniQuiz-AI-2/raw/main/download/ios/app.app.zip) | Simulator build (Apple Developer account required for real devices) |
-
-> Both apps wrap the live web version via Capacitor, so they stay auto-updated.
-
----
 
 ## 🛠️ Tech Stack
 
