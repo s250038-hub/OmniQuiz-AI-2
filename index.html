@@ -330,7 +330,7 @@
       </div>
       <div class="lab"><span style="letter-spacing:.08em">Model</span></div>
       <select class="in" id="modelSel" disabled><option>nvidia/nemotron-3-nano-omni-30b-a3b-reasoning</option></select>
-      <p class="micro">3 calls per quiz (MC / Short / Long) · 9,116 output tokens per call · 190,464 char input · no image limit.</p>
+      <p class="micro">Multimodal Vision model · 235K context · 16500 output tokens · No image limit.</p>
     </div>
 
     <button class="gen" id="genBtn" type="button"><span id="genLabel">⚡ GENERATE QUIZ</span></button>
@@ -520,6 +520,7 @@ async function extractPPTX(file){
   return out.join('\n\n');
 }
 
+// Compress image to reduce payload size
 async function compressImage(file){
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -658,32 +659,38 @@ function buildPrompt(material, want){
 }
 
 function sampleText(text){
-  const MAX = 190464; // max input chars
+  const MAX = 235000; // CHANGED: was 8000, now 235000
   let t = text.replace(/\r/g,'').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();
   if(t.length <= MAX) return t;
   return t.slice(0, MAX) + '\n[…excerpt…]\n';
 }
 
 async function callNVIDIA(textMaterial, images){
-  const userContent = [{ type:'text', text:textMaterial }];
-  for(const img of images) userContent.push({ type:'image_url', image_url:{ url: img.dataUrl } });
-  const mk = mt => ({
+  // Build multimodal content array
+  const userContent = [{ type: 'text', text: textMaterial }];
+  
+  // NO IMAGE LIMIT — send all images
+  for(const img of images){
+    userContent.push({ type: 'image_url', image_url: { url: img.dataUrl } });
+  }
+
+  const base = {
     model: MODEL,
     messages:[
       { role:'system', content:'You are an expert exam writer. Always respond with strict JSON only.' },
       { role:'user', content: userContent.length === 1 ? textMaterial : userContent }
     ],
-    chat_template_kwargs:{ enable_thinking:false },
-    temperature:0.7, top_p:0.7,
-    max_tokens: mt,   // 9116 per call; fallback 4096 if the endpoint rejects it
-    stream:false
+    chat_template_kwargs: { enable_thinking: false },
+    temperature: 0.7, top_p: 0.7, 
+    max_tokens: 16500, // CHANGED: was 8192, now 16500
+    stream: false
+  };
+
+  const r = await fetch(WORKER_URL, {
+    method:'POST', headers:{ 'Content-Type':'application/json' },
+    body: JSON.stringify(base)
   });
-  let r = await fetch(WORKER_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(mk(MAX_TOKENS)) });
-  let j = await r.json().catch(() => ({}));
-  if(!r.ok && (r.status === 400 || r.status === 422)){
-    r = await fetch(WORKER_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(mk(4096)) });
-    j = await r.json().catch(() => ({}));
-  }
+  const j = await r.json().catch(() => ({}));
   if(!r.ok) throw new Error(j?.error?.message || ('NVIDIA NIM error ' + r.status));
   return j?.choices?.[0]?.message?.content || '';
 }
@@ -769,27 +776,28 @@ async function generate(){
     const material = sampleText(allText);
     const images = readyFiles.filter(f => f.kind === 'image');
 
-    let mc = [], sh = [], lg = [], partial = false;
-
-    if(wantMC){
-      setStatus('▸ Batch 1/3: Multiple choice (' + wantMC + ' × 128 tok)…');
-      mc = await genBatch('mc', wantMC, material, images);
-      if(mc.length < wantMC) partial = true;
-    }
-    if(wantSH){
-      setStatus('▸ Batch 2/3: Short answer (' + wantSH + ' × 256 tok)…');
-      sh = await genBatch('short', wantSH, material, images);
-      if(sh.length < wantSH) partial = true;
-    }
-    if(wantLG){
-      setStatus('▸ Batch 3/3: Long / essay (' + wantLG + ' × 512 tok)…');
-      lg = await genBatch('long', wantLG, material, images);
-      if(lg.length < wantLG) partial = true;
+    let quiz = { mc:[], short:[], long:[] };
+    for(let attempt = 1; attempt <= 2; attempt++){
+      setStatus('▸ Asking AI… (attempt ' + attempt + '/2)' + (images.length>0 ? ' · analyzing ' + images.length + ' image(s)' : ''));
+      const raw = await callNVIDIA(prompt, images);
+      try{ quiz = parseQuiz(raw); break; }
+      catch(err){ if(attempt === 2) throw err; setStatus('▸ Fixing cut-off text, retrying…'); }
     }
 
-    if(!mc.length && !sh.length && !lg.length) throw new Error('No usable questions returned.');
+    quiz.mc = quiz.mc.slice(0, wantMC); quiz.short = quiz.short.slice(0, wantSH); quiz.long = quiz.long.slice(0, wantLG);
 
-    state.quiz = { mc, short:sh, long:lg }; state.graded = false;
+    const deficit = { mc: wantMC - quiz.mc.length, short: wantSH - quiz.short.length, long: wantLG - quiz.long.length };
+    if(deficit.mc > 0 || deficit.short > 0 || deficit.long > 0){
+      setStatus('▸ Topping up missing questions…');
+      try{
+        const q2 = parseQuiz(await callNVIDIA(buildPrompt(material, deficit), images));
+        quiz.mc = quiz.mc.concat(q2.mc).slice(0, wantMC);
+        quiz.short = quiz.short.concat(q2.short).slice(0, wantSH);
+        quiz.long = quiz.long.concat(q2.long).slice(0, wantLG);
+      }catch(_){}
+    }
+
+    state.quiz = quiz; state.graded = false;
     state.meta = {
       file: readyFiles.length > 0 ? readyFiles.map(f=>f.name).join(', ') : 'Typed notes',
       model: MODEL, secs: ((performance.now() - t0) / 1000).toFixed(1),
