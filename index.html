@@ -107,6 +107,15 @@
   @keyframes blink{50%{opacity:0}}
 
   input[type=range]{width:100%;accent-color:var(--yellow);cursor:pointer;height:26px}
+  .numin{width:76px;background:#0c251d;border:1.5px solid var(--line);color:var(--yellow);border-radius:8px;padding:6px 8px;font:700 .8rem var(--mono);text-align:center;transition:.18s}
+  .numin:focus{outline:none;border-color:var(--yellow);box-shadow:0 0 0 3px rgba(255,210,63,.16)}
+  .mixrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:20px 0 4px}
+  .mixrow .lbl{font:700 .64rem var(--mono);letter-spacing:.18em;color:var(--chalk2);text-transform:uppercase}
+  .budget{margin-top:16px;background:#0c251d;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;font:400 .72rem/1.7 var(--mono);color:var(--chalk2)}
+  .budget b{color:var(--yellow);font-weight:700}
+  .budget .ok{color:var(--mint)}
+  .budget .warn{color:var(--yellow)}
+  .budget .err{color:var(--red)}
   .seg{display:flex;background:#0c251d;border:1.5px solid var(--line);border-radius:10px;padding:3px;gap:3px}
   .seg button{flex:1;font:600 .8rem var(--body);color:var(--chalk2);background:transparent;border:0;padding:8px 4px;border-radius:7px;cursor:pointer;transition:.18s}
   .seg button:hover{color:#fff}
@@ -248,8 +257,8 @@
 
 <div class="ticker" aria-hidden="true">
   <div class="tt">
-    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MULTIMODAL VISION ✦ TYPED NOTES ✦ MC ✦ SHORT ✦ LONG ✦ AUTO-GRADING ✦ PDF EXPORT ✦&nbsp;</span>
-    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MULTIMODAL VISION ✦ TYPED NOTES ✦ MC ✦ SHORT ✦ LONG ✦ AUTO-GRADING ✦ PDF EXPORT ✦&nbsp;</span>
+    <span class="tg">PDF ✦ DOCX  PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MULTIMODAL VISION ✦ TYPED NOTES ✦ MC ✦ SHORT ✦ LONG ✦ TOKEN BUDGET ✦ PDF EXPORT ✦&nbsp;</span>
+    <span class="tg">PDF ✦ DOCX ✦ PPTX ✦ TXT ✦ PNG ✦ JPG ✦ MULTIMODAL VISION ✦ TYPED NOTES ✦ MC ✦ SHORT ✦ LONG ✦ TOKEN BUDGET ✦ PDF EXPORT ✦&nbsp;</span>
   </div>
 </div>
 
@@ -286,13 +295,24 @@
     </div>
 
     <div class="step">
-      <div class="lab"><span>02 · Quiz mix</span></div>
-      <div class="lab" style="margin-top:6px"><span style="letter-spacing:.08em">Multiple choice</span><span class="val" id="mcOut">6 Qs</span></div>
-      <input type="range" id="mcRange" min="0" max="20" value="6">
-      <div class="lab"><span style="letter-spacing:.08em">Short answer (1 sentence)</span><span class="val" id="shOut">3 Qs</span></div>
-      <input type="range" id="shRange" min="0" max="10" value="3">
-      <div class="lab"><span style="letter-spacing:.08em">Long / essay</span><span class="val" id="lgOut">1 Qs</span></div>
-      <input type="range" id="lgRange" min="0" max="5" value="1">
+      <div class="lab"><span>02 · Quiz mix (type or slide)</span></div>
+
+      <div class="mixrow"><span class="lbl">Multiple choice · 128 tok/q</span><input class="numin" id="mcNum" type="number" min="0" max="512" value="6"></div>
+      <input type="range" id="mcRange" min="0" max="512" value="6">
+
+      <div class="mixrow"><span class="lbl">Short answer (1 sentence) · 256 tok/q</span><input class="numin" id="shNum" type="number" min="0" max="256" value="3"></div>
+      <input type="range" id="shRange" min="0" max="256" value="3">
+
+      <div class="mixrow"><span class="lbl">Long / essay · 512 tok/q</span><input class="numin" id="lgNum" type="number" min="0" max="128" value="1"></div>
+      <input type="range" id="lgRange" min="0" max="128" value="1">
+
+      <div class="budget" id="budgetBox">
+        <div>Est. output: <b id="budEst">0</b> / <b>65,536</b> tokens · <b id="budLeft">65,536</b> left</div>
+        <div>+64 headroom/question: <b id="budHead">YES</b></div>
+        <div>Max possible at 65,536: <b>512 MC · 256 Short · 128 Long</b> (base cost)</div>
+        <div id="budWarn" class="ok">✔ Within budget.</div>
+      </div>
+
       <div class="lab"><span style="letter-spacing:.08em">Difficulty</span></div>
       <div class="seg" id="diffSeg" role="group" aria-label="Difficulty">
         <button type="button" data-v="easy">Easy</button>
@@ -316,7 +336,7 @@
       </div>
       <div class="lab"><span style="letter-spacing:.08em">Model</span></div>
       <select class="in" id="modelSel" disabled><option>nvidia/nemotron-3-nano-omni-30b-a3b-reasoning</option></select>
-      <p class="micro">Multimodal Vision model · 235K context · 16500 output tokens · No image limit.</p>
+      <p class="micro">Multimodal Vision · 190,464-char input · 65,536 output tokens · per-type generation.</p>
     </div>
 
     <button class="gen" id="genBtn" type="button"><span id="genLabel">⚡ GENERATE QUIZ</span></button>
@@ -369,7 +389,7 @@
 <footer>
   <div class="wrap foot">
     <span>🔒 Files parsed in-browser. AI queried securely via hidden proxy.</span>
-    <span>OMNIZQ-AI · MULTIMODAL EDITION</span>
+    <span>OMNIZQ-AI · TOKEN BUDGET EDITION</span>
   </div>
 </footer>
 
@@ -389,12 +409,18 @@ const LETTERS = 'ABCDEF';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-// state.files: array of {name, kind: 'text'|'image', text?, dataUrl?, size}
-const state = { files:[], notes:'', quiz:null, meta:null, graded:false };
+const state = { files:[], notes:'', quiz:null, meta:null, graded:false, budget:null };
 let difficulty = 'medium';
 
 const WORKER_URL = "https://ehjkwqngbrf.s250038.workers.dev";
 const MODEL = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning';
+
+/* ---- TOKEN BUDGET MODEL ---- */
+const MAX_TOKENS = 65536;          // output cap
+const MAX_INPUT  = 190464;         // input char cap
+const COST  = { mc:128, short:256, long:512 };   // base tokens per question
+const HEAD  = 64;                  // extra headroom tokens per question
+const CAPS  = { mc:512, short:256, long:128 };   // 65536/128, /256, /512
 
 function toast(msg){
   const t = document.createElement('div');
@@ -407,9 +433,42 @@ const setStatus = html => { $('#status').innerHTML = html; };
 
 $('#today').textContent = new Date().toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}).toUpperCase();
 
-$('#mcRange').addEventListener('input', e => $('#mcOut').textContent = e.target.value + ' Qs');
-$('#shRange').addEventListener('input', e => $('#shOut').textContent = e.target.value + ' Qs');
-$('#lgRange').addEventListener('input', e => $('#lgOut').textContent = e.target.value + ' Qs');
+/* ---- synced sliders + number inputs + live budget ---- */
+function calcBudget(){
+  const mc = +$('#mcRange').value, sq = +$('#shRange').value, lq = +$('#lgRange').value;
+  const base  = mc*COST.mc + sq*COST.short + lq*COST.long;
+  const extra = (mc+sq+lq)*HEAD;
+  let head = true, total = base + extra;
+  if(total > MAX_TOKENS){ head = false; total = base; }
+  const over  = base > MAX_TOKENS;
+  const atMax = (mc >= CAPS.mc) || (sq >= CAPS.short) || (lq >= CAPS.long);
+  state.budget = { mc, sq, lq, base, extra, total, head, over, atMax };
+
+  $('#budEst').textContent  = total.toLocaleString();
+  $('#budLeft').textContent = Math.max(0, MAX_TOKENS - total).toLocaleString();
+  $('#budHead').textContent = head ? 'YES' : 'NO (not enough room)';
+  const w = $('#budWarn');
+  if(over){ w.className='err'; w.textContent = '✖ OVER LIMIT: base ' + base.toLocaleString() + ' > 65,536 — reduce questions.'; }
+  else{
+    const msgs = [];
+    if(!head) msgs.push('⚠ No room for +64/question headroom.');
+    if(atMax) msgs.push('⚠ Not suggested to use max token / max counts.');
+    if(total > 32000) msgs.push('⚠ Very large request — proxy may time out (524).');
+    if(msgs.length){ w.className='warn'; w.textContent = msgs.join(' '); }
+    else { w.className='ok'; w.textContent = '✔ Within budget.'; }
+  }
+}
+function syncMix(from){
+  const pairs = [['mcRange','mcNum',CAPS.mc],['shRange','shNum',CAPS.short],['lgRange','lgNum',CAPS.long]];
+  for(const [r,n,cap] of pairs){
+    let v = Math.max(0, Math.min(cap, Math.round(+$( '#'+(from===n?r:n) ).value || 0)));
+    if(from === n) v = Math.max(0, Math.min(cap, Math.round(+$('#'+n).value || 0)));
+    $('#'+r).value = v; $('#'+n).value = v;
+  }
+  calcBudget();
+}
+['mcRange','shRange','lgRange'].forEach(id => $('#'+id).addEventListener('input', () => syncMix(id)));
+['mcNum','shNum','lgNum'].forEach(id => $('#'+id).addEventListener('input', () => syncMix(id)));
 $('#diffSeg').addEventListener('click', e => {
   const b = e.target.closest('button'); if(!b) return;
   $('#diffSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
@@ -463,7 +522,6 @@ async function extractPPTX(file){
   return out.join('\n\n');
 }
 
-// Compress image to reduce payload size
 async function compressImage(file){
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -482,8 +540,7 @@ async function compressImage(file){
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, width, height);
       ctx.drawImage(img, 0, 0, width, height);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-      resolve(dataUrl);
+      resolve(canvas.toDataURL('image/jpeg', 0.7));
     };
     img.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
     img.src = url;
@@ -493,66 +550,44 @@ async function compressImage(file){
 async function handleFiles(fileList){
   if(!fileList || fileList.length === 0) return;
   const files = Array.from(fileList);
-  
   const placeholders = [];
   for(const f of files){
     const name = f.name.toLowerCase();
     const type = f.type.toLowerCase();
     const isImage = type.startsWith('image/') || /\.(png|jpe?g|webp|gif|bmp)$/.test(name);
     const okExt  = /\.(pdf|docx|pptx|txt|md|png|jpe?g|webp|gif|bmp)$/.test(name);
-    const okMime = type.startsWith('image/') ||
-                   type === 'application/pdf' ||
-                   type.includes('wordprocessingml') ||
-                   type.includes('presentationml') ||
-                   type.startsWith('text/');
-    if(!okExt && !okMime){
-      toast('Skipped: ' + f.name);
-      continue;
-    }
-    placeholders.push({
-      name: f.name,
-      kind: isImage ? 'image' : 'text',
-      text: '',
-      dataUrl: '',
-      size: f.size,
-      processing: true,
-      _srcFile: f
-    });
+    const okMime = type.startsWith('image/') || type === 'application/pdf' || type.includes('wordprocessingml') || type.includes('presentationml') || type.startsWith('text/');
+    if(!okExt && !okMime){ toast('Skipped: ' + f.name); continue; }
+    placeholders.push({ name:f.name, kind:isImage?'image':'text', text:'', dataUrl:'', size:f.size, processing:true, _srcFile:f });
   }
-  
   if(placeholders.length === 0) return;
   state.files = state.files.concat(placeholders);
-  renderChips();
-  updateStatus();
-  
+  renderChips(); updateStatus();
   for(let i = 0; i < placeholders.length; i++){
     const p = placeholders[i];
     const realIdx = state.files.indexOf(p);
     try{
       if(p.kind === 'image'){
         setStatus('▸ Compressing ' + esc(p.name) + '…');
-        const dataUrl = await compressImage(p._srcFile);
-        state.files[realIdx].dataUrl = dataUrl;
+        state.files[realIdx].dataUrl = await compressImage(p._srcFile);
       }else{
         setStatus('▸ Reading ' + esc(p.name) + '…');
         let text = '';
-        const name = p.name.toLowerCase();
-        if(name.endsWith('.pdf'))       text = await extractPDF(p._srcFile);
-        else if(name.endsWith('.docx')) text = await extractDOCX(p._srcFile);
-        else if(name.endsWith('.pptx')) text = await extractPPTX(p._srcFile);
-        else                            text = await p._srcFile.text();
+        const n = p.name.toLowerCase();
+        if(n.endsWith('.pdf'))       text = await extractPDF(p._srcFile);
+        else if(n.endsWith('.docx')) text = await extractDOCX(p._srcFile);
+        else if(n.endsWith('.pptx')) text = await extractPPTX(p._srcFile);
+        else                         text = await p._srcFile.text();
         state.files[realIdx].text = text;
       }
       state.files[realIdx].processing = false;
       delete state.files[realIdx]._srcFile;
-      renderChips();
-      updateStatus();
+      renderChips(); updateStatus();
     }catch(err){
       state.files[realIdx].processing = false;
       delete state.files[realIdx]._srcFile;
       toast('Failed: ' + p.name);
-      renderChips();
-      updateStatus();
+      renderChips(); updateStatus();
     }
   }
 }
@@ -565,33 +600,14 @@ function renderChips(){
     chip.className = 'chip' + (f.processing ? ' processing' : '');
     const icon = f.kind === 'image' ? '🖼' : '¶';
     const words = (f.text || '').split(/\s+/).filter(Boolean).length;
-    const info = f.processing 
-      ? 'Processing…' 
-      : (f.kind === 'image'
-          ? Math.max(1, Math.round(f.size/1024)) + ' KB · Image (Vision)'
-          : Math.max(1, Math.round(f.size/1024)) + ' KB · ' + words + ' words');
-    const preview = !f.processing && f.kind === 'text' && f.text
-      ? `<div class="cpreview">${esc(f.text.slice(0, 200))}</div>` 
-      : '';
-    const actions = f.processing ? '' : `
-      <div class="cactions">
-        <button type="button" class="del">✕ REMOVE</button>
-      </div>`;
-    chip.innerHTML = `
-      <span class="fico" aria-hidden="true">${icon}</span>
-      <span class="cmeta">
-        <span class="cname">${esc(f.name)}</span><br>
-        <span class="cinfo">${info}</span>
-        ${preview}
-        ${actions}
-      </span>
-    `;
+    const info = f.processing ? 'Processing…' : (f.kind === 'image'
+        ? Math.max(1, Math.round(f.size/1024)) + ' KB · Image (Vision)'
+        : Math.max(1, Math.round(f.size/1024)) + ' KB · ' + words + ' words');
+    const preview = !f.processing && f.kind === 'text' && f.text ? `<div class="cpreview">${esc(f.text.slice(0, 200))}</div>` : '';
+    const actions = f.processing ? '' : `<div class="cactions"><button type="button" class="del">✕ REMOVE</button></div>`;
+    chip.innerHTML = `<span class="fico" aria-hidden="true">${icon}</span><span class="cmeta"><span class="cname">${esc(f.name)}</span><br><span class="cinfo">${info}</span>${preview}${actions}</span>`;
     const delBtn = chip.querySelector('.del');
-    if(delBtn) delBtn.addEventListener('click', () => {
-      state.files.splice(idx, 1);
-      renderChips();
-      updateStatus();
-    });
+    if(delBtn) delBtn.addEventListener('click', () => { state.files.splice(idx, 1); renderChips(); updateStatus(); });
     container.appendChild(chip);
   });
 }
@@ -604,15 +620,8 @@ function updateStatus(){
   const combined = totalWords + notesWords;
   const imgCount = readyFiles.filter(f => f.kind === 'image').length;
   const docCount = readyFiles.filter(f => f.kind === 'text').length;
-  
-  if(anyProcessing){
-    setStatus('▸ Processing files… (' + readyFiles.length + '/' + state.files.length + ' done)');
-    return;
-  }
-  if(state.files.length === 0 && notesWords === 0){
-    setStatus('▸ Awaiting submission…');
-    return;
-  }
+  if(anyProcessing){ setStatus('▸ Processing files… (' + readyFiles.length + '/' + state.files.length + ' done)'); return; }
+  if(state.files.length === 0 && notesWords === 0){ setStatus('▸ Awaiting submission…'); return; }
   const parts = [];
   if(docCount > 0) parts.push(docCount + ' document(s)');
   if(imgCount > 0) parts.push(imgCount + ' image(s)');
@@ -621,20 +630,16 @@ function updateStatus(){
 }
 
 function buildPrompt(material, want){
-  const flavor = {
-    easy:   'foundational recall',
-    medium: 'a balanced mix of recall and application',
-    hard:   'application and analysis'
-  }[difficulty];
+  const flavor = { easy:'foundational recall', medium:'a balanced mix of recall and application', hard:'application and analysis' }[difficulty];
   const lang = $('#langIn').value.trim(), focus = $('#focusIn').value.trim();
   const lines = [
     'You are an expert exam writer. Create a quiz strictly from the STUDY MATERIAL below (which may include text and images).',
     'When images are provided, carefully read their visual content and use it to create questions.',
     'Requirements:'
   ];
-  if(want.short > 0) lines.push(`- Exactly ${want.short} short-answer question(s). The answer MUST be exactly ONE complete sentence. DO NOT write multiple sentences or just a few words. Put FIRST.`);
-  if(want.long  > 0) lines.push(`- Exactly ${want.long} long-form / essay question(s). Keep the model answer STRICTLY under 60 words (3-4 sentences max) to prevent output truncation. Put SECOND.`);
-  if(want.mc    > 0) lines.push(`- Exactly ${want.mc} multiple-choice question(s). 4 options, 1 correct. Put LAST.`);
+  if(want.short > 0) lines.push(`- Exactly ${want.short} short-answer question(s). The answer MUST be exactly ONE complete sentence. DO NOT write multiple sentences or just a few words.`);
+  if(want.long  > 0) lines.push(`- Exactly ${want.long} long-form / essay question(s). Keep each model answer STRICTLY under 60 words (3-4 sentences max).`);
+  if(want.mc    > 0) lines.push(`- Exactly ${want.mc} multiple-choice question(s). 4 options, 1 correct.`);
   lines.push(
     `- Difficulty: ${flavor}.`,
     lang ? `- Language: ${lang}.` : '- Language: Same as material.',
@@ -650,21 +655,15 @@ function buildPrompt(material, want){
 }
 
 function sampleText(text){
-  const MAX = 235000; // CHANGED: was 8000, now 235000
+  const MAX = MAX_INPUT; // 190464
   let t = text.replace(/\r/g,'').replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();
   if(t.length <= MAX) return t;
   return t.slice(0, MAX) + '\n[…excerpt…]\n';
 }
 
-async function callNVIDIA(textMaterial, images){
-  // Build multimodal content array
-  const userContent = [{ type: 'text', text: textMaterial }];
-  
-  // NO IMAGE LIMIT — send all images
-  for(const img of images){
-    userContent.push({ type: 'image_url', image_url: { url: img.dataUrl } });
-  }
-
+async function callNVIDIA(textMaterial, images, maxTok){
+  const userContent = [{ type:'text', text:textMaterial }];
+  for(const img of images){ userContent.push({ type:'image_url', image_url:{ url:img.dataUrl } }); }
   const base = {
     model: MODEL,
     messages:[
@@ -672,15 +671,11 @@ async function callNVIDIA(textMaterial, images){
       { role:'user', content: userContent.length === 1 && userContent[0].type === 'text' ? textMaterial : userContent }
     ],
     chat_template_kwargs: { enable_thinking: false },
-    temperature: 0.7, top_p: 0.7, 
-    max_tokens: 16500, // CHANGED: was 8192, now 16500
+    temperature: 0.7, top_p: 0.7,
+    max_tokens: Math.min(MAX_TOKENS, maxTok || MAX_TOKENS),
     stream: false
   };
-
-  const r = await fetch(WORKER_URL, {
-    method:'POST', headers:{ 'Content-Type':'application/json' },
-    body: JSON.stringify(base)
-  });
+  const r = await fetch(WORKER_URL, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(base) });
   const j = await r.json().catch(() => ({}));
   if(!r.ok) throw new Error(j?.error?.message || ('NVIDIA NIM error ' + r.status));
   return j?.choices?.[0]?.message?.content || '';
@@ -688,7 +683,6 @@ async function callNVIDIA(textMaterial, images){
 
 const isPh = v => { const s = String(v ?? '').trim(); return !s || /^[\u2026.·•_\-\s]+$/.test(s); };
 
-// BULLETPROOF JSON PARSER
 function tryParse(raw){
   if (!raw) return null;
   let t = String(raw).trim();
@@ -703,8 +697,7 @@ function tryParse(raw){
   if (cut > 10) {
     let truncated = t.slice(0, cut + 1);
     if (!truncated.endsWith('}')) truncated += '}';
-    const truncClosers = [']}', ']}', ']}]}', ''];
-    for (const c of truncClosers) { try { return JSON.parse(truncated + c); } catch (_) {} }
+    for (const c of [']}', ']}', ']}]}', '']) { try { return JSON.parse(truncated + c); } catch (_) {} }
   }
   return null;
 }
@@ -732,13 +725,15 @@ function parseQuiz(raw){
       short.push({ question:q.question, answer:q.answer });
     }
   }
-  if(!mc.length && !short.length && !long.length) throw new Error('No questions returned — retrying.');
   return { mc, short, long };
 }
 
 $('#genBtn').addEventListener('click', generate);
 async function generate(){
-  const wantMC = +$('#mcRange').value, wantSH = +$('#shRange').value, wantLG = +$('#lgRange').value;
+  calcBudget();
+  const b = state.budget;
+  const wantMC = b.mc, wantSH = b.sq, wantLG = b.lq;
+  if(b.over){ toast('Over the 65,536-token limit — reduce question counts.'); return; }
   if(state.files.some(f => f.processing)){ toast('Still processing files.'); return; }
   const readyFiles = state.files.filter(f => !f.processing && ((f.text && f.text.trim().length > 0) || f.dataUrl));
   if(readyFiles.length === 0 && state.notes.trim().length === 0){ toast('Upload a file OR type notes.'); return; }
@@ -752,29 +747,31 @@ async function generate(){
     const fileText = readyFiles.filter(f=>f.kind==='text').map(f => `[Doc: ${f.name}]\n${f.text||''}`).join('\n\n');
     const allText = [fileText, state.notes.trim() ? '[Typed notes]\n' + state.notes.trim() : ''].filter(Boolean).join('\n\n');
     const material = sampleText(allText);
-    const prompt = buildPrompt(material, { mc:wantMC, short:wantSH, long:wantLG });
     const images = readyFiles.filter(f => f.kind === 'image');
 
-    let quiz = { mc:[], short:[], long:[] };
-    for(let attempt = 1; attempt <= 2; attempt++){
-      setStatus('▸ Asking AI… (attempt ' + attempt + '/2)' + (images.length>0 ? ' · analyzing ' + images.length + ' image(s)' : ''));
-      const raw = await callNVIDIA(prompt, images);
-      try{ quiz = parseQuiz(raw); break; }
-      catch(err){ if(attempt === 2) throw err; setStatus('▸ Fixing cut-off text, retrying…'); }
+    const quiz = { mc:[], short:[], long:[] };
+    const plan = [ ['mc', wantMC, 'Multiple Choice'], ['short', wantSH, 'Short Answer'], ['long', wantLG, 'Long / Essay'] ];
+
+    for(const [key, want, labelTxt] of plan){
+      if(want <= 0) continue;
+      let got = [];
+      for(let round = 1; round <= 2 && got.length < want; round++){
+        const need = want - got.length;
+        const est  = need * COST[key] + need * HEAD + 512;
+        setStatus('▸ ' + labelTxt + ': writing ' + need + ' (round ' + round + '/2)…' + (images.length ? ' · ' + images.length + ' image(s)' : ''));
+        const wantObj = { mc:0, short:0, long:0 }; wantObj[key] = need;
+        try{
+          const raw = await callNVIDIA(buildPrompt(material, wantObj), images, est);
+          got = got.concat(parseQuiz(raw)[key]);
+        }catch(err){
+          console.warn('[OmniQuiz] ' + labelTxt + ' round ' + round + ' failed:', err.message);
+          if(round === 2) toast(labelTxt + ': ' + err.message);
+        }
+      }
+      quiz[key] = got.slice(0, want);
     }
 
-    quiz.mc = quiz.mc.slice(0, wantMC); quiz.short = quiz.short.slice(0, wantSH); quiz.long = quiz.long.slice(0, wantLG);
-
-    const deficit = { mc: wantMC - quiz.mc.length, short: wantSH - quiz.short.length, long: wantLG - quiz.long.length };
-    if(deficit.mc > 0 || deficit.short > 0 || deficit.long > 0){
-      setStatus('▸ Topping up missing questions…');
-      try{
-        const q2 = parseQuiz(await callNVIDIA(buildPrompt(material, deficit), images));
-        quiz.mc = quiz.mc.concat(q2.mc).slice(0, wantMC);
-        quiz.short = quiz.short.concat(q2.short).slice(0, wantSH);
-        quiz.long = quiz.long.concat(q2.long).slice(0, wantLG);
-      }catch(_){}
-    }
+    if(!quiz.mc.length && !quiz.short.length && !quiz.long.length) throw new Error('No usable questions returned.');
 
     state.quiz = quiz; state.graded = false;
     state.meta = {
@@ -783,7 +780,7 @@ async function generate(){
       date: new Date().toLocaleDateString(undefined,{ year:'numeric', month:'short', day:'numeric' })
     };
     renderQuiz();
-    setStatus('✔ Paper ready — ' + quiz.mc.length + ' MC · ' + quiz.short.length + ' short · ' + quiz.long.length + ' long.');
+    setStatus('✔ Paper ready — ' + quiz.mc.length + '/' + wantMC + ' MC · ' + quiz.short.length + '/' + wantSH + ' short · ' + quiz.long.length + '/' + wantLG + ' long · est. ' + b.total.toLocaleString() + ' tok budget.');
   }catch(err){
     setStatus('✖ ' + esc(err.message)); toast(err.message);
   }finally{
@@ -846,7 +843,8 @@ $('#gradeBtn').addEventListener('click', () => {
   });
   state.graded = true; paper.classList.add('graded');
   $('#stampScore').textContent = score + ' / ' + mc.length; stamp.classList.add('on');
-  if(score === mc.length) stamp.classList.add('perfect'); $('#gradeBtn').textContent = '↺ RESET PICKS';
+  if(score === mc.length) stamp.classList.add('perfect');
+  $('#gradeBtn').textContent = '↺ RESET PICKS';
 });
 
 $('#keyBtn').addEventListener('click', () => { $('#paper').classList.toggle('show-key'); $('#keyBtn').classList.toggle('on'); });
@@ -886,6 +884,8 @@ $('#dlBtn').addEventListener('click', () => {
 });
 
 $('#printBtn').addEventListener('click', () => window.print());
+
+syncMix('mcRange');
 })();
 </script>
 </body>
