@@ -293,7 +293,9 @@
       <input type="range" id="shRange" min="0" max="10" value="3">
       <div class="lab"><span style="letter-spacing:.08em">Long / essay</span><span class="val" id="lgOut">1 Qs</span></div>
       <input type="range" id="lgRange" min="0" max="5" value="1">
-      <div class="lab"><span style="letter-spacing:.08em">Difficulty</span></div>
+      <div class="lab"><span style="letter-spacing:.08em">Style reference (optional)</span></div>
+      <textarea id="sampleQ" class="notes-area" style="min-height:90px" placeholder="Paste a sample question here and the AI will write questions in that style instead of Easy/Medium/Hard.&#10;&#10;Example:&#10;Q: How many beats are there in each bar for music written in duple metre?&#10;A. 2 beats  B. 3 beats  C. 4 beats  D. 1 beat"></textarea>
+      <div class="lab"><span style="letter-spacing:.08em">Difficulty</span><span class="micro" id="diffHint" style="font-weight:400">(ignored when a sample is provided)</span></div>
       <div class="seg" id="diffSeg" role="group" aria-label="Difficulty">
         <button type="button" data-v="easy">Easy</button>
         <button type="button" data-v="medium" class="on">Medium</button>
@@ -414,6 +416,12 @@ $('#diffSeg').addEventListener('click', e => {
   const b = e.target.closest('button'); if(!b) return;
   $('#diffSeg').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
   difficulty = b.dataset.v;
+});
+
+$('#sampleQ').addEventListener('input', e => {
+  const has = e.target.value.trim().length > 0;
+  $('#diffSeg').style.opacity = has ? '.4' : '1';
+  $('#diffHint').textContent = has ? '(overridden by sample above)' : '(ignored when a sample is provided)';
 });
 
 $('#notesInput').addEventListener('input', e => {
@@ -627,6 +635,7 @@ function buildPrompt(material, want){
     hard:   'application and analysis'
   }[difficulty];
   const lang = $('#langIn').value.trim(), focus = $('#focusIn').value.trim();
+  const sample = ($('#sampleQ')?.value || '').trim();
   const lines = [
     'You are an expert exam writer. Create a quiz strictly from the STUDY MATERIAL below (which may include text and images).',
     'When images are provided, carefully read their visual content and use it to create questions.',
@@ -635,8 +644,20 @@ function buildPrompt(material, want){
   if(want.short > 0) lines.push(`- Exactly ${want.short} short-answer question(s). The answer MUST be exactly ONE complete sentence. DO NOT write multiple sentences or just a few words. Put FIRST.`);
   if(want.long  > 0) lines.push(`- Exactly ${want.long} long-form / essay question(s). Keep the model answer STRICTLY under 60 words (3-4 sentences max) to prevent output truncation. Put SECOND.`);
   if(want.mc    > 0) lines.push(`- Exactly ${want.mc} multiple-choice question(s). 4 options, 1 correct. Put LAST.`);
+  if(sample){
+    lines.push(
+      `- STYLE OVERRIDE: Instead of following a difficulty level, mimic the SAMPLE QUESTION below as closely as possible — match its tone, phrasing, structure, format, length, reasoning style and complexity. Every generated question should look like it came from the same exam paper as the sample.`,
+      '',
+      'SAMPLE QUESTION:',
+      '"""',
+      sample.slice(0, 2000),
+      '"""',
+      ''
+    );
+  } else {
+    lines.push(`- Difficulty: ${flavor}.`);
+  }
   lines.push(
-    `- Difficulty: ${flavor}.`,
     lang ? `- Language: ${lang}.` : '- Language: Same as material.',
     focus ? `- Focus: ${focus}.` : '',
     '- Output ONLY the JSON object. No markdown fences, no commentary.',
