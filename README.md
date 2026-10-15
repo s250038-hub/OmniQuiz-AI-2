@@ -54,7 +54,7 @@ Here's what the AI generates from a single PDF upload:
 | PDF Export | [jsPDF](https://github.com/parallax/jsPDF) |
 | UI Fonts | Fraunces, Space Grotesk, Space Mono (Google Fonts) |
 | API Proxy | Cloudflare Workers (free tier) |
-| AI Engine | NVIDIA NIM — `?????` |
+| AI Engine | NVIDIA NIM — `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning` |
 | Mobile Wrapper | [Capacitor](https://capacitorjs.com/) |
 | Hosting | GitHub Pages (free) |
 ## hahaha
