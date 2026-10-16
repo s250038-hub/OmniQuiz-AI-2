@@ -57,4 +57,3 @@ Here's what the AI generates from a single PDF upload:
 | AI Engine | NVIDIA NIM — `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning` |
 | Mobile Wrapper | [Capacitor](https://capacitorjs.com/) |
 | Hosting | GitHub Pages (free) |
-## hahaha
