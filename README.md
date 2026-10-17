@@ -2,7 +2,7 @@
 ### *(Rework of the original 1.0)*
 
 > **Drop a file. Get a quiz.**
-> Upload any study document and let AI generate a complete exam paper — multiple choice, short answer, and long essay questions — instantly in your browser.
+> Upload any study document and let AI generate a complete exam paper — multiple choice, true/false, fill-in-the-blanks, and long essay questions (answers of 1–3 sentences) — instantly in your browser.
 
 [![Live Demo](https://img.shields.io/badge/demo-online-brightgreen.svg)](https://s250038-hub.github.io/OmniQuiz-AI-2/)
 ![GitHub Pages](https://img.shields.io/badge/Hosted%20on-GitHub%20Pages-blue)
@@ -17,7 +17,7 @@
 | Feature | Description |
 |---|---|
 | 📄 **Multi-format parsing** | Upload PDF, DOCX, PPTX, TXT, or Markdown files |
-| 🧩 **Five question types** | Multiple choice, true/false, fill-in-the-blanks, short answer, AND long/essay questions |
+| 🧩 **Four question types** | Multiple choice, true/false, fill-in-the-blanks, AND long/essay questions (model answers of 1–3 sentences) |
 | 🎚️ **Difficulty control** | Easy, Medium, or Hard question generation |
 | 🌐 **Auto language** | Detects document language or lets you specify one |
 | 🎯 **Topic focus** | Optionally emphasize a specific topic |
