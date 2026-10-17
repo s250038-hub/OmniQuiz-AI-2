@@ -17,7 +17,7 @@
 | Feature | Description |
 |---|---|
 | 📄 **Multi-format parsing** | Upload PDF, DOCX, PPTX, TXT, or Markdown files |
-| 🧩 **Three question types** | Multiple choice, short answer, AND long/essay questions |
+| 🧩 **Five question types** | Multiple choice, true/false, fill-in-the-blanks, short answer, AND long/essay questions |
 | 🎚️ **Difficulty control** | Easy, Medium, or Hard question generation |
 | 🌐 **Auto language** | Detects document language or lets you specify one |
 | 🎯 **Topic focus** | Optionally emphasize a specific topic |
